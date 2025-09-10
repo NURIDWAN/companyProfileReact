@@ -1,6 +1,6 @@
 # Company Profile — Laravel 12 + React (Inertia)
 
-> Aplikasi company profile menggunakan Laravel 12 sebagai backend dan React dengan Inertia.js sebagai frontend. Meniru struktur dan fitur dari situs comprof-laravel02.hancode.my.id.
+> Aplikasi company profile menggunakan Laravel 12 sebagai backend dan React dengan Inertia.js sebagai frontend.
 
 ---
 
