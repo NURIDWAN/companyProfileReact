@@ -19,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $locale = session('app_language', config('landing.default_language', config('app.locale')));
+        app()->setLocale($locale);
     }
 }

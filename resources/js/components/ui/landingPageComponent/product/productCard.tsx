@@ -1,8 +1,11 @@
 import React from "react";
+import { Link } from "@inertiajs/react";
 import { Product } from "@/types";
 import { Star } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import { itemVariants } from "@/utils/animations";
 
 interface ProductCardProps {
   product: Product;
@@ -10,7 +13,9 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
-    <Card className="flex flex-col rounded-2xl border p-4 shadow-md hover:shadow-lg transition">
+    <motion.div variants={itemVariants} whileHover={{ y: -6 }}>
+    <Link href={`/product/${product.slug}`} className="block h-full">
+    <Card className="flex h-full flex-col rounded-2xl border p-4 shadow-md hover:shadow-lg transition">
       {/* Thumbnail / Image */}
       <div className="relative h-40 w-full overflow-hidden rounded-xl bg-gray-100 flex items-center justify-center">
         {product.thumbnail ? (
@@ -27,28 +32,30 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       {/* Content */}
       <CardHeader className="mt-3 p-0">
         <h3 className="text-lg font-semibold">{product.name}</h3>
-        <span className="mt-1 inline-block text-sm text-gray-500">
-          {product.category}
-        </span>
+        {product.category && (
+          <span className="mt-1 inline-block text-sm text-gray-500">
+            {product.category}
+          </span>
+        )}
       </CardHeader>
 
       <CardContent className="flex flex-1 flex-col justify-between p-0">
         {/* Deskripsi */}
         <p className="mt-2 text-sm text-gray-600 line-clamp-2">
-          {product.description}
+          {product.description ?? 'Detail produk akan segera tersedia.'}
         </p>
 
         {/* Rating + Clients */}
         <div className="mt-3 flex items-center justify-between text-sm text-gray-500">
           <div className="flex items-center gap-1">
             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-            <span>{product.rating}</span>
+            <span>{product.rating ?? '-'}</span>
           </div>
-          <span>{product.clients} Clients</span>
+          <span>{product.clients ?? 0} Clients</span>
         </div>
 
         {/* Features */}
-        {product.features && (
+        {!!product.features?.length && (
           <ul className="mt-2 flex flex-wrap gap-1 text-xs text-gray-500">
             {product.features.slice(0, 3).map((f, idx) => (
               <li
@@ -81,5 +88,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
       </CardContent>
     </Card>
+    </Link>
+    </motion.div>
   );
 };

@@ -1,44 +1,62 @@
-import { Link, usePage } from "@inertiajs/react";
-import { useState, useEffect } from "react";
+import { Link, router, usePage } from "@inertiajs/react";
+import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Moon, Sun } from "lucide-react";
 import { useAppearance } from "@/hooks/use-appearance";
 import { cn } from "@/lib/utils";
+import { primaryNavLinks } from "@/config/navigation";
+import type { NavigationLink, SharedData } from "@/types";
 
 export function CompanyNavbar() {
     const { appearance, updateAppearance } = useAppearance();
-    const { url } = usePage(); // dapet url aktif dari Inertia
-    const [activeLink, setActiveLink] = useState("");
+    const page = usePage<SharedData>();
+    const { navigation, language } = page.props;
+    const url = page.url;
 
-    // Bikin daftar menu
-    const navLinks = [
-        { label: "Beranda", href: "/" },
-        { label: "Tentang Kami", href: "/about" },
-        { label: "Layanan", href: "/service" },
-        { label: "Produk", href: "/produk" },
-        { label: "Proyek", href: "/proyek" },
-        { label: "Karir", href: "/career" },
-        { label: "Blog", href: "/blog" },
-        { label: "Kontak", href: "/kontak" },
-        { label: "Galeri", href: "/galeri" },
+    const navItems: NavigationLink[] = useMemo(() => {
+        if (navigation?.primary?.length) {
+            return navigation.primary;
+        }
+
+        return primaryNavLinks.map((item, index) => ({
+            key: item.href,
+            href: item.href,
+            labels: { id: item.label, en: item.label },
+            order: index + 1,
+            active: true,
+        }));
+    }, [navigation]);
+
+    const currentLanguage = language?.current ?? language?.fallback ?? "id";
+    const languageOptions = language?.available ?? [
+        { code: "id", label: "ID", name: "Bahasa Indonesia" },
+        { code: "en", label: "EN", name: "English" }
     ];
 
-    // Update activeLink sesuai url sekarang
-    useEffect(() => {
-        const current = navLinks.find((item) =>
-            url.startsWith(item.href) && item.href !== "/"
-                ? url.startsWith(item.href)
-                : url === item.href
-        );
-        setActiveLink(current ? current.label : "Beranda");
-    }, [url]);
+    const activeLinkKey = useMemo(() => {
+        return navItems.find((item) =>
+            item.href === "/" ? url === "/" : url.startsWith(item.href)
+        )?.key;
+    }, [url, navItems]);
+
+    const resolveLabel = (item: NavigationLink) => {
+        return item.labels?.[currentLanguage] ??
+            item.labels?.[language?.fallback ?? "id"] ??
+            item.labels?.id ??
+            item.key;
+    };
 
     const toggleDarkMode = () => {
         updateAppearance(appearance === "dark" ? "light" : "dark");
     };
 
     const IconTheme = appearance === "dark" ? Moon : Sun;
+
+    const handleLanguageSwitch = (code: string) => {
+        if (code === currentLanguage) return;
+        router.post(route("language.switch"), { language: code }, { preserveScroll: true });
+    };
 
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -51,20 +69,20 @@ export function CompanyNavbar() {
 
                 {/* Desktop Navigation */}
                 <nav className="hidden items-center space-x-2 lg:flex">
-                    {navLinks.map((navItem) => (
-                        <div key={navItem.label} className="relative">
+                    {navItems.map((navItem) => (
+                        <div key={navItem.key} className="relative">
                             <Link href={navItem.href}>
                                 <Button
                                     variant="ghost"
                                     className={cn("text-sm", {
-                                        "text-blue-600 font-semibold": activeLink === navItem.label,
-                                        "text-foreground": activeLink !== navItem.label,
+                                        "text-blue-600 font-semibold": activeLinkKey === navItem.key,
+                                        "text-foreground": activeLinkKey !== navItem.key,
                                     })}
                                 >
-                                    {navItem.label}
+                                    {resolveLabel(navItem)}
                                 </Button>
                             </Link>
-                            {activeLink === navItem.label && (
+                            {activeLinkKey === navItem.key && (
                                 <div className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-blue-600" />
                             )}
                         </div>
@@ -73,12 +91,19 @@ export function CompanyNavbar() {
 
                 {/* Right side */}
                 <div className="flex items-center space-x-2">
-                    {/* Language Selector */}
-                    <Button variant="ghost" className="hidden lg:flex" size="icon">
-                        <span className="text-2xl" role="img" aria-label="Indonesian Flag">
-                            🇮🇩
-                        </span>
-                    </Button>
+                    <div className="hidden items-center space-x-1 lg:flex">
+                        {languageOptions.map((option) => (
+                            <Button
+                                key={option.code}
+                                variant={option.code === currentLanguage ? "default" : "ghost"}
+                                size="sm"
+                                className="px-3 text-xs"
+                                onClick={() => handleLanguageSwitch(option.code)}
+                            >
+                                {option.flag ?? option.label}
+                            </Button>
+                        ))}
+                    </div>
 
                     {/* Dark Mode Toggle */}
                     <Button variant="ghost" size="icon" onClick={toggleDarkMode}>
@@ -95,25 +120,36 @@ export function CompanyNavbar() {
                             </SheetTrigger>
                             <SheetContent side="right" className="p-4 pt-10">
                                 <nav className="flex flex-col items-start space-y-2">
-                                    {navLinks.map((navItem) => (
+                                    {navItems.map((navItem) => (
                                         <Link
-                                            key={navItem.label}
+                                            key={navItem.key}
                                             href={navItem.href}
                                             className="w-full"
                                         >
                                             <Button
                                                 variant="ghost"
                                                 className={cn("w-full justify-start text-base", {
-                                                    "text-blue-600 font-semibold":
-                                                        activeLink === navItem.label,
-                                                    "text-foreground": activeLink !== navItem.label,
+                                                    "text-blue-600 font-semibold": activeLinkKey === navItem.key,
+                                                    "text-foreground": activeLinkKey !== navItem.key,
                                                 })}
                                             >
-                                                {navItem.label}
+                                                {resolveLabel(navItem)}
                                             </Button>
                                         </Link>
                                     ))}
                                 </nav>
+                                <div className="mt-6 flex gap-2">
+                                    {languageOptions.map((option) => (
+                                        <Button
+                                            key={option.code}
+                                            variant={option.code === currentLanguage ? "default" : "outline"}
+                                            className="flex-1 bg-blue-600"
+                                            onClick={() => handleLanguageSwitch(option.code)}
+                                        >
+                                            {option.label}
+                                        </Button>
+                                    ))}
+                                </div>
                             </SheetContent>
                         </Sheet>
                     </div>

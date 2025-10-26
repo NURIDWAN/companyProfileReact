@@ -2,16 +2,71 @@ import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
+import { type NavGroup, type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { BookOpen, Briefcase, Cog, Cpu, FileText, Folder, LayoutGrid, MessageSquare, Package, Settings2, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
+const mainNavGroups: NavGroup[] = [
     {
         title: 'Dashboard',
-        href: '/dashboard',
-        icon: LayoutGrid,
+        items: [
+            {
+                title: 'Overview',
+                href: '/dashboard',
+                icon: LayoutGrid,
+            },
+        ],
+    },
+    {
+        title: 'Konten CMS',
+        items: [
+            {
+                title: 'Layanan',
+                href: '/admin/services',
+                icon: Cog,
+            },
+            {
+                title: 'Produk',
+                href: '/admin/products',
+                icon: Package,
+            },
+            {
+                title: 'Proyek',
+                href: '/admin/projects',
+                icon: Folder,
+            },
+            {
+                title: 'Karir',
+                href: '/admin/job-positions',
+                icon: Briefcase,
+            },
+            {
+                title: 'Blog',
+                href: '/admin/blog-posts',
+                icon: FileText,
+            },
+            {
+                title: 'Testimoni',
+                href: '/admin/testimonials',
+                icon: MessageSquare,
+            },
+            {
+                title: 'Tim',
+                href: '/admin/team-members',
+                icon: Users,
+            },
+            {
+                title: 'Setting Konten',
+                href: '/admin/settings',
+                icon: Settings2,
+            },
+            {
+                title: 'Landing Page',
+                href: '/admin/landing',
+                icon: LayoutGrid,
+            },
+        ],
     },
 ];
 
@@ -44,11 +99,11 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain groups={mainNavGroups} />
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+                {/* <NavFooter items={footerNavItems} className="mt-auto" /> */}
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

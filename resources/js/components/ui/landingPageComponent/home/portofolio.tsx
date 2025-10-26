@@ -34,7 +34,7 @@ const projectsData = [
 
 export function Portfolio() {
   return (
-    <section id="portfolio" className="w-full py-12 sm:py-16 lg:py-20 bg-gray-50 dark:bg-gray-950">
+    <section id="portfolio" className="w-full py-12 sm:py-16 lg:py-20 bg-gray-50 dark:bg-gray-950 rounded-3xl">
       <div className="container mx-auto max-w-screen-xl px-4 text-center">
         <h2 className="mb-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
           Proyek Terbaik

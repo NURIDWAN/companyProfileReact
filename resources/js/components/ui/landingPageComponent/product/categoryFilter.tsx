@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Category } from "@/types";
+import { motion } from "framer-motion";
+import { containerVariants, itemVariants } from "@/utils/animations";
 
 interface Props {
   categories: Category[];
@@ -12,16 +14,23 @@ export const CategoryFilter: React.FC<Props> = ({
   selectedCategory,
   onSelect,
 }) => (
-  <div className="flex flex-wrap gap-2 justify-center">
+  <motion.div
+    className="flex flex-wrap gap-2 justify-center"
+    initial="hidden"
+    whileInView="show"
+    viewport={{ once: true, amount: 0.3 }}
+    variants={containerVariants}
+  >
     {categories.map((category) => (
-      <Button
-        key={category}
-        variant={selectedCategory === category ? "default" : "outline"}
-        onClick={() => onSelect(category)}
-        size="sm"
-      >
-        {category}
-      </Button>
+      <motion.div key={category} variants={itemVariants} whileHover={{ scale: 1.05 }}>
+        <Button
+          variant={selectedCategory === category ? "default" : "outline"}
+          onClick={() => onSelect(category)}
+          size="sm"
+        >
+          {category}
+        </Button>
+      </motion.div>
     ))}
-  </div>
+  </motion.div>
 );

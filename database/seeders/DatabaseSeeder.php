@@ -13,11 +13,26 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@nusantaradigital.id'],
+            [
+                'name' => 'Administrator',
+                'password' => bcrypt('password'),
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            ServiceSeeder::class,
+            ProductSeeder::class,
+            ProjectSeeder::class,
+            JobPositionSeeder::class,
+            TeamMemberSeeder::class,
+            TestimonialSeeder::class,
+            CompanySettingSeeder::class,
+            LandingPageSettingSeeder::class,
+            ServicePageSettingSeeder::class,
+            BlogPostSeeder::class,
+            SitePresentationSeeder::class,
         ]);
     }
 }

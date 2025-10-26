@@ -2,6 +2,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Cloud, Layers, Paintbrush, Smartphone } from 'lucide-react';
 import React from 'react';
+import { motion } from 'framer-motion';
+import { containerVariants, itemVariants } from '@/utils/animations';
 
 const services = [
     {
@@ -27,33 +29,40 @@ const services = [
 ];
 
 const OurServicesSection = () => (
-    <section className="py-20 bg-slate-50 dark:bg-slate-900">
-        <div className="container mx-auto px-6">
-            <div className="text-center mb-16">
+    <motion.section 
+        className="py-20 bg-slate-50 dark:bg-slate-900"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
+    >
+        <motion.div className="container mx-auto px-6" variants={containerVariants}>
+            <motion.div className="text-center mb-16" variants={itemVariants}>
                 <Badge variant="outline" className="mb-4 text-sm">Layanan Kami</Badge>
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white">Apa yang Kami Tawarkan</h2>
                 <p className="text-lg text-gray-600 dark:text-gray-400 mt-3 max-w-3xl mx-auto">
                     Solusi lengkap untuk memenuhi semua kebutuhan digital dan teknologi perusahaan Anda.
                 </p>
                 <div className="mt-4 w-24 h-1 bg-indigo-500 mx-auto rounded-full"></div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            </motion.div>
+            <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8" variants={containerVariants}>
                 {services.map((service) => (
-                    <Card key={service.title} className="text-center hover:shadow-lg hover:-translate-y-2 transition-transform duration-300">
-                        <CardHeader>
-                            <div className="mx-auto w-16 h-16 bg-indigo-100 dark:bg-indigo-900/40 rounded-full flex items-center justify-center mb-4">
-                                {service.icon}
-                            </div>
-                            <CardTitle className="dark:text-white">{service.title}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-gray-600 dark:text-gray-400">{service.description}</p>
-                        </CardContent>
-                    </Card>
+                    <motion.div key={service.title} variants={itemVariants} whileHover={{ y: -8 }}>
+                        <Card className="text-center hover:shadow-lg transition-transform duration-300">
+                            <CardHeader>
+                                <div className="mx-auto w-16 h-16 bg-indigo-100 dark:bg-indigo-900/40 rounded-full flex items-center justify-center mb-4">
+                                    {service.icon}
+                                </div>
+                                <CardTitle className="dark:text-white">{service.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-gray-600 dark:text-gray-400">{service.description}</p>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
                 ))}
-            </div>
-        </div>
-    </section>
+            </motion.div>
+        </motion.div>
+    </motion.section>
 );
 
-export default OurServicesSection;  
+export default OurServicesSection; 

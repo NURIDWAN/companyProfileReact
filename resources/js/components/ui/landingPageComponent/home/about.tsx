@@ -1,72 +1,85 @@
-// src/components/CompanyProfile.jsx
-import { Check, Clock, Shield, Headphones } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { CheckCircle } from "lucide-react";
+import { motion } from "framer-motion";
+import { containerVariants, itemVariants, slideIn } from "@/utils/animations";
 
-export function About() {
+interface AboutContent {
+  title?: string | null;
+  description?: string | null;
+  highlights?: string[];
+  image_url?: string | null;
+}
+
+interface AboutProps {
+  content?: AboutContent;
+}
+
+export function About({ content }: AboutProps) {
+  const title = content?.title ?? 'Tentang Kami';
+  const description = content?.description ?? 'Tambahkan narasi perusahaan melalui dashboard.';
+  const highlights = content?.highlights ?? [];
+  const imageUrl = content?.image_url;
+  
   return (
-    <section className="bg-gray-50 dark:bg-gray-900 py-16 px-4">
-      <div className="container mx-auto grid md:grid-cols-2 gap-8 items-center">
-        {/* Left Column */}
-        <div className="space-y-6">
-          <h1 className="text-4xl font-bold tracking-tight lg:text-5xl">
-            Tentang PT Digital Solusi Nusantara
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
-            Sejak didirikan pada tahun 2015, kami telah menjadi mitra terpercaya bagi lebih dari 500 perusahaan dalam transformasi digital mereka. Tim ahli kami terdiri dari profesional berpengalaman di bidang teknologi informasi, desain, dan strategi bisnis. Kami mengkhususkan diri dalam pengembangan aplikasi web dan mobile, sistem manajemen enterprise, e-commerce, dan solusi cloud computing. Dengan pendekatan yang berfokus pada klien, kami memastikan setiap solusi yang kami berikan sesuai dengan kebutuhan spesifik dan tujuan bisnis Anda.
-          </p>
-          
-          <div className="grid grid-cols-2 gap-6">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300">
-                <Check className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Tim Profesional</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Expert berpengalaman</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <div className="p-2 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300">
-                <Clock className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Tepat Waktu</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Delivery sesuai jadwal</p>
-              </div>
-            </div>
+    <motion.section
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, amount: 0.4 }}
+      className="rounded-3xl bg-gray-50 py-16 px-4 dark:bg-gray-900"
+    >
+      <motion.div
+        className="container mx-auto grid items-center gap-8 md:grid-cols-2"
+        variants={containerVariants}
+      >
+        <motion.div
+          className="space-y-6"
+          variants={slideIn}
+        >
+          <motion.h1
+            variants={itemVariants}
+            className="text-4xl font-bold tracking-tight lg:text-5xl"
+          >
+            {title}
+          </motion.h1>
+          <motion.p
+            variants={itemVariants}
+            className="text-lg leading-relaxed text-gray-600 dark:text-gray-400"
+          >
+            {description}
+          </motion.p>
 
-            <div className="flex items-center space-x-2">
-              <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300">
-                <Shield className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Berkualitas</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Standard tinggi</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <div className="p-2 rounded-full bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300">
-                <Headphones className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Support 24/7</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Dukungan penuh</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Right Column (Image) */}
-        <div className="relative mt-8 md:mt-0">
-          <img
-            src="https://picsum.photos/seed/crm/400/300" // Replace with your image path
-            alt="Office Building of PT Digital Solusi Nusantara"
-            className="rounded-xl shadow-lg w-full h-auto object-cover"
-          />
-        </div>
-      </div>
-    </section>
+          {highlights.length ? (
+            <motion.div
+              className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+              variants={containerVariants}
+            >
+              {highlights.map((highlight) => (
+                <motion.div
+                  key={highlight}
+                  variants={itemVariants}
+                  className="flex items-start gap-3 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
+                >
+                  <CheckCircle className="h-5 w-5 flex-shrink-0 text-indigo-500" />
+                  <span className="text-sm text-gray-600 dark:text-gray-300">{highlight}</span>
+                </motion.div>
+              ))}
+            </motion.div>
+          ) : null}
+        </motion.div>
+
+        {imageUrl && (
+          <motion.div
+            className="relative mt-8 md:mt-0"
+            variants={itemVariants}
+            whileHover={{ scale: 1.02 }}
+          >
+            <img
+              src={imageUrl}
+              alt={title}
+              className="h-auto w-full rounded-xl object-cover shadow-lg"
+            />
+          </motion.div>
+        )}
+      </motion.div>
+    </motion.section>
   );
 }
