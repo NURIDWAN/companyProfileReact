@@ -37,7 +37,7 @@ export default function BlogDetailPage() {
                     <Badge className="bg-blue-50 text-blue-600">Insight</Badge>
                     <h1 className="text-4xl font-bold text-gray-900">{article.title}</h1>
                     <p className="text-lg text-gray-600">
-                        {article.excerpt ?? 'Insight terbaru dari tim kami seputar transformasi digital dan teknologi bisnis.'}
+                        {article.excerpt ?? 'Insight terbaru dari tim kami mengenai strategi bisnis, operasional, dan pengelolaan perubahan.'}
                     </p>
                     <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-500">
                         <span className="flex items-center gap-2">
@@ -69,7 +69,7 @@ export default function BlogDetailPage() {
                                             </Link>
                                         </CardTitle>
                                         <p className="text-sm text-gray-500 line-clamp-2">
-                                            {related.excerpt ?? 'Insight terbaru seputar transformasi digital.'}
+                                            {related.excerpt ?? 'Insight terbaru mengenai strategi dan praktik bisnis lintas industri.'}
                                         </p>
                                     </CardHeader>
                                 </Card>

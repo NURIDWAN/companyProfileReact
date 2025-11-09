@@ -20,6 +20,9 @@ class Product extends Model
         'category',
         'features',
         'price',
+        'price_variants',
+        'gallery',
+        'purchase_url',
         'clients',
         'rating',
         'popular',
@@ -30,6 +33,8 @@ class Product extends Model
     protected $casts = [
         'features' => 'array',
         'price' => 'decimal:2',
+        'price_variants' => 'array',
+        'gallery' => 'array',
         'clients' => 'integer',
         'rating' => 'decimal:1',
         'popular' => 'boolean',
@@ -65,5 +70,14 @@ class Product extends Model
         }
 
         return $path;
+    }
+
+    public function resolveGalleryUrls(): array
+    {
+        return collect($this->gallery ?? [])
+            ->map(fn ($image) => $this->resolveImageUrl(is_array($image) ? ($image['url'] ?? null) : $image))
+            ->filter()
+            ->values()
+            ->all();
     }
 }

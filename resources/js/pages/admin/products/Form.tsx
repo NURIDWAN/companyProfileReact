@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import AppLayout from "@/layouts/app-layout";
 import { Head, Link, useForm } from "@inertiajs/react";
-import { FormEventHandler, useMemo } from "react";
+import { FormEventHandler, useEffect, useMemo } from "react";
+import { RichTextEditor } from "@/components/RichTextEditor";
 
 type Product = {
     id: number;
@@ -20,6 +21,15 @@ type Product = {
     description?: string | null;
     features?: string[] | null;
     price?: number | null;
+    price_variants?: Array<{
+        name?: string | null;
+        price?: number | null;
+        compare_at_price?: number | null;
+        sku?: string | null;
+        stock?: number | null;
+    }> | null;
+    gallery?: string[] | null;
+    purchase_url?: string | null;
     category?: string | null;
     clients?: number | null;
     rating?: number | null;
@@ -34,6 +44,14 @@ interface Props {
 
 export default function ProductForm({ product }: Props) {
     const title = product ? "Edit Produk" : "Tambah Produk";
+    const initialVariants = (product?.price_variants ?? []).map((variant) => ({
+        name: variant?.name ?? "",
+        price: variant?.price != null ? String(variant.price) : "",
+        compare_at_price: variant?.compare_at_price != null ? String(variant.compare_at_price) : "",
+        sku: variant?.sku ?? "",
+        stock: variant?.stock != null ? String(variant.stock) : "",
+    }));
+    const initialGallery = product?.gallery?.length ? product.gallery : [""];
     const form = useForm({
         name: product?.name ?? "",
         slug: product?.slug ?? "",
@@ -41,11 +59,17 @@ export default function ProductForm({ product }: Props) {
         cover_image_file: undefined as File | undefined,
         thumbnail: product?.thumbnail ?? "",
         thumbnail_file: undefined as File | undefined,
+        gallery: initialGallery,
+        gallery_files: [] as File[],
         excerpt: product?.excerpt ?? "",
         description: product?.description ?? "",
         features: (product?.features ?? []).join("\n"),
         category: product?.category ?? "",
         price: product?.price ? String(product.price) : "",
+        price_variants: initialVariants.length ? initialVariants : [
+            { name: "", price: "", compare_at_price: "", sku: "", stock: "" },
+        ],
+        purchase_url: product?.purchase_url ?? "",
         clients: product?.clients ? String(product.clients) : "",
         rating: product?.rating ? String(product.rating) : "",
         popular: product?.popular ?? false,
@@ -53,10 +77,66 @@ export default function ProductForm({ product }: Props) {
         is_active: product?.is_active ?? true,
     });
 
-    console.log(form.data);
-
     const { data, setData, processing, errors } = form;
     const generalError = (errors as typeof errors & { general?: string }).general;
+
+    useEffect(() => {
+        if (!product) {
+            const trimmed = data.name.trim();
+            const slug = trimmed
+                ? trimmed
+                      .toLowerCase()
+                      .replace(/[^a-z0-9\s-]/g, "")
+                      .replace(/\s+/g, "-")
+                      .replace(/-+/g, "-")
+                : "";
+            setData("slug", slug);
+        }
+    }, [data.name, product, setData]);
+    const fieldError = (field: string) => (errors as Record<string, string | undefined>)[field];
+    const galleryUrls = (data.gallery ?? []).length ? data.gallery ?? [] : [""];
+    const variantRows =
+        (data.price_variants ?? []).length
+            ? data.price_variants ?? []
+            : [{ name: "", price: "", compare_at_price: "", sku: "", stock: "" }];
+
+    const handleGalleryChange = (index: number, value: string) => {
+        const updated = [...galleryUrls];
+        updated[index] = value;
+        setData("gallery", updated);
+    };
+
+    const addGalleryRow = () => {
+        setData("gallery", [...galleryUrls, ""]);
+    };
+
+    const removeGalleryRow = (index: number) => {
+        const updated = galleryUrls.filter((_, idx) => idx !== index);
+        setData("gallery", updated.length ? updated : [""]);
+    };
+
+    const updateVariant = (index: number, field: string, value: string) => {
+        const updated = variantRows.map((variant, idx) =>
+            idx === index ? { ...variant, [field]: value } : variant,
+        );
+
+        setData("price_variants", updated);
+    };
+
+    const addVariantRow = () => {
+        setData("price_variants", [
+            ...variantRows,
+            { name: "", price: "", compare_at_price: "", sku: "", stock: "" },
+        ]);
+    };
+
+    const removeVariantRow = (index: number) => {
+        const updated = variantRows.filter((_, idx) => idx !== index);
+        setData(
+            "price_variants",
+            updated.length ? updated : [{ name: "", price: "", compare_at_price: "", sku: "", stock: "" }],
+        );
+    };
 
     const action = useMemo(() => {
         return product
@@ -71,6 +151,7 @@ export default function ProductForm({ product }: Props) {
             ...formData,
             cover_image_file: formData.cover_image_file ?? undefined,
             thumbnail_file: formData.thumbnail_file ?? undefined,
+            gallery_files: formData.gallery_files ?? [],
         }));
 
         if (product) {
@@ -80,6 +161,7 @@ export default function ProductForm({ product }: Props) {
                 onFinish: () => {
                     setData("cover_image_file", undefined);
                     setData("thumbnail_file", undefined);
+                    setData("gallery_files", []);
                     form.transform((data) => data);
                 },
             });
@@ -90,6 +172,7 @@ export default function ProductForm({ product }: Props) {
                 onFinish: () => {
                     setData("cover_image_file", undefined);
                     setData("thumbnail_file", undefined);
+                    setData("gallery_files", []);
                     form.transform((data) => data);
                 },
             });
@@ -180,6 +263,50 @@ export default function ProductForm({ product }: Props) {
                                 <img src={product.thumbnail_url} alt={product.name} className="h-24 w-24 rounded object-cover" />
                             )}
                         </div>
+                        <div className="space-y-3 rounded-lg border border-dashed border-border p-4">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-sm font-medium">Galeri Produk (URL)</Label>
+                                <Button type="button" size="sm" variant="outline" onClick={addGalleryRow}>
+                                    Tambah URL
+                                </Button>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Isi dengan tautan gambar tambahan atau unggah file langsung. Urutan pertama akan tampil sebagai gambar utama.
+                            </p>
+                            <div className="space-y-2">
+                                {galleryUrls.map((url, index) => (
+                                    <div key={`gallery-${index}`} className="flex gap-2">
+                                        <Input
+                                            value={url}
+                                            placeholder="https://..."
+                                            onChange={(event) => handleGalleryChange(index, event.target.value)}
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => removeGalleryRow(index)}
+                                            disabled={galleryUrls.length === 1 && url === ""}
+                                        >
+                                            Hapus
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="gallery_files">Upload Gambar Galeri</Label>
+                                <Input
+                                    id="gallery_files"
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={(event) => setData("gallery_files", Array.from(event.target.files ?? []))}
+                                />
+                                {fieldError("gallery_files") && (
+                                    <p className="text-xs text-rose-500">{fieldError("gallery_files")}</p>
+                                )}
+                            </div>
+                        </div>
                         <div className="grid gap-2">
                             <Label htmlFor="excerpt">Ringkasan</Label>
                             <Input
@@ -191,11 +318,10 @@ export default function ProductForm({ product }: Props) {
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="description">Deskripsi</Label>
-                            <textarea
-                                id="description"
-                                className="min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                value={data.description ?? ""}
-                                onChange={(event) => setData("description", event.target.value)}
+                            <RichTextEditor
+                                value={data.description ?? ''}
+                                onChange={(value) => setData("description", value)}
+                                placeholder="Paparkan fitur utama, manfaat, dan konteks penggunaan produk."
                             />
                             {errors.description && <p className="text-xs text-rose-500">{errors.description}</p>}
                         </div>
@@ -226,6 +352,98 @@ export default function ProductForm({ product }: Props) {
                                 onChange={(event) => setData("price", event.target.value)}
                             />
                             {errors.price && <p className="text-xs text-rose-500">{errors.price}</p>}
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="purchase_url">Link Pembelian e-Commerce</Label>
+                            <Input
+                                id="purchase_url"
+                                placeholder="https://tokopedia.com/..."
+                                value={data.purchase_url ?? ""}
+                                onChange={(event) => setData("purchase_url", event.target.value)}
+                            />
+                            {errors.purchase_url && <p className="text-xs text-rose-500">{errors.purchase_url}</p>}
+                        </div>
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-sm font-medium">Variasi Harga</Label>
+                                <Button type="button" size="sm" variant="outline" onClick={addVariantRow}>
+                                    Tambah Variasi
+                                </Button>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Tambahkan paket harga berbeda (misalnya Basic, Standard, atau Premium). Jika dikosongkan, sistem akan menggunakan harga utama.
+                            </p>
+                            <div className="space-y-3">
+                                {variantRows.map((variant, index) => (
+                                    <div key={`variant-${index}`} className="space-y-3 rounded-xl border border-border p-3">
+                                        <div className="grid gap-3 md:grid-cols-2">
+                                            <div className="grid gap-2">
+                                                <Label>Nama Paket</Label>
+                                                <Input
+                                                    value={variant.name ?? ""}
+                                                    onChange={(event) => updateVariant(index, "name", event.target.value)}
+                                                />
+                                                {fieldError(`price_variants.${index}.name`) && (
+                                                    <p className="text-xs text-rose-500">
+                                                        {fieldError(`price_variants.${index}.name`)}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div className="grid gap-2">
+                                                <Label>Harga</Label>
+                                                <Input
+                                                    value={variant.price ?? ""}
+                                                    onChange={(event) => updateVariant(index, "price", event.target.value)}
+                                                    placeholder="4500000"
+                                                />
+                                                {fieldError(`price_variants.${index}.price`) && (
+                                                    <p className="text-xs text-rose-500">
+                                                        {fieldError(`price_variants.${index}.price`)}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="grid gap-3 md:grid-cols-3">
+                                            <div className="grid gap-2">
+                                                <Label>Harga Coret (Opsional)</Label>
+                                                <Input
+                                                    value={variant.compare_at_price ?? ""}
+                                                    onChange={(event) =>
+                                                        updateVariant(index, "compare_at_price", event.target.value)
+                                                    }
+                                                    placeholder="5000000"
+                                                />
+                                            </div>
+                                            <div className="grid gap-2">
+                                                <Label>SKU</Label>
+                                                <Input
+                                                    value={variant.sku ?? ""}
+                                                    onChange={(event) => updateVariant(index, "sku", event.target.value)}
+                                                />
+                                            </div>
+                                            <div className="grid gap-2">
+                                                <Label>Stok</Label>
+                                                <Input
+                                                    value={variant.stock ?? ""}
+                                                    onChange={(event) => updateVariant(index, "stock", event.target.value)}
+                                                    placeholder="50"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-end">
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => removeVariantRow(index)}
+                                                disabled={variantRows.length === 1}
+                                            >
+                                                Hapus Variasi
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                         <div className="grid gap-2 md:grid-cols-2">
                             <div className="grid gap-2">

@@ -3,11 +3,12 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import AppLayout from "@/layouts/app-layout";
 import { Head, Link, useForm } from "@inertiajs/react";
 import { FormEventHandler, useMemo } from "react";
+import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/RichTextEditor";
 
 type BlogPost = {
     id: number;
@@ -117,6 +118,7 @@ export default function BlogPostForm({ post, users = [] }: Props) {
                             <Label htmlFor="excerpt">Ringkasan</Label>
                             <Textarea
                                 id="excerpt"
+                                className="min-h-[100px]"
                                 value={data.excerpt ?? ""}
                                 onChange={(event) => setData("excerpt", event.target.value)}
                             />
@@ -124,11 +126,10 @@ export default function BlogPostForm({ post, users = [] }: Props) {
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="body">Konten</Label>
-                            <Textarea
-                                id="body"
-                                className="min-h-[200px]"
-                                value={data.body ?? ""}
-                                onChange={(event) => setData("body", event.target.value)}
+                            <RichTextEditor
+                                value={data.body ?? ''}
+                                onChange={(value) => setData("body", value)}
+                                placeholder="Tulis artikel dengan heading, list, dan paragraf kaya."
                             />
                             {errors.body && <p className="text-xs text-rose-500">{errors.body}</p>}
                         </div>

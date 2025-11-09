@@ -40,7 +40,7 @@ export default function ProjectDetailPage() {
                         {project.status ?? 'Completed'}
                     </Badge>
                     <h1 className="text-4xl font-bold text-gray-900">{project.name}</h1>
-                    <p className="text-lg text-gray-600">{project.summary ?? 'Transformasi digital dengan pendekatan strategis dan terukur.'}</p>
+                    <p className="text-lg text-gray-600">{project.summary ?? 'Program peningkatan kinerja dengan pendekatan strategis dan terukur.'}</p>
                     <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                         {project.client_name && (
                             <span className="flex items-center gap-2">
@@ -69,7 +69,7 @@ export default function ProjectDetailPage() {
                     <CardContent className="space-y-4 text-gray-600 leading-relaxed">
                         <p>
                             {project.description ??
-                                'Implementasi platform digital terintegrasi dengan fokus pada peningkatan efisiensi operasional dan pengalaman pelanggan.'}
+                                'Implementasi solusi terintegrasi dengan fokus pada peningkatan efisiensi operasional dan pengalaman pelanggan.'}
                         </p>
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="rounded-lg border p-4">
@@ -108,7 +108,7 @@ export default function ProjectDetailPage() {
                                             </Link>
                                         </CardTitle>
                                         <CardDescription className="line-clamp-2 text-sm text-gray-600">
-                                            {recent.summary ?? 'Transformasi end-to-end untuk mendukung pertumbuhan bisnis klien.'}
+                                            {recent.summary ?? 'Inisiatif menyeluruh untuk mendukung pertumbuhan dan daya saing bisnis klien.'}
                                         </CardDescription>
                                     </CardHeader>
                                 </Card>

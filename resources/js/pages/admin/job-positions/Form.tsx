@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import AppLayout from "@/layouts/app-layout";
 import { Head, Link, useForm } from "@inertiajs/react";
-import { FormEventHandler, useMemo } from "react";
+import { FormEventHandler, useMemo, useEffect } from "react";
+import { RichTextEditor } from "@/components/RichTextEditor";
 
 type JobPosition = {
     id: number;
@@ -59,6 +60,20 @@ export default function JobPositionForm({ position }: Props) {
             form.post(action, { preserveScroll: true });
         }
     };
+
+    useEffect(() => {
+        if (!position) {
+            const trimmed = data.title.trim();
+            const slug = trimmed
+                ? trimmed
+                      .toLowerCase()
+                      .replace(/[^a-z0-9\s-]/g, "")
+                      .replace(/\s+/g, "-")
+                      .replace(/-+/g, "-")
+                : "";
+            setData("slug", slug);
+        }
+    }, [data.title, position, setData]);
 
     return (
         <AppLayout>
@@ -141,21 +156,19 @@ export default function JobPositionForm({ position }: Props) {
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="description">Deskripsi</Label>
-                            <textarea
-                                id="description"
-                                className="min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                value={data.description ?? ""}
-                                onChange={(event) => setData("description", event.target.value)}
+                            <RichTextEditor
+                                value={data.description ?? ''}
+                                onChange={(value) => setData("description", value)}
+                                placeholder="Uraikan tanggung jawab utama posisi."
                             />
                             {errors.description && <p className="text-xs text-rose-500">{errors.description}</p>}
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="requirements">Kualifikasi</Label>
-                            <textarea
-                                id="requirements"
-                                className="min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                value={data.requirements ?? ""}
-                                onChange={(event) => setData("requirements", event.target.value)}
+                            <RichTextEditor
+                                value={data.requirements ?? ''}
+                                onChange={(value) => setData("requirements", value)}
+                                placeholder="Cantumkan keahlian & pengalaman yang diharapkan."
                             />
                             {errors.requirements && <p className="text-xs text-rose-500">{errors.requirements}</p>}
                         </div>

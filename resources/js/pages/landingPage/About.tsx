@@ -1,23 +1,33 @@
-import AboutCompany from '@/components/ui/landingPageComponent/about/aboutCompany';
-import CoreValuesSection from '@/components/ui/landingPageComponent/about/CoreValues';
-import CTASection from '@/components/ui/landingPageComponent/about/CTASection';
-import ManagementTeamSection from '@/components/ui/landingPageComponent/about/ManagementTeam';
-import StatisticsSection from '@/components/ui/landingPageComponent/about/Statistics';
-import VisionMissionSection from '@/components/ui/landingPageComponent/about/visionmision';
+import { usePage } from '@inertiajs/react';
 import LandingPageLayout from '@/layouts/landingPage-layouts';
+import AboutCompany, { type AboutOverviewContent } from '@/components/ui/landingPageComponent/about/aboutCompany';
+import VisionMissionSection, { type AboutVisionContent } from '@/components/ui/landingPageComponent/about/visionmision';
+import CoreValuesSection, { type CoreValue } from '@/components/ui/landingPageComponent/about/CoreValues';
+import StatisticsSection, { type StatisticsContent } from '@/components/ui/landingPageComponent/about/Statistics';
+import ManagementTeamSection, { type TeamContent } from '@/components/ui/landingPageComponent/about/ManagementTeam';
+import CTASection, { type AboutCtaContent } from '@/components/ui/landingPageComponent/about/CTASection';
 import React from 'react';
 
-
+type AboutPageProps = {
+    overview: AboutOverviewContent;
+    vision: AboutVisionContent;
+    values: CoreValue[];
+    statistics: StatisticsContent;
+    team: TeamContent;
+    cta: AboutCtaContent;
+};
 
 export default function AboutPage() {
+    const { overview, vision, values, statistics, team, cta } = usePage<AboutPageProps>().props;
+
     return (
         <LandingPageLayout>
-            <AboutCompany />
-            <VisionMissionSection />
-            <CoreValuesSection />
-            <StatisticsSection />
-            <ManagementTeamSection />
-            <CTASection />
+            <AboutCompany content={overview} />
+            <VisionMissionSection content={vision} />
+            <CoreValuesSection values={values} />
+            <StatisticsSection content={statistics} />
+            <ManagementTeamSection content={team} />
+            <CTASection content={cta} />
         </LandingPageLayout>
     );
 }

@@ -14,6 +14,7 @@ type HomePageProps = PageProps & {
         id: number;
         title: string;
         slug: string;
+        icon?: string | null;
         excerpt?: string | null;
         description?: string | null;
     }>;

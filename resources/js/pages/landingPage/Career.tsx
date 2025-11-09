@@ -4,75 +4,174 @@ import LandingPageLayout from '@/layouts/landingPage-layouts';
 import JobList from '@/components/ui/landingPageComponent/career/joblist';
 import type { JobPosition } from '@/components/ui/landingPageComponent/career/types';
 import type { PageProps } from '@inertiajs/core';
-import { usePage } from '@inertiajs/react';
-import { Briefcase, Building, DollarSign } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { Briefcase, Building, Clock, DollarSign, GraduationCap, MapPin, TrendingUp } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import type { ReactElement } from 'react';
+
+type SectionCopy = {
+    badge?: string | null;
+    heading?: string | null;
+    description?: string | null;
+};
+
+type CareerPageProps = PageProps & {
+    positions?: JobPosition[];
+    careerHero?: SectionCopy;
+};
+
+const metrics = [
+    { label: 'Tim Profesional', value: '150+', description: 'Konsultan & engineers lintas industri.' },
+    { label: 'Klien Aktif', value: '90+', description: 'Perusahaan dari sektor publik & privat.' },
+    { label: 'Lokasi Kerja', value: '12 kota', description: 'Hybrid & remote-friendly environment.' },
+    { label: 'Program Career', value: '30+', description: 'Program training tersertifikasi tiap tahun.' },
+];
+
+const insights = [
+    { title: '1. Deep Collaboration', description: 'Ritme kerja mengandalkan squad lintas fungsi dengan akses langsung ke stakeholders.' },
+    { title: '2. Clear Career Map', description: 'Setiap role didampingi career coach & framework skill untuk leveling.' },
+    { title: '3. Work-Life Rhythm', description: 'Model kerja hybrid dengan fleksibilitas hari remote dan wellness day.' },
+];
 
 const benefits: Array<{ icon: LucideIcon; iconBg: string; iconColor: string; title: string; description: string }> = [
     {
         icon: Building,
-        iconBg: 'bg-blue-100',
+        iconBg: 'bg-blue-50',
         iconColor: 'text-blue-600',
         title: 'Lingkungan Kerja Modern',
-        description: 'Workspace yang nyaman dengan teknologi terdepan',
+        description: 'Workspace nyaman dengan dukungan teknologi terdepan bagi tim lintas fungsi.',
     },
     {
         icon: DollarSign,
-        iconBg: 'bg-green-100',
-        iconColor: 'text-green-600',
+        iconBg: 'bg-emerald-50',
+        iconColor: 'text-emerald-600',
         title: 'Kompensasi Kompetitif',
-        description: 'Gaji menarik dengan benefit lengkap',
+        description: 'Skema remunerasi transparan dengan bonus dan program saham internal.',
     },
     {
         icon: Briefcase,
-        iconBg: 'bg-purple-100',
+        iconBg: 'bg-purple-50',
         iconColor: 'text-purple-600',
         title: 'Pengembangan Karir',
-        description: 'Program training dan jenjang karir yang jelas',
+        description: 'Career coach dedicated per role, mentoring lintas divisi, dan akses kursus premium.',
     },
 ];
 
-function PageHeader() {
+function HeroSection({ copy }: { copy?: SectionCopy }) {
+    const heroBadge = copy?.badge ?? '#LifeAtHarmony';
+    const heroHeading = copy?.heading ?? 'Bangun Masa Depan Industri Bersama Kami';
+    const heroDescription =
+        copy?.description ??
+        'Kami memberdayakan talenta untuk memimpin perubahan industri melalui proyek transformasi digital, akses program pengembangan terkurasi, dan budaya yang mendukung work-life rhythm.';
+
     return (
-        <div className="space-y-4 text-center">
-            <h1 className="text-4xl font-bold text-gray-900">Bergabung Bersama Kami</h1>
-            <p className="mx-auto max-w-2xl text-lg text-gray-600">
-                Temukan peluang karir yang menarik dan kembangkan potensi Anda bersama tim profesional kami. Kami mencari talenta terbaik untuk
-                bergabung dalam perjalanan inovasi teknologi.
-            </p>
-        </div>
+        <section className="relative overflow-hidden rounded-[32px] border border-slate-200 bg-gradient-to-br from-[#F7FAFF] via-white to-[#EEF4FF] p-10 text-slate-900 shadow-xl dark:border-white/10 dark:from-[#060B1D] dark:via-[#101C3F] dark:to-[#0B1227] dark:text-white dark:shadow-2xl">
+            <div className="relative flex flex-col gap-6">
+                <div className="space-y-4 text-center">
+                    <span className="inline-flex items-center rounded-full bg-blue-100 px-4 py-1 text-xs tracking-[0.3em] text-blue-700 dark:bg-white/10 dark:text-white/70">
+                        {heroBadge}
+                    </span>
+                    <h1 className="text-4xl font-bold leading-tight text-slate-900 sm:text-5xl dark:text-white">{heroHeading}</h1>
+                    <p className="mx-auto max-w-3xl text-lg text-slate-600 dark:text-white/70">{heroDescription}</p>
+                </div>
+                <div className="grid gap-4 rounded-3xl border border-white/60 bg-white/80 p-6 backdrop-blur md:grid-cols-4 dark:border-white/5 dark:bg-white/5">
+                    {metrics.map((metric) => (
+                        <div key={metric.label} className="space-y-1 text-center">
+                            <p className="text-3xl font-semibold text-slate-900 dark:text-white">{metric.value}</p>
+                            <p className="text-sm font-medium text-slate-600 dark:text-white/90">{metric.label}</p>
+                            <p className="text-xs text-slate-500 dark:text-white/70">{metric.description}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+function InsightsSection() {
+    return (
+        <section className="rounded-[32px] border border-slate-200 bg-white p-8 text-slate-900 shadow-xl dark:border-white/10 dark:bg-white/5 dark:text-white dark:backdrop-blur">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                <div className="space-y-2">
+                    <p className="text-sm uppercase tracking-[0.4em] text-slate-500 dark:text-white/80">Budaya Kerja</p>
+                    <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Mengapa Talenta Memilih Harmony Strategic Group</h2>
+                </div>
+                <p className="max-w-xl text-sm text-slate-600 dark:text-white/70">
+                    Kami membangun lingkungan yang kolaboratif, adaptif, dan fokus pada pertumbuhan berkelanjutan. Setiap squad memiliki otonomi tinggi,
+                    namun tetap mendapat dukungan leadership dan tool kelas enterprise.
+                </p>
+            </div>
+            <div className="mt-6 grid gap-4 lg:grid-cols-3">
+                {insights.map((insight) => (
+                    <Card key={insight.title} className="border border-slate-100 bg-slate-50 text-slate-900 dark:border-white/10 dark:bg-[#101B3B] dark:text-white">
+                        <CardHeader>
+                            <CardTitle className="text-sm uppercase tracking-wide text-blue-600 dark:text-blue-200">{insight.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="text-sm text-slate-600 dark:text-white/80">{insight.description}</CardContent>
+                    </Card>
+                ))}
+            </div>
+        </section>
     );
 }
 
 function BenefitsSection() {
     return (
-        <div className="mb-8 grid gap-6 md:grid-cols-3">
+        <section className="grid gap-6 md:grid-cols-3">
             {benefits.map((benefit) => {
                 const Icon = benefit.icon;
                 return (
-                <Card key={benefit.title} className="p-6 text-center">
-                    <div className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg ${benefit.iconBg}`}>
-                        <Icon className={`h-6 w-6 ${benefit.iconColor}`} />
-                    </div>
-                    <h3 className="mb-2 font-semibold">{benefit.title}</h3>
-                    <p className="text-sm text-gray-600">{benefit.description}</p>
-                </Card>
+                    <Card key={benefit.title} className="border border-slate-200 bg-white p-6 text-slate-900 shadow-sm dark:border-white/10 dark:bg-[#0F1836] dark:text-white dark:shadow-lg">
+                        <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${benefit.iconBg} dark:bg-white/10`}>
+                            <Icon className={`h-6 w-6 ${benefit.iconColor} dark:text-white`} />
+                        </div>
+                        <h3 className="mb-2 text-lg font-semibold">{benefit.title}</h3>
+                        <p className="text-sm text-slate-600 dark:text-white/70">{benefit.description}</p>
+                    </Card>
                 );
             })}
-        </div>
+        </section>
+    );
+}
+
+function ExperienceStrip() {
+    const highlights = [
+        { icon: MapPin, label: 'Hybrid-first', desc: 'Pilihan base di Jakarta, Bandung, Surabaya, dengan remote days fleksibel.' },
+        { icon: Clock, label: 'Ritme Agile', desc: 'Sprint dua mingguan dengan ritual squad yang ringan dan produktif.' },
+        { icon: GraduationCap, label: 'Learning Fund', desc: 'Subsidi sertifikasi, conference, dan coaching session personal.' },
+        { icon: TrendingUp, label: 'Growth Review', desc: 'Performance review transparan dua kali setahun bersama career coach.' },
+    ];
+
+    return (
+        <section className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-inner dark:border-white/5 dark:bg-[#060C1F]">
+            <div className="grid gap-4 md:grid-cols-2">
+                {highlights.map(({ icon: Icon, label, desc }) => (
+                    <div key={label} className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4 text-slate-900 dark:bg-white/5 dark:text-white">
+                        <Icon className="mt-1 h-5 w-5 text-blue-600 dark:text-blue-300" />
+                        <div>
+                            <p className="text-sm font-semibold">{label}</p>
+                            <p className="text-xs text-slate-600 dark:text-white/70">{desc}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </section>
     );
 }
 
 function CallToAction() {
     return (
-        <Card className="my-10 bg-gradient-to-r from-blue-600 to-purple-600 text-center text-white">
-            <CardContent className="space-y-4">
-                <h2 className="text-2xl font-bold">Tidak Menemukan Posisi yang Cocok?</h2>
-                <p className="text-blue-100">
-                    Kirimkan CV Anda kepada kami. Kami akan menghubungi ketika ada posisi yang sesuai dengan keahlian Anda.
+        <Card className="my-12 overflow-hidden border-none bg-gradient-to-r from-indigo-600 via-blue-600 to-emerald-500 text-center text-white shadow-2xl">
+            <CardContent className="space-y-4 py-10">
+                <p className="text-sm uppercase tracking-[0.3em] text-white/80">Masih mencari?</p>
+                <h2 className="text-3xl font-bold">Tidak Menemukan Posisi yang Cocok?</h2>
+                <p className="mx-auto max-w-2xl text-lg text-white/80">
+                    Kirimkan CV terbaru Anda. Tim People kami akan menghubungi ketika ada posisi yang sesuai dengan keahlian dan passion Anda.
                 </p>
-                <Button variant="secondary" size="lg">
-                    Kirim CV Spontan
+                <Button variant="secondary" size="lg" className="rounded-full px-8" asChild>
+                    <Link href="mailto:talent@harmonygroup.id?subject=Lamaran%20Spontan%20Harmony%20Strategic%20Group">
+                        Kirim CV Spontan
+                    </Link>
                 </Button>
             </CardContent>
         </Card>
@@ -80,66 +179,147 @@ function CallToAction() {
 }
 
 function PerksSummary() {
+    const items = [
+        {
+            title: 'Benefit Utama',
+            desc: 'Kami berinvestasi pada kesejahteraan tim.',
+            points: ['Asuransi kesehatan & tunjangan keluarga', 'Subsidi pembelajaran dan sertifikasi', 'Cuti fleksibel serta hybrid working'],
+        },
+        {
+            title: 'Kompensasi',
+            desc: 'Struktur remunerasi transparan.',
+            points: ['Skema bonus berbasis kinerja', 'Review gaji dua kali setahun', 'Program kepemilikan saham internal'],
+        },
+        {
+            title: 'Pengembangan',
+            desc: 'Kurikulum belajar yang terarah.',
+            points: ['Career coach dedicated per role', 'Mentoring lintas divisi', 'Akses platform kursus premium'],
+        },
+    ];
+
     return (
-        <div className="grid gap-6 md:grid-cols-3">
-            <Card className="p-6">
-                <CardHeader>
-                    <CardTitle className="text-lg">Benefit Utama</CardTitle>
-                    <CardDescription>Kami berinvestasi pada kesejahteraan tim.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm text-gray-600">
-                    <p>• Asuransi kesehatan dan tunjangan keluarga</p>
-                    <p>• Subsidi pembelajaran dan sertifikasi</p>
-                    <p>• Cuti fleksibel dan remote working hybrid</p>
-                </CardContent>
-            </Card>
-            <Card className="p-6">
-                <CardHeader>
-                    <CardTitle className="text-lg">Kompensasi</CardTitle>
-                    <CardDescription>Struktur remunerasi transparan.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm text-gray-600">
-                    <p>• Skema bonus berbasis kinerja</p>
-                    <p>• Review gaji dua kali setahun</p>
-                    <p>• Program kepemilikan saham internal</p>
-                </CardContent>
-            </Card>
-            <Card className="p-6">
-                <CardHeader>
-                    <CardTitle className="text-lg">Pengembangan</CardTitle>
-                    <CardDescription>Kurikulum belajar yang terarah.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm text-gray-600">
-                    <p>• Career coach dedicated per role</p>
-                    <p>• Mentoring lintas divisi</p>
-                    <p>• Akses platform kursus premium</p>
-                </CardContent>
-            </Card>
-        </div>
+        <section className="grid gap-6 md:grid-cols-3">
+            {items.map((item) => (
+                <Card key={item.title} className="border border-slate-200 bg-white text-slate-900 dark:border-white/10 dark:bg-[#0F1836] dark:text-white">
+                    <CardHeader>
+                        <CardTitle className="text-lg">{item.title}</CardTitle>
+                        <CardDescription className="text-slate-600 dark:text-white/70">{item.desc}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-2 text-sm text-slate-600 dark:text-white/80">
+                        {item.points.map((point) => (
+                            <p key={point}>• {point}</p>
+                        ))}
+                    </CardContent>
+                </Card>
+            ))}
+        </section>
     );
 }
 
-type CareerPageProps = PageProps & {
-    positions?: JobPosition[];
-};
+function HiringTimeline() {
+    const steps = [
+        { title: 'Submit Lamaran', desc: 'Unggah CV, portfolio, dan highlight pengalaman Anda.' },
+        { title: 'People Interview', desc: 'Diskusi culture-fit, motivasi, dan preferensi kerja.' },
+        { title: 'Case Discussion', desc: 'Simulation session dengan user / lead squad terkait.' },
+        { title: 'Final Alignment', desc: 'Bahas kompensasi, area pengembangan, dan target onboarding.' },
+    ];
 
-export default function CareerPage(): React.ReactElement {
-    const { positions = [] } = usePage<CareerPageProps>().props;
+    return (
+        <section className="rounded-[32px] border border-slate-200 bg-white p-8 text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-white">
+            <div className="flex flex-col gap-6 lg:flex-row lg:justify-between">
+                <div>
+                    <p className="text-sm uppercase tracking-[0.3em] text-slate-500 dark:text-white/80">Hiring Journey</p>
+                    <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Transparan & Supportive</h2>
+                </div>
+                <p className="max-w-xl text-sm text-slate-600 dark:text-white/70">
+                    Setiap kandidat mendapatkan buddy dari tim People untuk membantu persiapan. Kami menjaga proses tetap cepat dan transparan supaya Anda
+                    selalu tahu progresnya.
+                </p>
+            </div>
+            <div className="mt-8 grid gap-4 md:grid-cols-4">
+                {steps.map((step, index) => (
+                    <div key={step.title} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-[#0C142F]">
+                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700 dark:bg-white/10 dark:text-white">
+                            {index + 1}
+                        </span>
+                        <h3 className="mt-3 text-sm font-semibold text-slate-900 dark:text-white">{step.title}</h3>
+                        <p className="mt-2 text-xs text-slate-600 dark:text-white/70">{step.desc}</p>
+                    </div>
+                ))}
+            </div>
+        </section>
+    );
+}
+
+function JobSpotlight({ positions }: { positions: JobPosition[] }) {
+    const featured = positions.slice(0, 3);
+
+    if (!featured.length) {
+        return null;
+    }
+
+    return (
+        <section className="rounded-[32px] border border-slate-200 bg-white p-8 text-slate-900 dark:border-white/10 dark:bg-[#091028] dark:text-white">
+            <div className="flex flex-col gap-2">
+                <p className="text-sm uppercase tracking-[0.4em] text-blue-600 dark:text-blue-200">Spotlight Roles</p>
+                <h2 className="text-2xl font-semibold">Prioritas Rekrutmen Q4</h2>
+            </div>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+                {featured.map((role) => (
+                    <Card key={role.id} className="border border-slate-200 bg-slate-50 dark:border-white/15 dark:bg-white/5">
+                        <CardHeader>
+                            <CardTitle className="text-lg text-slate-900 dark:text-white">{role.title}</CardTitle>
+                            <CardDescription className="text-slate-500 dark:text-white/70">{role.department ?? 'Team Strategis'}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4 text-sm text-slate-600 dark:text-white/80">
+                            <p>{role.description ?? 'Peran kunci untuk memperkuat tim delivery lintas industri.'}</p>
+                            <div className="flex flex-wrap gap-2 text-xs text-slate-600 dark:text-white/70">
+                                <span className="rounded-full bg-slate-100 px-3 py-1 dark:bg-white/10">{role.location ?? 'Hybrid'}</span>
+                                <span className="rounded-full bg-slate-100 px-3 py-1 dark:bg-white/10">{role.employment_type ?? 'Full-time'}</span>
+                                <span className="rounded-full bg-slate-100 px-3 py-1 dark:bg-white/10">{role.salary_range ?? 'Diskusi bersama'}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs uppercase tracking-wide text-slate-500 dark:text-white/60">
+                                <span>
+                                    Target mulai {role.posted_at ? new Date(role.posted_at).toLocaleDateString('id-ID') : 'segera'}
+                                </span>
+                                <Link
+                                    href={route('career.show', role.slug)}
+                                    className="text-[13px] font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-200 dark:hover:text-white"
+                                >
+                                    Lihat detail →
+                                </Link>
+                            </div>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+        </section>
+    );
+}
+
+export default function CareerPage(): ReactElement {
+    const { positions = [], careerHero } = usePage<CareerPageProps>().props;
 
     return (
         <LandingPageLayout>
-            <div className="container mx-auto mt-10 mb-20 px-4 md:px-6 lg:px-8 space-y-10">
-                <PageHeader />
-                <BenefitsSection />
-                <PerksSummary />
-                {positions.length ? (
-                    <JobList jobs={positions} />
-                ) : (
-                    <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-                        Tidak ada posisi yang tersedia saat ini. Kirimkan CV Anda dan kami akan menghubungi ketika ada kesempatan baru.
-                    </div>
-                )}
-                <CallToAction />
+            <div className="bg-[#F5F7FB] py-16 text-slate-900 dark:bg-[#050A1A] dark:text-white">
+                <div className="container mx-auto flex max-w-6xl flex-col gap-12 px-4 md:px-6">
+                    <HeroSection copy={careerHero} />
+                    <InsightsSection />
+                    <BenefitsSection />
+                    <ExperienceStrip />
+                    <HiringTimeline />
+                    <JobSpotlight positions={positions} />
+                    {positions.length ? (
+                        <JobList jobs={positions} />
+                    ) : (
+                        <div className="rounded-[32px] border border-dashed border-slate-300 bg-white p-10 text-center text-slate-600 dark:border-white/20 dark:bg-[#080F26] dark:text-white/70">
+                            Saat ini belum ada posisi terbuka. Kirimkan CV Anda dan kami akan menghubungi ketika ada kesempatan baru.
+                        </div>
+                    )}
+                    <PerksSummary />
+                    <CallToAction />
+                </div>
             </div>
         </LandingPageLayout>
     );

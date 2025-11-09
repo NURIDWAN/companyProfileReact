@@ -8,7 +8,7 @@ export function PageSeo() {
         return null;
     }
 
-    const title = seo.title ?? name ?? 'Nusantara Digital Solution';
+    const title = seo.title ?? name ?? 'Harmony Strategic Group';
     const description = seo.description ?? '';
     const keywords = Array.isArray(seo.keywords) ? seo.keywords.join(', ') : seo.keywords ?? '';
     const image = seo.image ?? null;

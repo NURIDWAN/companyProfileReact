@@ -2,6 +2,7 @@ import AppLayout from "@/layouts/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Head, Link } from "@inertiajs/react";
+import { DeleteButton } from "@/components/DeleteButton";
 
 type Position = {
     id: number;
@@ -70,10 +71,16 @@ export default function JobPositionIndex({ positions }: Props) {
                                                     {position.is_active ? "Aktif" : "Ditutup"}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-2 text-right">
-                                                <Button asChild variant="outline" size="sm">
-                                                    <Link href={route("admin.job-positions.edit", position.id)}>Edit</Link>
-                                                </Button>
+                                            <td className="px-4 py-2">
+                                                <div className="flex justify-end gap-2">
+                                                    <Button asChild variant="outline" size="sm">
+                                                        <Link href={route("admin.job-positions.edit", position.id)}>Edit</Link>
+                                                    </Button>
+                                                    <DeleteButton
+                                                        url={route("admin.job-positions.destroy", position.id)}
+                                                        confirmMessage={`Hapus lowongan "${position.title}"?`}
+                                                    />
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}

@@ -1,10 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { containerVariants, itemVariants } from "@/utils/animations";
+import { serviceIconRegistry, defaultServiceIcon } from "@/lib/service-icons";
 
 type ServiceCard = {
     id: number;
     title: string;
+    icon?: string | null;
     excerpt?: string | null;
     description?: string | null;
 };
@@ -38,7 +40,7 @@ export function Services({ services = [] }: ServicesProps) {
                     variants={itemVariants}
                     className="mx-auto mb-12 max-w-2xl text-lg text-gray-500 dark:text-gray-400"
                 >
-                    Temukan layanan yang kami sediakan untuk membantu transformasi digital perusahaan Anda.
+                    Temukan layanan yang kami siapkan untuk mendukung pertumbuhan perusahaan, meningkatkan efisiensi, dan menghadirkan pengalaman pelanggan yang unggul.
                 </motion.p>
 
                 {hasData ? (
@@ -55,10 +57,26 @@ export function Services({ services = [] }: ServicesProps) {
                             >
                                 <Card className="flex h-full flex-col overflow-hidden border-none shadow-lg">
                                     <CardContent className="flex flex-col p-6">
+                                        {(() => {
+                                            const Icon =
+                                                (service.icon && serviceIconRegistry[service.icon]) || defaultServiceIcon;
+                                            return (
+                                                <div className="mb-3 inline-flex rounded-2xl bg-indigo-50/80 p-3 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-200">
+                                                    <Icon className="h-5 w-5" />
+                                                </div>
+                                            );
+                                        })()}
                                         <h3 className="mb-2 text-left text-xl font-bold">{service.title}</h3>
-                                        <p className="text-left text-sm text-gray-500 dark:text-gray-400">
-                                            {service.description ?? service.excerpt ?? "Detail layanan akan segera tersedia."}
-                                        </p>
+                                        {service.description ? (
+                                            <div
+                                                className="richtext-view text-left text-sm text-gray-500 dark:text-gray-400"
+                                                dangerouslySetInnerHTML={{ __html: service.description }}
+                                            />
+                                        ) : (
+                                            <p className="text-left text-sm text-gray-500 dark:text-gray-400">
+                                                {service.excerpt ?? "Detail layanan akan segera tersedia."}
+                                            </p>
+                                        )}
                                     </CardContent>
                                 </Card>
                             </motion.div>

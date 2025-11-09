@@ -22,23 +22,23 @@ const ServicesHeroSection = () => {
                     className="text-4xl md:text-6xl font-bold leading-tight"
                     variants={itemVariants}
                 >
-                    Solusi Digital Inovatif untuk <span className="text-indigo-400">Masa Depan Bisnis Anda</span>
+                    Solusi Bisnis Terintegrasi untuk <span className="text-indigo-400">Pertumbuhan Berkelanjutan</span>
                 </motion.h1>
                 <motion.p 
                     className="text-lg md:text-xl text-gray-200 mt-6 max-w-3xl mx-auto"
                     variants={itemVariants}
                 >
-                    Kami membantu bisnis bertransformasi secara digital dengan layanan pengembangan web, aplikasi mobile, dan desain UI/UX kelas dunia.
+                    Kami mendampingi organisasi di berbagai sektor untuk meningkatkan efisiensi operasional, kualitas layanan, dan kesiapan perubahan.
                 </motion.p>
                 <motion.div 
                     className="mt-8 flex justify-center gap-4"
                     variants={itemVariants}
                 >
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700">Lihat Layanan Kami</Button>
+                        <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700">Lihat Layanan</Button>
                     </motion.div>
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button size="lg" variant="secondary">Hubungi Kami</Button>
+                        <Button size="lg" variant="secondary">Diskusikan Kebutuhan</Button>
                     </motion.div>
                 </motion.div>
             </motion.div>

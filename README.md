@@ -40,6 +40,20 @@ php artisan key:generate
 php artisan migrate --seed
 npm run dev      # development (Vite dev server)
 php artisan serve # akses di http://127.0.0.1:8000
+```
+
+### Google reCAPTCHA v2
+
+- Daftarkan kredensial reCAPTCHA **v2 (checkbox)** lalu isi `RECAPTCHA_SITE_KEY` dan `RECAPTCHA_SECRET_KEY` di `.env`.
+- Set `RECAPTCHA_ENABLED=true` (default) untuk mengaktifkan proteksi; ubah ke `false` bila ingin menonaktifkan sementara (misalnya lingkungan lokal). Jangan lupa sesuaikan `VITE_RECAPTCHA_ENABLED`.
+- Pastikan `VITE_RECAPTCHA_SITE_KEY` bernilai sama agar widget muncul di frontend (login, kontak, karier).
+- Setelah kunci diisi atau diganti, restart Vite (`npm run dev`) supaya script reCAPTCHA termuat ulang.
+
+### Akses Admin
+
+- Fitur registrasi dan lupa password dinonaktifkan untuk keamanan. Akses akun hanya diberikan oleh tim internal.
+- `DatabaseSeeder` otomatis membuat akun awal `admin@example.id / password`. Ubah kredensial tersebut sesuai kebutuhan sebelum deploy.
+- Bila perlu menambah akun baru, lakukan lewat seeder/tinker atau panel manajemen pengguna setelah login.
 
 
 ## Pengaturan Inertia + React

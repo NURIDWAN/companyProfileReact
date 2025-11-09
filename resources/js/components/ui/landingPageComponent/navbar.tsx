@@ -1,4 +1,4 @@
-import { Link, router, usePage } from "@inertiajs/react";
+import { Link, usePage } from "@inertiajs/react";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -6,12 +6,12 @@ import { Menu, Moon, Sun } from "lucide-react";
 import { useAppearance } from "@/hooks/use-appearance";
 import { cn } from "@/lib/utils";
 import { primaryNavLinks } from "@/config/navigation";
-import type { NavigationLink, SharedData } from "@/types";
+import type { BrandingInfo, NavigationLink, SharedData } from "@/types";
 
 export function CompanyNavbar() {
     const { appearance, updateAppearance } = useAppearance();
     const page = usePage<SharedData>();
-    const { navigation, language } = page.props;
+    const { navigation, branding } = page.props;
     const url = page.url;
 
     const navItems: NavigationLink[] = useMemo(() => {
@@ -28,12 +28,6 @@ export function CompanyNavbar() {
         }));
     }, [navigation]);
 
-    const currentLanguage = language?.current ?? language?.fallback ?? "id";
-    const languageOptions = language?.available ?? [
-        { code: "id", label: "ID", name: "Bahasa Indonesia" },
-        { code: "en", label: "EN", name: "English" }
-    ];
-
     const activeLinkKey = useMemo(() => {
         return navItems.find((item) =>
             item.href === "/" ? url === "/" : url.startsWith(item.href)
@@ -41,10 +35,8 @@ export function CompanyNavbar() {
     }, [url, navItems]);
 
     const resolveLabel = (item: NavigationLink) => {
-        return item.labels?.[currentLanguage] ??
-            item.labels?.[language?.fallback ?? "id"] ??
-            item.labels?.id ??
-            item.key;
+        const labels = item.labels ?? {};
+        return labels.id ?? labels.en ?? Object.values(labels)[0] ?? item.key;
     };
 
     const toggleDarkMode = () => {
@@ -53,18 +45,32 @@ export function CompanyNavbar() {
 
     const IconTheme = appearance === "dark" ? Moon : Sun;
 
-    const handleLanguageSwitch = (code: string) => {
-        if (code === currentLanguage) return;
-        router.post(route("language.switch"), { language: code }, { preserveScroll: true });
-    };
+    const brandProps = branding as BrandingInfo | undefined;
+    const brandName = brandProps?.name ?? 'Harmony Strategic Group';
+    const brandTagline = brandProps?.tagline ?? undefined;
+
+    const initials = brandName
+        .split(' ')
+        .map((word) => word.charAt(0))
+        .filter(Boolean)
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();
 
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-16 items-center justify-between px-4 md:px-6">
                 {/* Logo */}
                 <Link href="/" className="flex items-center space-x-2">
-                    <span className="font-bold text-blue-600 text-3xl">H</span>
-                    <span className="font-bold text-red-600 text-3xl">S</span>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white font-semibold">
+                        {initials || 'LC'}
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-base font-semibold text-foreground">{brandName}</span>
+                        {brandTagline ? (
+                            <span className="text-xs text-muted-foreground line-clamp-1">{brandTagline}</span>
+                        ) : null}
+                    </div>
                 </Link>
 
                 {/* Desktop Navigation */}
@@ -91,20 +97,6 @@ export function CompanyNavbar() {
 
                 {/* Right side */}
                 <div className="flex items-center space-x-2">
-                    <div className="hidden items-center space-x-1 lg:flex">
-                        {languageOptions.map((option) => (
-                            <Button
-                                key={option.code}
-                                variant={option.code === currentLanguage ? "default" : "ghost"}
-                                size="sm"
-                                className="px-3 text-xs"
-                                onClick={() => handleLanguageSwitch(option.code)}
-                            >
-                                {option.flag ?? option.label}
-                            </Button>
-                        ))}
-                    </div>
-
                     {/* Dark Mode Toggle */}
                     <Button variant="ghost" size="icon" onClick={toggleDarkMode}>
                         <IconTheme className="h-5 w-5" />
@@ -138,18 +130,6 @@ export function CompanyNavbar() {
                                         </Link>
                                     ))}
                                 </nav>
-                                <div className="mt-6 flex gap-2">
-                                    {languageOptions.map((option) => (
-                                        <Button
-                                            key={option.code}
-                                            variant={option.code === currentLanguage ? "default" : "outline"}
-                                            className="flex-1 bg-blue-600"
-                                            onClick={() => handleLanguageSwitch(option.code)}
-                                        >
-                                            {option.label}
-                                        </Button>
-                                    ))}
-                                </div>
                             </SheetContent>
                         </Sheet>
                     </div>

@@ -2,6 +2,7 @@ import AppLayout from "@/layouts/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Head, Link } from "@inertiajs/react";
+import { DeleteButton } from "@/components/DeleteButton";
 
 type Service = {
     id: number;
@@ -70,10 +71,16 @@ export default function ServiceIndex({ services }: Props) {
                                             <td className="px-4 py-2 text-muted-foreground">
                                                 {new Date(service.updated_at).toLocaleDateString("id-ID")}
                                             </td>
-                                            <td className="px-4 py-2 text-right">
-                                                <Button asChild variant="outline" size="sm">
-                                                    <Link href={route("admin.services.edit", service.id)}>Edit</Link>
-                                                </Button>
+                                            <td className="px-4 py-2">
+                                                <div className="flex justify-end gap-2">
+                                                    <Button asChild variant="outline" size="sm">
+                                                        <Link href={route("admin.services.edit", service.id)}>Edit</Link>
+                                                    </Button>
+                                                    <DeleteButton
+                                                        url={route("admin.services.destroy", service.id)}
+                                                        confirmMessage={`Hapus layanan "${service.name}"?`}
+                                                    />
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}

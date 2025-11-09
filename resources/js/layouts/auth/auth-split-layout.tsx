@@ -12,30 +12,43 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
     const { name, quote } = usePage<SharedData>().props;
 
     return (
-        <div className="relative grid h-dvh flex-col items-center justify-center px-8 sm:px-0 lg:max-w-none lg:grid-cols-2 lg:px-0">
-            <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
-                <div className="absolute inset-0 bg-zinc-900" />
-                <Link href={route('home')} className="relative z-20 flex items-center text-lg font-medium">
-                    <AppLogoIcon className="mr-2 size-8 fill-current text-white" />
+        <div className="flex min-h-dvh flex-col lg:flex-row">
+            <div className="relative flex flex-1 flex-col overflow-hidden bg-[#050505] px-10 py-8 text-white">
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.05),_transparent_55%)]" />
+                <div
+                    className="pointer-events-none absolute inset-0 opacity-45"
+                    style={{
+                        backgroundImage:
+                            'linear-gradient(120deg, rgba(15,23,42,0.8), rgba(15,118,110,0.5)), url(https://images.unsplash.com/photo-1487611459768-bd414656ea10?q=80&w=1600&auto=format&fit=crop)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        mixBlendMode: 'screen',
+                    }}
+                />
+                <div className="relative flex items-center gap-3 text-lg font-semibold">
+                    <AppLogoIcon className="size-8 fill-current text-white" />
                     {name}
-                </Link>
-                {quote && (
-                    <div className="relative z-20 mt-auto">
-                        <blockquote className="space-y-2">
-                            <p className="text-lg">&ldquo;{quote.message}&rdquo;</p>
-                            <footer className="text-sm text-neutral-300">{quote.author}</footer>
-                        </blockquote>
+                </div>
+                {quote ? (
+                    <div className="relative mt-auto max-w-md text-sm text-neutral-200">
+                        <p className="text-lg">&ldquo;{quote.message}&rdquo;</p>
+                        <p className="mt-3 text-xs uppercase tracking-[0.3em] text-neutral-400">{quote.author}</p>
+                    </div>
+                ) : (
+                    <div className="relative mt-auto text-sm text-neutral-200">
+                        <p>
+                            &ldquo;People find pleasure in different ways. I find it in keeping my mind clear.&rdquo;
+                        </p>
+                        <p className="mt-3 text-xs uppercase tracking-[0.3em] text-neutral-400">Marcus Aurelius</p>
                     </div>
                 )}
             </div>
-            <div className="w-full lg:p-8">
-                <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-                    <Link href={route('home')} className="relative z-20 flex items-center justify-center lg:hidden">
-                        <AppLogoIcon className="h-10 fill-current text-black sm:h-12" />
-                    </Link>
-                    <div className="flex flex-col items-start gap-2 text-left sm:items-center sm:text-center">
-                        <h1 className="text-xl font-medium">{title}</h1>
-                        <p className="text-sm text-balance text-muted-foreground">{description}</p>
+            <div className="flex w-full flex-1 items-center justify-center bg-[#f7f7f5] px-6 py-10 sm:px-10 lg:px-16">
+                <div className="w-full max-w-lg space-y-6">
+                    <div className="space-y-1 text-left">
+                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Harmony Console</p>
+                        <h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
+                        <p className="text-sm text-muted-foreground">{description}</p>
                     </div>
                     {children}
                 </div>

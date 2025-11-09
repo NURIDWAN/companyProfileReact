@@ -139,3 +139,54 @@
         @apply bg-background text-foreground;
     }
 }
+
+@layer components {
+    .tiptap {
+        min-height: 180px;
+        padding: 0.75rem 1rem;
+    }
+    .tiptap p {
+        margin-bottom: 0.5rem;
+    }
+    .tiptap ul,
+    .tiptap ol {
+        padding-left: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+    .tiptap ul li {
+        list-style-type: disc;
+    }
+    .tiptap ol li {
+        list-style-type: decimal;
+    }
+    .rte-btn {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        border: 1px solid var(--border);
+        background-color: white;
+        color: var(--foreground);
+    }
+    .rte-btn.active {
+        background-color: rgb(99 102 241 / 0.12);
+        border-color: rgb(99 102 241);
+        color: rgb(99 102 241);
+    }
+}
+@layer components {
+    .richtext-view p {
+        margin-bottom: 0.5rem;
+    }
+    .richtext-view ul,
+    .richtext-view ol {
+        padding-left: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+    .richtext-view ul li {
+        list-style-type: disc;
+    }
+    .richtext-view ol li {
+        list-style-type: decimal;
+    }
+}

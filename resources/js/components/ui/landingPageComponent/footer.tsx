@@ -1,7 +1,14 @@
 import { Link, usePage } from '@inertiajs/react';
 import { MountainIcon, Linkedin, Twitter, Instagram, Link2 } from 'lucide-react';
 import { primaryNavLinks } from '@/config/navigation';
-import type { FooterContent, NavigationLink, SharedData } from '@/types';
+import type {
+    BrandingInfo,
+    CompanyAddress,
+    CompanyContactsInfo,
+    FooterContent,
+    NavigationLink,
+    SharedData,
+} from '@/types';
 
 const socialIcons: Record<string, React.ComponentType<{ className?: string }>> = {
     linkedin: Linkedin,
@@ -11,17 +18,36 @@ const socialIcons: Record<string, React.ComponentType<{ className?: string }>> =
 
 export function Footer() {
     const currentYear = new Date().getFullYear();
-    const { footer, navigation, language } = usePage<SharedData>().props;
+    const { footer, navigation, branding, companyContacts, companyAddress } = usePage<SharedData>().props;
+
+    const brandingInfo = branding as BrandingInfo | undefined;
+    const defaultCompanyName = brandingInfo?.name ?? 'Harmony Strategic Group';
+    const defaultDescription = brandingInfo?.tagline ?? 'Menyediakan solusi terpadu untuk meningkatkan kinerja dan layanan bisnis Anda.';
+
+    const contactsInfo = companyContacts as CompanyContactsInfo | undefined;
+    const defaultContactEmail = contactsInfo?.email ?? 'hello@harmonygroup.id';
+    const defaultContactPhone = contactsInfo?.phone
+        ?? contactsInfo?.whatsapp
+        ?? '+62 811 7788 990';
+    const addressInfo = companyAddress as CompanyAddress | undefined;
+    const defaultAddress = [
+        addressInfo?.line1,
+        addressInfo?.city,
+        addressInfo?.province,
+        addressInfo?.postal_code,
+    ]
+        .filter(Boolean)
+        .join(', ') || 'Jakarta, Indonesia';
 
     const footerContent: FooterContent = footer ?? {
         company: {
-            name: 'Nusantara Digital Solution',
-            description: 'Menyediakan solusi inovatif untuk membantu bisnis Anda bertumbuh dan sukses di dunia digital.',
+            name: defaultCompanyName,
+            description: defaultDescription,
         },
         contacts: {
-            email: 'halo@nusantaradigital.id',
-            phone: '+62 811 1234 567',
-            address: 'Jakarta, Indonesia',
+            email: defaultContactEmail,
+            phone: defaultContactPhone,
+            address: defaultAddress,
         },
     };
 
@@ -34,13 +60,18 @@ export function Footer() {
             order: index + 1,
         }));
 
+    const resolveNavLabel = (item: NavigationLink) => {
+        const labels = item.labels ?? {};
+        return labels.id ?? labels.en ?? Object.values(labels)[0] ?? item.key;
+    };
+
     const companyLinks = footerContent.columns?.length
         ? footerContent.columns
         : [
             {
                 title: 'Perusahaan',
                 links: navItems.slice(0, 4).map((item) => ({
-                    label: item.labels?.[language?.current ?? 'id'] ?? item.labels.id ?? item.key,
+                    label: resolveNavLabel(item),
                     href: item.href,
                 })),
             },

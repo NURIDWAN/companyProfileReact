@@ -29,6 +29,24 @@ export type SeoMeta = {
 
 export type FooterLink = { label: string; href: string };
 
+export interface BrandingInfo {
+    name?: string;
+    tagline?: string;
+}
+
+export interface CompanyAddress {
+    line1?: string | null;
+    city?: string | null;
+    province?: string | null;
+    postal_code?: string | null;
+}
+
+export interface CompanyContactsInfo {
+    phone?: string | null;
+    email?: string | null;
+    whatsapp?: string | null;
+}
+
 export interface FooterColumn {
     title: string;
     links: FooterLink[];
@@ -83,13 +101,16 @@ export interface SharedData {
     navigation?: {
         primary: NavigationLink[];
     };
-    language?: {
-        current: string;
-        available: LanguageOption[];
-        fallback?: string;
-    };
     footer?: FooterContent;
+    branding?: BrandingInfo;
+    companyAddress?: CompanyAddress;
+    companyContacts?: CompanyContactsInfo;
     seo?: SeoMeta;
+    flash?: {
+        success?: string;
+        error?: string;
+        [key: string]: unknown;
+    };
     [key: string]: unknown;
 }
 
@@ -107,12 +128,29 @@ export interface User {
 // Definisi tipe kategori
 export type Category = "All" | "Software" | "Hardware" | "Service" | "Cloud" | string;
 
-// Definisi tipe produk
+export type ProductPriceRange = {
+    min: number;
+    max: number;
+    currency: string;
+    formatted: string;
+};
+
+export type ProductPriceVariant = {
+    name?: string | null;
+    sku?: string | null;
+    price?: number | null;
+    compare_at_price?: number | null;
+    price_formatted?: string | null;
+    compare_at_price_formatted?: string | null;
+    stock?: number | null;
+};
+
 export interface Product {
     id: number;
     slug: string;
     name: string;
     description?: string | null;
+    excerpt?: string | null;
     category?: Category | string | null;
     features?: string[];
     rating?: number | null;
@@ -124,4 +162,39 @@ export interface Product {
     cover_image?: string | null;
     cover_image_url?: string | null;
     thumbnail_url?: string | null;
+    gallery?: string[] | null;
+    price_range?: ProductPriceRange | null;
+    variants?: ProductPriceVariant[];
+    purchase_url?: string | null;
+}
+
+export interface JobApplication {
+    id: number;
+    name: string;
+    email: string;
+    phone?: string | null;
+    linkedin_url?: string | null;
+    portfolio_url?: string | null;
+    cover_letter?: string | null;
+    resume_url?: string | null;
+    status: string;
+    created_at?: string | null;
+    job?: {
+        id: number;
+        title: string;
+        slug: string;
+        department?: string | null;
+        location?: string | null;
+        employment_type?: string | null;
+        salary_range?: string | null;
+    } | null;
+}
+
+declare global {
+    interface Window {
+        grecaptcha?: {
+            render: (container: HTMLElement, parameters: Record<string, unknown>) => number;
+            reset: (widgetId?: number) => void;
+        };
+    }
 }

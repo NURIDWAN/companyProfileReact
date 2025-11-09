@@ -15,11 +15,12 @@ export default function JobList({ jobs }: JobListProps) {
       whileInView="show"
       viewport={{ once: true, amount: 0.2 }}
       variants={containerVariants}
+      className="mx-auto w-full px-4 sm:px-6 lg:px-8"
     >
-      <motion.h2 className="text-2xl font-bold text-gray-900 mb-6" variants={itemVariants}>
+      <motion.h2 className="mb-6 text-2xl font-bold text-slate-900 dark:text-white" variants={itemVariants}>
         Posisi yang Tersedia
       </motion.h2>
-      <motion.div className="grid gap-6" variants={containerVariants}>
+      <motion.div className="flex flex-col gap-5" variants={containerVariants}>
         {jobs.map((job) => (
           <JobCard key={job.id} job={job} />
         ))}

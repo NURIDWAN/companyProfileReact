@@ -8,6 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
+type SectionCopy = {
+    badge?: string | null;
+    heading?: string | null;
+    description?: string | null;
+};
+
 interface ProjectItem {
     id: number;
     name: string;
@@ -23,6 +29,7 @@ interface ProjectItem {
 
 type ProjectPageProps = PageProps & {
     projects?: ProjectItem[];
+    projectHero?: SectionCopy;
 };
 
 function ProjectCard({ project }: { project: ProjectItem }) {
@@ -43,7 +50,7 @@ function ProjectCard({ project }: { project: ProjectItem }) {
                 </div>
                 <CardTitle className="text-xl">{project.name}</CardTitle>
                 <CardDescription className="text-sm text-gray-600 line-clamp-2">
-                    {project.summary ?? 'Transformasi digital dengan pendekatan strategis dan terukur.'}
+                    {project.summary ?? 'Inisiatif peningkatan kinerja dengan pendekatan strategis dan terukur.'}
                 </CardDescription>
             </CardHeader>
             <CardContent className="mt-auto space-y-4 text-sm text-gray-500">
@@ -66,8 +73,10 @@ function ProjectCard({ project }: { project: ProjectItem }) {
 }
 
 export default function ProjectPage() {
-    const { projects = [] } = usePage<ProjectPageProps>().props;
+    const { projects = [], projectHero } = usePage<ProjectPageProps>().props;
     const [statusFilter, setStatusFilter] = useState<string>('All');
+    const completedProjects = projects.filter((project) => (project.status ?? '').toLowerCase() === 'completed').length;
+    const currentYear = new Date().getFullYear();
 
     const statuses = useMemo(() => {
         const unique = new Set(projects.map((project) => project.status ?? 'On Going'));
@@ -81,16 +90,54 @@ export default function ProjectPage() {
         return projects.filter((project) => (project.status ?? 'On Going') === statusFilter);
     }, [projects, statusFilter]);
 
+    const heroBadge = projectHero?.badge ?? 'Portofolio Proyek';
+    const heroHeading =
+        projectHero?.heading ??
+        'Dokumentasi studi kasus lintas industri yang menyoroti strategi, implementasi, dan hasil nyata.';
+    const heroDescription =
+        projectHero?.description ??
+        'Ikuti bagaimana kami mendampingi organisasi dalam mengakselerasi transformasi digital, efisiensi operasional, dan pengembangan layanan.';
+    const heroImage =
+        'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80';
+
     return (
         <LandingPageLayout>
             <div className="mx-auto max-w-7xl space-y-10 p-6">
-                <div className="space-y-4 text-center">
-                    <h1 className="text-4xl font-bold text-gray-900">Portofolio Proyek</h1>
-                    <p className="mx-auto max-w-3xl text-lg text-gray-600">
-                        Lihat berbagai proyek yang telah kami kerjakan di sektor publik maupun enterprise. Setiap proyek menunjukkan komitmen kami
-                        terhadap kualitas dan inovasi.
-                    </p>
-                </div>
+                <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950 text-white shadow-2xl">
+                    <img
+                        src={heroImage}
+                        alt="Project hero background"
+                        className="absolute inset-0 h-full w-full object-cover opacity-40"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900/80 to-slate-800/40" />
+                    <div className="relative z-10 flex flex-col gap-8 p-8 md:flex-row md:items-end md:justify-between">
+                        <div className="max-w-2xl space-y-4">
+                            <span className="inline-flex items-center rounded-full bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-300">
+                                {heroBadge}
+                            </span>
+                            <h1 className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">{heroHeading}</h1>
+                            <p className="text-base text-white/80 sm:text-lg">{heroDescription}</p>
+                        </div>
+                        <div className="grid gap-4 rounded-2xl border border-white/10 bg-white/10 p-6 text-left backdrop-blur md:w-[420px]">
+                            <div>
+                                <p className="text-sm text-white/70">Total proyek</p>
+                                <p className="text-3xl font-semibold">{projects.length}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-white/70">Proyek selesai</p>
+                                <p className="text-3xl font-semibold">{completedProjects}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-white/70">Status aktif</p>
+                                <p className="text-3xl font-semibold">{statuses.length - 1}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-white/70">Tahun operasi</p>
+                                <p className="text-3xl font-semibold">{currentYear}</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 <div className="grid gap-6 md:grid-cols-3">
                     <Card className="p-6 text-center">

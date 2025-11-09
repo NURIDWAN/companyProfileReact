@@ -14,11 +14,28 @@ it('can create a product with uploaded images', function () {
         'slug' => 'crm-platform',
         'cover_image_file' => UploadedFile::fake()->image('cover.jpg'),
         'thumbnail_file' => UploadedFile::fake()->image('thumb.jpg'),
+        'gallery' => ['https://example.com/gallery-1.jpg', ''],
         'excerpt' => 'Ringkasan produk',
         'description' => 'Deskripsi lengkap',
         'category' => 'Software',
         'features' => "Integrasi\nDashboard",
         'price' => 1250000,
+        'price_variants' => [
+            [
+                'name' => 'Starter',
+                'price' => 1250000,
+                'compare_at_price' => 1500000,
+                'sku' => 'CRM-START',
+                'stock' => 25,
+            ],
+            [
+                'name' => 'Professional',
+                'price' => 2750000,
+                'sku' => 'CRM-PRO',
+                'stock' => 10,
+            ],
+        ],
+        'purchase_url' => 'https://shop.example.com/crm-platform',
         'clients' => 10,
         'rating' => 4.5,
         'popular' => true,
@@ -40,6 +57,10 @@ it('can create a product with uploaded images', function () {
 
     Storage::disk('public')->assertExists($product->cover_image);
     Storage::disk('public')->assertExists($product->thumbnail);
+    expect($product->gallery)->toContain('https://example.com/gallery-1.jpg');
+    expect($product->price_variants)->toHaveCount(2);
+    expect(data_get($product->price_variants, '0.name'))->toBe('Starter');
+    expect($product->purchase_url)->toBe('https://shop.example.com/crm-platform');
 });
 
 it('can update a product and replace images', function () {
@@ -63,11 +84,22 @@ it('can update a product and replace images', function () {
         'slug' => 'crm-platform-updated',
         'cover_image_file' => $newCover,
         'thumbnail_file' => $newThumb,
+        'gallery' => ['https://example.com/updated-gallery.jpg'],
         'excerpt' => 'Ringkasan baru',
         'description' => 'Deskripsi baru',
         'category' => 'Software',
         'features' => "SLA\nSupport",
-        'price' => 1500000,
+        'price' => '',
+        'price_variants' => [
+            [
+                'name' => 'Enterprise',
+                'price' => 3500000,
+                'compare_at_price' => 4000000,
+                'sku' => 'CRM-ENT',
+                'stock' => 5,
+            ],
+        ],
+        'purchase_url' => 'https://shop.example.com/crm-platform-enterprise',
         'clients' => 20,
         'rating' => 4.7,
         'popular' => true,
@@ -82,6 +114,11 @@ it('can update a product and replace images', function () {
     expect($product->name)->toBe('CRM Platform Updated');
     expect($product->features)->toBe(['SLA', 'Support']);
     expect($product->demo)->toBeFalse();
+    expect($product->gallery)->toContain('https://example.com/updated-gallery.jpg');
+    expect($product->price_variants)->toHaveCount(1);
+    expect(data_get($product->price_variants, '0.price'))->toEqual(3500000.0);
+    expect($product->price)->toEqual(3500000.0);
+    expect($product->purchase_url)->toBe('https://shop.example.com/crm-platform-enterprise');
 
     Storage::disk('public')->assertExists($product->cover_image);
     Storage::disk('public')->assertExists($product->thumbnail);

@@ -14,7 +14,9 @@ type CareerDetailProps = PageProps & {
 };
 
 export default function CareerDetailPage() {
-    const { position, relatedPositions = [] } = usePage<CareerDetailProps>().props;
+    const { position, relatedPositions = [], flash } = usePage<CareerDetailProps>().props as CareerDetailProps & {
+        flash?: { success?: string };
+    };
     const requirements = position.requirements && position.requirements.length
         ? position.requirements
         : ['Komitmen tinggi terhadap kualitas kerja', 'Mampu bekerja secara kolaboratif'];
@@ -23,11 +25,16 @@ export default function CareerDetailPage() {
         <LandingPageLayout>
             <div className="mx-auto max-w-4xl space-y-8 p-6">
                 <Link href="/career" className="text-sm text-blue-600">&larr; Kembali ke daftar karier</Link>
+                {flash?.success && (
+                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
+                        {flash.success}
+                    </div>
+                )}
                 <div className="space-y-4">
                     <p className="text-xs uppercase tracking-wide text-blue-600">Lowongan</p>
                     <h1 className="text-4xl font-bold text-gray-900">{position.title}</h1>
                     <p className="text-lg text-gray-600">
-                        {position.description ?? 'Kami mencari talenta terbaik untuk memperkuat tim dan menghadirkan solusi digital berdampak.'}
+                        {position.description ?? 'Kami mencari talenta terbaik untuk memperkuat tim dan menghadirkan solusi bisnis berdampak.'}
                     </p>
                     <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                         <span className="flex items-center gap-2"><Building className="h-4 w-4" />{position.department ?? 'Semua Divisi'}</span>
@@ -59,9 +66,13 @@ export default function CareerDetailPage() {
                     <h2 className="text-2xl font-semibold text-gray-900">Siap bergabung?</h2>
                     <p className="mt-2 text-gray-600">Kirim CV dan portofolio terbaik Anda. Tim People akan meninjau dalam 5 hari kerja.</p>
                     <div className="mt-4 flex flex-wrap gap-3">
-                        <Button size="lg" className="bg-blue-600 hover:bg-blue-700">Lamar Sekarang</Button>
+                        <Button size="lg" className="bg-blue-600 hover:bg-blue-700" asChild>
+                            <Link href={route('career.apply', position.slug)}>Lamar Sekarang</Link>
+                        </Button>
                         <Button size="lg" variant="outline" asChild>
-                            <Link href="mailto:career@nusantaradigital.id">Tanyakan Detail</Link>
+                            <Link href={`mailto:talent@harmonygroup.id?subject=Pertanyaan%20tentang%20${encodeURIComponent(position.title)}`}>
+                                Tanyakan Detail
+                            </Link>
                         </Button>
                     </div>
                 </div>

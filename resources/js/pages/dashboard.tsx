@@ -111,7 +111,7 @@ export default function Dashboard() {
 
     const quickLinks: Array<{ href: string; label: string; icon: LucideIcon; description: string }> = [
         { href: '/admin/services', label: 'Kelola Layanan', icon: Layers, description: 'Atur paket dan detail layanan terbaru.' },
-        { href: '/admin/products', label: 'Kelola Produk', icon: PackageSearch, description: 'Perbarui katalog produk digital Anda.' },
+        { href: '/admin/products', label: 'Kelola Produk', icon: PackageSearch, description: 'Perbarui katalog program dan solusi Anda.' },
         { href: '/admin/projects', label: 'Kelola Proyek', icon: BriefcaseBusiness, description: 'Pantau status dan progres proyek.' },
         { href: '/admin/team-members', label: 'Kelola Tim', icon: UsersRound, description: 'Perkuat profil anggota tim inti.' },
         { href: '/admin/testimonials', label: 'Kelola Testimoni', icon: MessageCircle, description: 'Kurasi feedback terbaik dari klien.' },
@@ -139,7 +139,7 @@ export default function Dashboard() {
         {
             label: 'Produk',
             value: metrics.products,
-            description: 'Produk digital tersedia.',
+            description: 'Program atau produk yang aktif.',
             icon: PackageSearch,
             iconClassName: 'bg-indigo-500/15 text-indigo-500',
             accentClassName: 'from-indigo-500/60 via-indigo-500/20 to-transparent',
@@ -293,7 +293,7 @@ export default function Dashboard() {
                             </div>
                             <div className="space-y-1">
                                 <CardTitle>Produk Terbaru</CardTitle>
-                                <p className="text-sm text-muted-foreground">Produk digital yang baru saja dirilis.</p>
+                                <p className="text-sm text-muted-foreground">Program atau solusi yang baru saja diluncurkan.</p>
                             </div>
                         </CardHeader>
                         <CardContent className="space-y-3 pb-6">

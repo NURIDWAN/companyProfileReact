@@ -6,7 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import AppLayout from "@/layouts/app-layout";
 import { Head, Link, useForm } from "@inertiajs/react";
-import { FormEventHandler } from "react";
+import { FormEventHandler, useEffect } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { serviceIconOptions } from "@/lib/service-icons";
+import { RichTextEditor } from "@/components/RichTextEditor";
 
 type Service = {
     id: number;
@@ -36,6 +39,22 @@ export default function ServiceForm({ service }: Props) {
         is_active: service?.is_active ?? true,
     });
     const generalError = (errors as typeof errors & { general?: string }).general;
+    const selectedIconOption = serviceIconOptions.find((option) => option.value === data.icon);
+    const PreviewIcon = selectedIconOption?.icon;
+
+    useEffect(() => {
+        if (!service) {
+            const trimmed = data.name.trim();
+            const slug = trimmed
+                ? trimmed
+                      .toLowerCase()
+                      .replace(/[^a-z0-9\s-]/g, "")
+                      .replace(/\s+/g, "-")
+                      .replace(/-+/g, "-")
+                : "";
+            setData("slug", slug);
+        }
+    }, [data.name, service, setData]);
 
     const submit: FormEventHandler<HTMLFormElement> = (event) => {
         event.preventDefault();
@@ -93,12 +112,33 @@ export default function ServiceForm({ service }: Props) {
                                 {errors.slug && <p className="text-xs text-rose-500">{errors.slug}</p>}
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="icon">Ikon (opsional)</Label>
-                                <Input
-                                    id="icon"
-                                    value={data.icon ?? ""}
-                                    onChange={(event) => setData("icon", event.target.value)}
-                                />
+                                <Label htmlFor="icon">Ikon</Label>
+                                <Select
+                                    value={data.icon && data.icon !== "" ? data.icon : "none"}
+                                    onValueChange={(value) => setData("icon", value === "none" ? "" : value)}
+                                >
+                                    <SelectTrigger id="icon">
+                                        <SelectValue placeholder="Pilih ikon" />
+                                    </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="none">Tanpa ikon</SelectItem>
+                                        {serviceIconOptions.map((option) => (
+                                            <SelectItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {PreviewIcon ? (
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                        <PreviewIcon className="h-4 w-4 text-indigo-600" />
+                                        <span>{selectedIconOption.label}</span>
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-muted-foreground">
+                                        Ikon akan tampil di kartu layanan pada landing page.
+                                    </p>
+                                )}
                                 {errors.icon && <p className="text-xs text-rose-500">{errors.icon}</p>}
                             </div>
                             <div className="grid gap-2">
@@ -112,11 +152,10 @@ export default function ServiceForm({ service }: Props) {
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="description">Deskripsi</Label>
-                                <textarea
-                                    id="description"
-                                    className="min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                    value={data.description ?? ""}
-                                    onChange={(event) => setData("description", event.target.value)}
+                                <RichTextEditor
+                                    value={data.description ?? ''}
+                                    onChange={(value) => setData("description", value)}
+                                    placeholder="Jelaskan lingkup layanan, manfaat, dan hasil yang ditawarkan."
                                 />
                                 {errors.description && <p className="text-xs text-rose-500">{errors.description}</p>}
                             </div>

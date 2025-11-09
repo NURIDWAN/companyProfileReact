@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Throwable;
 use Inertia\Inertia;
@@ -100,6 +102,17 @@ class ProductController extends Controller
             'category' => ['nullable', 'string', 'max:100'],
             'features' => ['nullable', 'string'],
             'price' => ['nullable', 'numeric', 'min:0'],
+            'price_variants' => ['nullable', 'array'],
+            'price_variants.*.name' => ['nullable', 'string', 'max:120'],
+            'price_variants.*.price' => ['nullable', 'numeric', 'min:0'],
+            'price_variants.*.compare_at_price' => ['nullable', 'numeric', 'min:0'],
+            'price_variants.*.sku' => ['nullable', 'string', 'max:120'],
+            'price_variants.*.stock' => ['nullable', 'integer', 'min:0'],
+            'gallery' => ['nullable', 'array'],
+            'gallery.*' => ['nullable', 'string', 'max:500'],
+            'gallery_files' => ['nullable', 'array'],
+            'gallery_files.*' => ['nullable', 'image', 'max:4096'],
+            'purchase_url' => ['nullable', 'url', 'max:255'],
             'clients' => ['nullable', 'integer', 'min:0'],
             'rating' => ['nullable', 'numeric', 'between:0,5'],
             'popular' => ['nullable'],
@@ -140,8 +153,115 @@ class ProductController extends Controller
             $data['thumbnail'] = $data['thumbnail'] ?: ($product?->thumbnail ?? null);
         }
 
-        unset($data['cover_image_file'], $data['thumbnail_file']);
+        $gallery = $this->prepareGallery(
+            collect($request->input('gallery', [])),
+            collect($request->file('gallery_files', [])),
+            $product
+        );
+
+        if ($product) {
+            $this->cleanupRemovedGallery($product, $gallery);
+        }
+
+        $data['gallery'] = $gallery->values()->all();
+
+        $variants = $this->prepareVariants(collect($request->input('price_variants', [])));
+
+        if ($variants->isNotEmpty() && !$request->filled('price')) {
+            $data['price'] = $variants
+                ->map(fn (array $variant) => $variant['price'] ?? null)
+                ->filter()
+                ->min();
+        }
+
+        $data['price_variants'] = $variants->values()->all();
+
+        unset($data['cover_image_file'], $data['thumbnail_file'], $data['gallery_files']);
 
         return $data;
+    }
+
+    private function prepareGallery(Collection $existing, Collection $files, ?Product $product): Collection
+    {
+        $gallery = $existing
+            ->map(fn ($value) => is_string($value) ? trim($value) : null)
+            ->filter(fn ($value) => $value !== null && $value !== '')
+            ->values();
+
+        $files->filter()
+            ->each(function ($file) use (&$gallery): void {
+                if ($file) {
+                    $gallery->push($file->store('products', 'public'));
+                }
+            });
+
+        return $gallery;
+    }
+
+    private function cleanupRemovedGallery(Product $product, Collection $updatedGallery): void
+    {
+        $previous = collect($product->gallery ?? []);
+
+        $previous
+            ->filter(fn ($path) => Str::startsWith($path, 'products/'))
+            ->diff($updatedGallery)
+            ->each(fn ($path) => Storage::disk('public')->delete($path));
+    }
+
+    private function prepareVariants(Collection $variants): Collection
+    {
+        return $variants
+            ->map(function ($variant) {
+                if (!is_array($variant)) {
+                    return null;
+                }
+
+                $name = trim((string) ($variant['name'] ?? ''));
+                $price = $this->normalizeMoney($variant['price'] ?? null);
+                $compareAt = $this->normalizeMoney($variant['compare_at_price'] ?? null);
+                $sku = trim((string) ($variant['sku'] ?? ''));
+                $stock = $variant['stock'] ?? null;
+                $stock = $stock === '' || $stock === null ? null : (int) $stock;
+
+                if ($name === '' && $price === null) {
+                    return null;
+                }
+
+                return array_filter([
+                    'name' => $name !== '' ? $name : null,
+                    'price' => $price,
+                    'compare_at_price' => $compareAt,
+                    'sku' => $sku !== '' ? $sku : null,
+                    'stock' => $stock,
+                ], fn ($value) => $value !== null);
+            })
+            ->filter()
+            ->values();
+    }
+
+    private function normalizeMoney($value): ?float
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (is_string($value)) {
+            $normalized = str_replace(',', '.', $value);
+            $normalized = preg_replace('/[^0-9.]/', '', $normalized) ?? '';
+
+            if ($normalized === '') {
+                return null;
+            }
+
+            if (substr_count($normalized, '.') > 1) {
+                $parts = explode('.', $normalized);
+                $decimal = array_pop($parts);
+                $normalized = implode('', $parts) . '.' . $decimal;
+            }
+
+            return (float) $normalized;
+        }
+
+        return (float) $value;
     }
 }

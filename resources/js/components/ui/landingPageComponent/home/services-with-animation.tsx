@@ -38,7 +38,7 @@ export function Services({ services = [] }: ServicesProps) {
                     variants={itemVariants}
                     className="mx-auto mb-12 max-w-2xl text-lg text-gray-500 dark:text-gray-400"
                 >
-                    Temukan layanan yang kami sediakan untuk membantu transformasi digital perusahaan Anda.
+                    Temukan layanan yang kami siapkan untuk mendukung peningkatan kinerja, pengalaman pelanggan, dan kesiapan perubahan di perusahaan Anda.
                 </motion.p>
 
                 {hasData ? (

@@ -52,26 +52,15 @@ class HandleInertiaRequests extends Middleware
                 'location' => $request->url(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'language' => $this->languageMeta($request),
             'navigation' => $this->navigation(),
             'footer' => $this->footerContent(),
-        ];
-    }
-
-    protected function languageMeta(Request $request): array
-    {
-        $available = config('landing.languages', []);
-        $fallback = config('landing.default_language', config('app.locale'));
-        $current = $request->session()->get('app_language', $fallback);
-
-        if (!collect($available)->contains(fn ($lang) => $lang['code'] === $current)) {
-            $current = $fallback;
-        }
-
-        return [
-            'current' => $current,
-            'available' => $available,
-            'fallback' => $fallback,
+            'branding' => $this->branding(),
+            'companyAddress' => $this->companyAddress(),
+            'companyContacts' => $this->companyContacts(),
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
         ];
     }
 
@@ -81,10 +70,11 @@ class HandleInertiaRequests extends Middleware
         $state = collect(
             CompanySetting::query()->where('key', 'navigation.primary')->value('value') ?? []
         );
+        $hasCustomState = $state->isNotEmpty();
 
         return [
             'primary' => $defaults
-                ->map(function (array $item) use ($state) {
+                ->map(function (array $item) use ($state, $hasCustomState) {
                     $stateItem = $state->firstWhere('key', $item['key']) ?? [];
 
                     return [
@@ -92,7 +82,9 @@ class HandleInertiaRequests extends Middleware
                         'href' => $item['href'],
                         'labels' => $item['labels'] ?? [],
                         'order' => $stateItem['order'] ?? $item['default_order'] ?? 0,
-                        'active' => $stateItem['active'] ?? $item['default_active'] ?? true,
+                        'active' => $hasCustomState
+                            ? ($stateItem['active'] ?? false)
+                            : ($stateItem['active'] ?? $item['default_active'] ?? true),
                     ];
                 })
                 ->filter(fn ($item) => $item['active'])
@@ -108,5 +100,64 @@ class HandleInertiaRequests extends Middleware
         $stored = CompanySetting::query()->where('key', 'footer.content')->value('value') ?? [];
 
         return array_replace_recursive($defaults, $stored);
+    }
+
+    protected function branding(): array
+    {
+        $name = $this->resolveScalarSetting('company.name', config('app.name'));
+        $tagline = $this->resolveScalarSetting('company.tagline');
+
+        return array_filter([
+            'name' => $name,
+            'tagline' => $tagline,
+        ], fn ($value) => $value !== null && $value !== '');
+    }
+
+    protected function companyAddress(): array
+    {
+        $address = CompanySetting::query()->where('key', 'company.address')->value('value') ?? [];
+
+        return array_merge([
+            'line1' => null,
+            'city' => null,
+            'province' => null,
+            'postal_code' => null,
+        ], is_array($address) ? $address : []);
+    }
+
+    protected function companyContacts(): array
+    {
+        $contacts = CompanySetting::query()->where('key', 'company.contacts')->value('value') ?? [];
+
+        return array_merge([
+            'phone' => null,
+            'email' => null,
+            'whatsapp' => null,
+        ], is_array($contacts) ? $contacts : []);
+    }
+
+    protected function resolveScalarSetting(string $key, $default = null)
+    {
+        $setting = CompanySetting::query()->where('key', $key)->first();
+
+        if (! $setting) {
+            return $default;
+        }
+
+        $value = $setting->value;
+
+        if (is_string($value)) {
+            return trim($value) !== '' ? $value : $default;
+        }
+
+        if (is_array($value)) {
+            foreach ($value as $candidate) {
+                if (is_string($candidate) && trim($candidate) !== '') {
+                    return $candidate;
+                }
+            }
+        }
+
+        return $default;
     }
 }

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Head, useForm } from "@inertiajs/react";
+import React from "react";
+import { Head, useForm, usePage } from "@inertiajs/react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,13 +8,62 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Mail, MapPin, Phone } from "lucide-react";
 import LandingPageLayout from "@/layouts/landingPage-layouts";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { RecaptchaField, type RecaptchaFieldHandle } from '@/components/RecaptchaField';
+
+type SettingsProps = {
+  settings?: Record<string, unknown>;
+  branding?: {
+    name?: string;
+    tagline?: string;
+  };
+  companyAddress?: CompanyAddress;
+  companyContacts?: CompanyContacts;
+};
+
+type CompanyAddress = {
+  line1?: string;
+  city?: string;
+  province?: string;
+  postal_code?: string;
+};
+
+type CompanyContacts = {
+  phone?: string;
+  email?: string;
+  whatsapp?: string;
+};
 
 export default function ContactPage() {
+  const { settings, branding, companyAddress, companyContacts, flash } = usePage<SettingsProps & { flash?: { success?: string } }>().props;
+  const companyName = (settings?.["company.name"] as string | undefined)
+    ?? branding?.name
+    ?? "Harmony Strategic Group";
+  const tagline = (settings?.["company.tagline"] as string | undefined)
+    ?? branding?.tagline
+    ?? "Kami siap membantu menjawab kebutuhan bisnis Anda.";
+
+  const addressSetting = (settings?.["company.address"] as CompanyAddress | undefined)
+    ?? companyAddress
+    ?? {};
+  const contactsSetting = (settings?.["company.contacts"] as CompanyContacts | undefined)
+    ?? companyContacts
+    ?? {};
+
+  const addressParts = [addressSetting.line1, addressSetting.city, addressSetting.province, addressSetting.postal_code]
+    .filter(Boolean)
+    .join(", ");
+
+  const recaptchaEnabled = import.meta.env.VITE_RECAPTCHA_ENABLED !== 'false';
+  const recaptchaRef = React.useRef<RecaptchaFieldHandle>(null);
+
   const { data, setData, post, processing, reset, errors } = useForm({
     name: "",
     email: "",
     phone: "",
+    subject: "",
     message: "",
+    recaptcha_token: "",
   });
 
   function handleSubmit(e: React.FormEvent) {
@@ -23,6 +72,12 @@ export default function ContactPage() {
       onSuccess: () => {
         reset();
       },
+      onFinish: () => {
+        if (recaptchaEnabled) {
+          recaptchaRef.current?.reset();
+        }
+        setData("recaptcha_token", "");
+      },
     });
   }
 
@@ -30,20 +85,29 @@ export default function ContactPage() {
     <>
     <LandingPageLayout >
       <Head title="Kontak" />
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-12 space-y-6">
+        {flash?.success && (
+          <Alert className="border-green-200 bg-green-50 text-green-800">
+            <AlertDescription>{flash.success}</AlertDescription>
+          </Alert>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left column: Info */}
           <Card className="lg:col-span-1 p-6 shadow-lg">
             <CardHeader>
               <CardTitle>Kontak Kami</CardTitle>
-              <CardDescription>Hubungi kami jika Anda punya pertanyaan atau butuh bantuan.</CardDescription>
+              <CardDescription>
+                {tagline}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 pt-2">
               <div className="flex items-start gap-3">
                 <MapPin className="mt-1" />
                 <div>
                   <p className="font-medium">Alamat</p>
-                  <p className="text-sm text-muted-foreground">Jl. Contoh No.123, Jakarta</p>
+                  <p className="text-sm text-muted-foreground">
+                    {addressParts || "Alamat belum ditentukan"}
+                  </p>
                 </div>
               </div>
 
@@ -51,7 +115,9 @@ export default function ContactPage() {
                 <Phone className="mt-1" />
                 <div>
                   <p className="font-medium">Telepon</p>
-                  <p className="text-sm text-muted-foreground">(021) 1234-5678</p>
+                  <p className="text-sm text-muted-foreground">
+                    {contactsSetting.phone || contactsSetting.whatsapp || "-"}
+                  </p>
                 </div>
               </div>
 
@@ -59,7 +125,9 @@ export default function ContactPage() {
                 <Mail className="mt-1" />
                 <div>
                   <p className="font-medium">Email</p>
-                  <p className="text-sm text-muted-foreground">hello@example.com</p>
+                  <p className="text-sm text-muted-foreground">
+                    {contactsSetting.email || "-"}
+                  </p>
                 </div>
               </div>
 
@@ -91,7 +159,7 @@ export default function ContactPage() {
           <Card className="lg:col-span-2 p-6 shadow-lg">
             <CardHeader>
               <CardTitle>Kirim Pesan</CardTitle>
-              <CardDescription>Isi form berikut untuk mengirimkan pesan kepada tim kami.</CardDescription>
+              <CardDescription>Isi form berikut untuk mengirimkan pesan kepada tim {companyName}.</CardDescription>
             </CardHeader>
             <CardContent className="pt-4">
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -132,6 +200,17 @@ export default function ContactPage() {
                 </div>
 
                 <div>
+                  <Label htmlFor="subject">Subjek (opsional)</Label>
+                  <Input
+                    id="subject"
+                    placeholder="Judul singkat pesan Anda"
+                    value={data.subject}
+                    onChange={(e) => setData("subject", e.target.value)}
+                  />
+                  {errors.subject && <p className="text-sm text-red-500">{errors.subject}</p>}
+                </div>
+
+                <div>
                   <Label htmlFor="message">Pesan</Label>
                   <Textarea
                     id="message"
@@ -143,17 +222,33 @@ export default function ContactPage() {
                   {errors.message && <p className="text-sm text-red-500">{errors.message}</p>}
                 </div>
 
-                <div className="flex items-center gap-2">
+                {recaptchaEnabled ? (
+                  <RecaptchaField
+                    ref={recaptchaRef}
+                    className="mt-2"
+                    onVerify={(token) => setData("recaptcha_token", token ?? "")}
+                    error={errors.recaptcha_token}
+                  />
+                ) : null}
+                <div className="flex flex-col gap-2 pt-4 sm:flex-row sm:items-center sm:gap-3">
                   <Button type="submit" disabled={processing}>
                     {processing ? "Mengirim..." : "Kirim Pesan"}
                   </Button>
                   <Button
                     variant="outline"
                     type="button"
-                    onClick={() => reset()}
+                    onClick={() => {
+                      reset();
+                      if (recaptchaEnabled) {
+                        recaptchaRef.current?.reset();
+                      }
+                    }}
                   >
                     Reset
                   </Button>
+                  {flash?.success && (
+                    <p className="text-sm font-medium text-emerald-600">{flash.success}</p>
+                  )}
                 </div>
               </form>
             </CardContent>

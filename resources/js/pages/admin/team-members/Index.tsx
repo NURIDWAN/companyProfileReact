@@ -2,6 +2,7 @@ import AppLayout from "@/layouts/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Head, Link } from "@inertiajs/react";
+import { DeleteButton } from "@/components/DeleteButton";
 
 type TeamMember = {
     id: number;
@@ -66,10 +67,16 @@ export default function TeamMemberIndex({ members }: Props) {
                                                     {member.is_active ? "Aktif" : "Nonaktif"}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-2 text-right">
-                                                <Button asChild variant="outline" size="sm">
-                                                    <Link href={route("admin.team-members.edit", member.id)}>Edit</Link>
-                                                </Button>
+                                            <td className="px-4 py-2">
+                                                <div className="flex justify-end gap-2">
+                                                    <Button asChild variant="outline" size="sm">
+                                                        <Link href={route("admin.team-members.edit", member.id)}>Edit</Link>
+                                                    </Button>
+                                                    <DeleteButton
+                                                        url={route("admin.team-members.destroy", member.id)}
+                                                        confirmMessage={`Hapus anggota "${member.name}"?`}
+                                                    />
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}

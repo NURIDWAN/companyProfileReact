@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavGroup, type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Briefcase, Cog, Cpu, FileText, Folder, LayoutGrid, MessageSquare, Package, Settings2, Users } from 'lucide-react';
+import { BookOpen, Briefcase, Cog, Database, FileText, Folder, Inbox, LayoutGrid, Mail, MessageSquare, Package, Settings2, UserCog, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavGroups: NavGroup[] = [
@@ -19,8 +19,13 @@ const mainNavGroups: NavGroup[] = [
         ],
     },
     {
-        title: 'Konten CMS',
+        title: 'Konten Publik',
         items: [
+            {
+                title: 'Landing Page',
+                href: '/admin/landing',
+                icon: LayoutGrid,
+            },
             {
                 title: 'Layanan',
                 href: '/admin/services',
@@ -37,11 +42,6 @@ const mainNavGroups: NavGroup[] = [
                 icon: Folder,
             },
             {
-                title: 'Karir',
-                href: '/admin/job-positions',
-                icon: Briefcase,
-            },
-            {
                 title: 'Blog',
                 href: '/admin/blog-posts',
                 icon: FileText,
@@ -56,15 +56,45 @@ const mainNavGroups: NavGroup[] = [
                 href: '/admin/team-members',
                 icon: Users,
             },
+        ],
+    },
+    {
+        title: 'Karier & Komunikasi',
+        items: [
+            {
+                title: 'Karir',
+                href: '/admin/job-positions',
+                icon: Briefcase,
+            },
+            {
+                title: 'Lamaran',
+                href: '/admin/job-applications',
+                icon: Inbox,
+            },
+            {
+                title: 'Kontak Masuk',
+                href: '/admin/contact-messages',
+                icon: Mail,
+            },
+        ],
+    },
+    {
+        title: 'Administrasi',
+        items: [
             {
                 title: 'Setting Konten',
                 href: '/admin/settings',
                 icon: Settings2,
             },
             {
-                title: 'Landing Page',
-                href: '/admin/landing',
-                icon: LayoutGrid,
+                title: 'Manajemen Pengguna',
+                href: '/admin/users',
+                icon: UserCog,
+            },
+            {
+                title: 'Backup Konten',
+                href: '/settings/backup',
+                icon: Database,
             },
         ],
     },

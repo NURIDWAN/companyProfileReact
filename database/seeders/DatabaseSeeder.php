@@ -14,18 +14,21 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $admin = User::firstOrCreate(
-            ['email' => 'admin@nusantaradigital.id'],
+            ['email' => 'admin@example.id'],
             [
                 'name' => 'Administrator',
                 'password' => bcrypt('password'),
             ]
-        );
+        ); 
 
         $this->call([
+            RolePermissionSeeder::class,
             ServiceSeeder::class,
             ProductSeeder::class,
             ProjectSeeder::class,
             JobPositionSeeder::class,
+            JobApplicationSeeder::class,
+            ContactMessageSeeder::class,
             TeamMemberSeeder::class,
             TestimonialSeeder::class,
             CompanySettingSeeder::class,

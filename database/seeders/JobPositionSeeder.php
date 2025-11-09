@@ -2,15 +2,20 @@
 
 namespace Database\Seeders;
 
+use App\Models\JobApplication;
 use App\Models\JobPosition;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 class JobPositionSeeder extends Seeder
 {
     public function run(): void
     {
+        Schema::disableForeignKeyConstraints();
+        JobApplication::query()->truncate();
         JobPosition::query()->truncate();
+        Schema::enableForeignKeyConstraints();
 
         $positions = [
             [

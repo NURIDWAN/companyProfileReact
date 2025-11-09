@@ -7,25 +7,25 @@ import { containerVariants, itemVariants } from '@/utils/animations';
 
 const services = [
     {
-        title: "Web Development",
-        description: "Membangun aplikasi web modern, cepat, dan aman yang disesuaikan dengan kebutuhan bisnis Anda.",
-        icon: <Layers className="w-8 h-8 text-indigo-500" />
+        title: 'Konsultasi Strategi & Operasi',
+        description: 'Menyelaraskan tujuan bisnis, proses, dan indikator kinerja agar organisasi siap bertumbuh.',
+        icon: <Layers className="w-8 h-8 text-indigo-500" />,
     },
     {
-        title: "Mobile App Development",
-        description: "Membuat aplikasi mobile (iOS & Android) yang intuitif dan berperforma tinggi untuk menjangkau pengguna Anda.",
-        icon: <Smartphone className="w-8 h-8 text-indigo-500" />
+        title: 'Pengalaman Pelanggan',
+        description: 'Merancang perjalanan pelanggan, kanal layanan, serta standar pelayanan yang konsisten.',
+        icon: <Smartphone className="w-8 h-8 text-indigo-500" />,
     },
     {
-        title: "UI/UX Design",
-        description: "Merancang antarmuka yang menarik dan pengalaman pengguna yang mulus untuk meningkatkan engagement.",
-        icon: <Paintbrush className="w-8 h-8 text-indigo-500" />
+        title: 'Pengembangan Talenta & Perubahan',
+        description: 'Mendukung transformasi budaya melalui program pelatihan, coaching, dan manajemen perubahan.',
+        icon: <Paintbrush className="w-8 h-8 text-indigo-500" />,
     },
     {
-        title: "Cloud Solutions",
-        description: "Infrastruktur cloud yang scalable dan efisien untuk mendukung pertumbuhan aplikasi Anda dengan AWS atau GCP.",
-        icon: <Cloud className="w-8 h-8 text-indigo-500" />
-    }
+        title: 'Digital & Data Enablement',
+        description: 'Memanfaatkan teknologi dan data untuk mempercepat pengambilan keputusan di setiap lini bisnis.',
+        icon: <Cloud className="w-8 h-8 text-indigo-500" />,
+    },
 ];
 
 const OurServicesSection = () => (
@@ -40,7 +40,7 @@ const OurServicesSection = () => (
                 <Badge variant="outline" className="mb-4 text-sm">Layanan Kami</Badge>
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white">Apa yang Kami Tawarkan</h2>
                 <p className="text-lg text-gray-600 dark:text-gray-400 mt-3 max-w-3xl mx-auto">
-                    Solusi lengkap untuk memenuhi semua kebutuhan digital dan teknologi perusahaan Anda.
+                    Solusi menyeluruh yang dapat disesuaikan dengan kebutuhan perusahaan di berbagai sektor industri.
                 </p>
                 <div className="mt-4 w-24 h-1 bg-indigo-500 mx-auto rounded-full"></div>
             </motion.div>

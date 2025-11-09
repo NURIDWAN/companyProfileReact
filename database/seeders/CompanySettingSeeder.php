@@ -14,38 +14,38 @@ class CompanySettingSeeder extends Seeder
         $settings = [
             [
                 'key' => 'company.name',
-                'value' => 'Nusantara Digital Solution',
+                'value' => 'Harmony Strategic Group',
                 'group' => 'company',
             ],
             [
                 'key' => 'company.tagline',
-                'value' => 'Mendampingi transformasi digital sektor publik dan enterprise.',
+                'value' => 'Mitra strategis untuk pertumbuhan bisnis lintas industri.',
                 'group' => 'company',
             ],
             [
                 'key' => 'company.address',
                 'value' => [
-                    'line1' => 'Jl. H. R. Rasuna Said Kav. 6',
-                    'city' => 'Jakarta Selatan',
+                    'line1' => 'Jl. Merdeka No. 123',
+                    'city' => 'Jakarta Pusat',
                     'province' => 'DKI Jakarta',
-                    'postal_code' => '12940',
+                    'postal_code' => '10110',
                 ],
                 'group' => 'contact',
             ],
             [
                 'key' => 'company.contacts',
                 'value' => [
-                    'phone' => '+62 21 1234 5678',
-                    'email' => 'halo@nusantaradigital.id',
-                    'whatsapp' => '+62 811 1234 567',
+                    'phone' => '+62 21 555 8890',
+                    'email' => 'hello@harmonygroup.id',
+                    'whatsapp' => '+62 811 7788 990',
                 ],
                 'group' => 'contact',
             ],
             [
                 'key' => 'company.socials',
                 'value' => [
-                    'linkedin' => 'https://www.linkedin.com/company/nusantara-digital',
-                    'instagram' => 'https://www.instagram.com/nusantaradigital.id',
+                    'linkedin' => 'https://www.linkedin.com/company/harmony-strategic-group',
+                    'instagram' => 'https://www.instagram.com/harmonystrategic',
                 ],
                 'group' => 'contact',
             ],

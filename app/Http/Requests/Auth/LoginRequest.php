@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Rules\RecaptchaV2;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -28,6 +29,9 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
+            'recaptcha_token' => config('services.recaptcha.enabled')
+                ? ['required', 'string', new RecaptchaV2($this->ip())]
+                : ['nullable', 'string'],
         ];
     }
 

@@ -28,14 +28,14 @@ export function LatestArticles({ articles = [] }: LatestArticlesProps) {
       initial="hidden"
       whileInView="show"
       viewport={{ once: true, amount: 0.2 }}
-      className="w-full bg-white py-12 sm:py-16 lg:py-20 dark:bg-gray-950"
+      className="w-full py-12 sm:py-16 lg:py-20 bg-gray-50  dark:bg-gray-950 shadow-2xl rounded-3xl"
     >
       <motion.div
         className="container mx-auto max-w-screen-xl px-4 text-center"
         variants={containerVariants}
       >
         <motion.div
-          className="mb-12"
+          className="mb-12 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:mb-16"
           variants={itemVariants}
         >
           <h2 className="mb-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
@@ -90,7 +90,7 @@ export function LatestArticles({ articles = [] }: LatestArticlesProps) {
 
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{article.title}</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">
-                  {article.excerpt ?? "Insight terbaru dari tim kami seputar transformasi digital dan teknologi bisnis."}
+                  {article.excerpt ?? "Insight terbaru dari tim kami mengenai strategi bisnis, operasional, dan pengelolaan perubahan di berbagai industri."}
                 </p>
 
                 {/* Author and Read More */}

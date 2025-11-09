@@ -1,63 +1,59 @@
 import { Card } from "@/components/ui/card";
-import { Package, Users, Star, Award } from "lucide-react";
+import { Award, Package, Star, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { containerVariants, itemVariants } from "@/utils/animations";
 
-interface StatsProps {
-  productsCount: number;
-  totalClients: number;
-  averageRating: string;
-  awards: number;
+type StatIcon = "package" | "users" | "star" | "award";
+
+interface StatItem {
+  icon: StatIcon;
+  value: string;
+  label: string;
 }
 
-export const StatsSection: React.FC<StatsProps> = ({
-  productsCount,
-  totalClients,
-  averageRating,
-  awards,
-}) => (
+interface StatsProps {
+  items: StatItem[];
+}
+
+const iconThemes: Record<
+  StatIcon,
+  { bg: string; text: string; Icon: typeof Package }
+> = {
+  package: { bg: "bg-blue-100", text: "text-blue-600", Icon: Package },
+  users: { bg: "bg-green-100", text: "text-green-600", Icon: Users },
+  star: { bg: "bg-purple-100", text: "text-purple-600", Icon: Star },
+  award: { bg: "bg-orange-100", text: "text-orange-600", Icon: Award },
+};
+
+export const StatsSection: React.FC<StatsProps> = ({ items }) => (
   <motion.div
-    className="grid grid-cols-2 md:grid-cols-4 gap-6"
+    className="grid grid-cols-2 gap-6 md:grid-cols-4"
     initial="hidden"
     whileInView="show"
     viewport={{ once: true, amount: 0.3 }}
     variants={containerVariants}
   >
-    <motion.div variants={itemVariants}>
-    <Card className="text-center p-6">
-      <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
-        <Package className="h-6 w-6 text-blue-600" />
-      </div>
-      <h3 className="text-2xl font-bold text-gray-900">{productsCount}+</h3>
-      <p className="text-sm text-gray-600">Produk Unggulan</p>
-    </Card>
-    </motion.div>
-    <motion.div variants={itemVariants}>
-    <Card className="text-center p-6">
-      <div className="bg-green-100 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
-        <Users className="h-6 w-6 text-green-600" />
-      </div>
-      <h3 className="text-2xl font-bold text-gray-900">{totalClients}+</h3>
-      <p className="text-sm text-gray-600">Klien Puas</p>
-    </Card>
-    </motion.div>
-    <motion.div variants={itemVariants}>
-    <Card className="text-center p-6">
-      <div className="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
-        <Star className="h-6 w-6 text-purple-600" />
-      </div>
-      <h3 className="text-2xl font-bold text-gray-900">{averageRating}</h3>
-      <p className="text-sm text-gray-600">Rating Rata-rata</p>
-    </Card>
-    </motion.div>
-    <motion.div variants={itemVariants}>
-    <Card className="text-center p-6">
-      <div className="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
-        <Award className="h-6 w-6 text-orange-600" />
-      </div>
-      <h3 className="text-2xl font-bold text-gray-900">{awards}+</h3>
-      <p className="text-sm text-gray-600">Penghargaan</p>
-    </Card>
-    </motion.div>
+    {items.map((item, index) => {
+      const theme = iconThemes[item.icon] ?? iconThemes.package;
+      const Icon = theme.Icon;
+
+      return (
+        <motion.div key={`stat-${index}`} variants={itemVariants}>
+          <Card className="p-6 text-center">
+            <div
+              className={`${theme.bg} mb-4 flex h-12 w-12 items-center justify-center rounded-lg`}
+            >
+              <Icon className={`h-6 w-6 ${theme.text}`} />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {item.value}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {item.label}
+            </p>
+          </Card>
+        </motion.div>
+      );
+    })}
   </motion.div>
 );
