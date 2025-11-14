@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\CompanySetting;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
 
@@ -106,10 +107,14 @@ class HandleInertiaRequests extends Middleware
     {
         $name = $this->resolveScalarSetting('company.name', config('app.name'));
         $tagline = $this->resolveScalarSetting('company.tagline');
+        $logoPath = $this->resolveScalarSetting('company.logo_image');
+        $logoIcon = $this->resolveScalarSetting('company.logo_icon');
 
         return array_filter([
             'name' => $name,
             'tagline' => $tagline,
+            'logo_url' => $this->resolveImageUrl($logoPath),
+            'logo_icon' => $logoIcon,
         ], fn ($value) => $value !== null && $value !== '');
     }
 
@@ -133,6 +138,8 @@ class HandleInertiaRequests extends Middleware
             'phone' => null,
             'email' => null,
             'whatsapp' => null,
+            'map_label' => null,
+            'map_embed_url' => null,
         ], is_array($contacts) ? $contacts : []);
     }
 
@@ -159,5 +166,18 @@ class HandleInertiaRequests extends Middleware
         }
 
         return $default;
+    }
+
+    protected function resolveImageUrl(?string $path): ?string
+    {
+        if (! $path) {
+            return null;
+        }
+
+        if (Storage::disk('public')->exists($path)) {
+            return Storage::disk('public')->url($path);
+        }
+
+        return $path;
     }
 }

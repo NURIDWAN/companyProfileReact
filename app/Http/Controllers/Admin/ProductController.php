@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -39,6 +40,8 @@ class ProductController extends Controller
             });
 
             return redirect()->route('admin.products.index')->with('success', 'Produk berhasil dibuat.');
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (Throwable $e) {
             Log::error('Gagal membuat produk', [
                 'message' => $e->getMessage(),
@@ -65,6 +68,8 @@ class ProductController extends Controller
             });
 
             return redirect()->route('admin.products.index')->with('success', 'Produk berhasil diperbarui.');
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (Throwable $e) {
             Log::error('Gagal memperbarui produk', [
                 'product_id' => $product->id,
@@ -113,6 +118,7 @@ class ProductController extends Controller
             'gallery_files' => ['nullable', 'array'],
             'gallery_files.*' => ['nullable', 'image', 'max:4096'],
             'purchase_url' => ['nullable', 'url', 'max:255'],
+            'whatsapp_number' => ['nullable', 'string', 'max:30'],
             'clients' => ['nullable', 'integer', 'min:0'],
             'rating' => ['nullable', 'numeric', 'between:0,5'],
             'popular' => ['nullable'],

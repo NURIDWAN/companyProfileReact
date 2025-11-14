@@ -104,6 +104,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('job-applications.status');
         Route::get('job-applications/{jobApplication}/resume', [JobApplicationController::class, 'downloadResume'])
             ->name('job-applications.resume');
+        Route::post('blog-posts/generate', [BlogPostController::class, 'generate'])->name('blog-posts.generate');
+        Route::post('blog-posts/upload-image', [BlogPostController::class, 'uploadImage'])->name('blog-posts.upload-image');
         Route::resource('blog-posts', BlogPostController::class);
         Route::resource('testimonials', TestimonialController::class);
         Route::resource('team-members', TeamMemberController::class);
@@ -127,6 +129,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('landing/product-cta', [LandingContentController::class, 'updateProductCta'])->name('landing.product-cta.update');
         Route::post('landing/metrics', [LandingContentController::class, 'updateMetrics'])->name('landing.metrics.update');
         Route::post('landing/navigation', [LandingContentController::class, 'updateNavigation'])->name('landing.navigation.update');
+        Route::post('landing/sections', [LandingContentController::class, 'updateSectionVisibility'])->name('landing.sections.update');
         Route::post('landing/product-stats', [LandingContentController::class, 'updateProductStats'])->name('landing.product-stats.update');
         Route::post('landing/product/hero', [LandingContentController::class, 'updateProductHero'])->name('landing.product.hero.update');
         Route::post('landing/project/hero', [LandingContentController::class, 'updateProjectHero'])->name('landing.project.hero.update');

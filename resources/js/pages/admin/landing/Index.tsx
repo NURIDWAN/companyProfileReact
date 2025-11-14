@@ -156,6 +156,21 @@ interface ServiceFaqContent extends ServiceSectionCopy {
     items?: ServiceFaqItem[];
 }
 
+const SECTION_TOGGLE_OPTIONS = [
+    { key: 'hero', label: 'Bagian Hero' },
+    { key: 'about', label: 'Tentang Perusahaan' },
+    { key: 'services', label: 'Highlight Layanan' },
+    { key: 'testimonials', label: 'Testimoni & Cerita Klien' },
+    { key: 'team', label: 'Tim Manajemen' },
+    { key: 'metrics', label: 'Statistik Utama' },
+    { key: 'articles', label: 'Artikel Terbaru' },
+    { key: 'final_cta', label: 'Ajakan Bertindak Terakhir' },
+] as const;
+
+type SectionKey = (typeof SECTION_TOGGLE_OPTIONS)[number]['key'];
+
+type LandingSectionVisibility = Record<SectionKey, boolean>;
+
 interface LandingContentProps {
     hero: HeroContent;
     about: AboutContent;
@@ -177,6 +192,7 @@ interface LandingContentProps {
     navigationOptions: NavigationOption[];
     languages: LanguageOption[];
     defaultLanguage: string;
+    sectionVisibility: LandingSectionVisibility;
     routes: {
         hero: string;
         about: string;
@@ -196,6 +212,7 @@ interface LandingContentProps {
         serviceProcess: string;
         serviceAdvantages: string;
         serviceFaqs: string;
+        sections: string;
     };
 }
 
@@ -203,6 +220,17 @@ const FALLBACK_LANGUAGES: LanguageOption[] = [
     { code: 'id', label: 'ID', name: 'Bahasa Indonesia' },
     { code: 'en', label: 'EN', name: 'English' },
 ];
+
+const SECTION_DEFAULTS: LandingSectionVisibility = {
+    hero: true,
+    about: true,
+    services: true,
+    testimonials: true,
+    articles: true,
+    final_cta: true,
+    metrics: true,
+    team: true,
+};
 
 const normalizeLocalizedObject = (
     languages: LanguageOption[],
@@ -270,6 +298,7 @@ export default function LandingContentPage({
     navigationOptions,
     languages,
     defaultLanguage,
+    sectionVisibility,
     routes,
 }: LandingContentProps) {
     const languageOptions = languages.length ? languages : FALLBACK_LANGUAGES;
@@ -311,6 +340,11 @@ export default function LandingContentPage({
         description: normalizeLocalizedObject(languageOptions, about.description),
         highlights: normalizeLocalizedList(languageOptions, about.highlights),
         image: null as File | null,
+    });
+
+    const sectionsForm = useForm<LandingSectionVisibility>({
+        ...SECTION_DEFAULTS,
+        ...sectionVisibility,
     });
 
     const ctaForm = useForm({
@@ -504,6 +538,13 @@ export default function LandingContentPage({
     const navigationForm = useForm({
         active_keys: navigationOptions.filter((option) => option.active !== false).map((option) => option.key),
     });
+
+    const submitSections: FormEventHandler<HTMLFormElement> = (event) => {
+        event.preventDefault();
+        sectionsForm.post(route(routes.sections), {
+            preserveScroll: true,
+        });
+    };
 
     const submitHero: FormEventHandler<HTMLFormElement> = (event) => {
         event.preventDefault();
@@ -969,6 +1010,46 @@ export default function LandingContentPage({
     return (
         <AppLayout>
             <div className="space-y-8 p-4">
+                <form onSubmit={submitSections}>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Section Landing Page</CardTitle>
+                            <p className="text-sm text-muted-foreground">
+                                Aktifkan atau sembunyikan setiap komponen yang tampil di halaman utama.
+                            </p>
+                        </CardHeader>
+                        <CardContent className="grid gap-3 md:grid-cols-2">
+                            {SECTION_TOGGLE_OPTIONS.map((option) => (
+                                <div key={option.key} className="flex items-start space-x-3 rounded-lg border p-3">
+                                    <Checkbox
+                                        id={`section-${option.key}`}
+                                        checked={sectionsForm.data[option.key]}
+                                        onCheckedChange={(value) =>
+                                            sectionsForm.setData(option.key, value === true)
+                                        }
+                                    />
+                                    <div className="space-y-1">
+                                        <Label htmlFor={`section-${option.key}`}>{option.label}</Label>
+                                        <p className="text-xs text-muted-foreground">
+                                            {sectionsForm.data[option.key]
+                                                ? 'Bagian ini akan ditampilkan.'
+                                                : 'Bagian ini disembunyikan dari pengunjung.'}
+                                        </p>
+                                        {sectionsForm.errors[option.key] && (
+                                            <p className="text-xs text-rose-500">{sectionsForm.errors[option.key]}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </CardContent>
+                        <CardFooter className="justify-end">
+                            <Button type="submit" disabled={sectionsForm.processing}>
+                                Simpan Pengaturan Section
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                </form>
+
                 <form onSubmit={submitNavigation}>
                     <Card>
                         <CardHeader>

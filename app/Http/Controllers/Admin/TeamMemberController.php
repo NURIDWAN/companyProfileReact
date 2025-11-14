@@ -8,7 +8,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -36,6 +39,8 @@ class TeamMemberController extends Controller
             });
 
             return redirect()->route('admin.team-members.index')->with('success', 'Anggota tim berhasil dibuat.');
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (Throwable $e) {
             Log::error('Gagal membuat anggota tim', [
                 'message' => $e->getMessage(),
@@ -61,6 +66,8 @@ class TeamMemberController extends Controller
             });
 
             return redirect()->route('admin.team-members.index')->with('success', 'Anggota tim berhasil diperbarui.');
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (Throwable $e) {
             Log::error('Gagal memperbarui anggota tim', [
                 'team_member_id' => $teamMember->id,
@@ -86,6 +93,7 @@ class TeamMemberController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'role' => ['required', 'string', 'max:255'],
             'photo' => ['nullable', 'string', 'max:255'],
+            'photo_file' => ['nullable', 'image', 'max:2048'],
             'email' => [
                 'nullable',
                 'email',
@@ -100,6 +108,26 @@ class TeamMemberController extends Controller
         ]);
 
         $data['is_active'] = $request->boolean('is_active');
+
+        if ($file = $request->file('photo_file')) {
+            if ($member && $member->photo && Str::startsWith($member->photo, 'team-members/')) {
+                Storage::disk('public')->delete($member->photo);
+            }
+
+            $data['photo'] = $file->store('team-members', 'public');
+        } else {
+            if (($data['photo'] ?? null) === '') {
+                if ($member && $member->photo && Str::startsWith($member->photo, 'team-members/')) {
+                    Storage::disk('public')->delete($member->photo);
+                }
+
+                $data['photo'] = null;
+            } else {
+                $data['photo'] = $data['photo'] ?? ($member?->photo ?? null);
+            }
+        }
+
+        unset($data['photo_file']);
 
         return $data;
     }

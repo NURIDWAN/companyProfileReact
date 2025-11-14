@@ -23,6 +23,7 @@ class Product extends Model
         'price_variants',
         'gallery',
         'purchase_url',
+        'whatsapp_number',
         'clients',
         'rating',
         'popular',

@@ -15,6 +15,7 @@ type Testimonial = {
     author_role?: string | null;
     company?: string | null;
     avatar?: string | null;
+    avatar_url?: string | null;
     quote: string;
     rating?: number | null;
     is_active: boolean;
@@ -31,6 +32,7 @@ export default function TestimonialForm({ testimonial }: Props) {
         author_role: testimonial?.author_role ?? "",
         company: testimonial?.company ?? "",
         avatar: testimonial?.avatar ?? "",
+        avatar_file: undefined as File | undefined,
         quote: testimonial?.quote ?? "",
         rating: testimonial?.rating ?? 5,
         is_active: testimonial?.is_active ?? true,
@@ -48,11 +50,23 @@ export default function TestimonialForm({ testimonial }: Props) {
     const submit: FormEventHandler<HTMLFormElement> = (event) => {
         event.preventDefault();
 
-        if (testimonial) {
-            form.put(action, { preserveScroll: true });
-        } else {
-            form.post(action, { preserveScroll: true });
-        }
+        form.transform((formData) => {
+            const transformed = {
+                ...formData,
+                avatar_file: formData.avatar_file ?? undefined,
+            };
+
+            return testimonial ? { ...transformed, _method: "put" } : transformed;
+        });
+
+        form.post(action, {
+            forceFormData: true,
+            preserveScroll: true,
+            onFinish: () => {
+                setData("avatar_file", undefined);
+                form.transform((data) => data);
+            },
+        });
     };
 
     return (
@@ -64,7 +78,7 @@ export default function TestimonialForm({ testimonial }: Props) {
                         &larr; Kembali ke daftar testimoni
                     </Link>
                 </div>
-                <form onSubmit={submit}>
+                <form onSubmit={submit} encType="multipart/form-data">
                 <Card>
                     <CardHeader>
                         <CardTitle>{title}</CardTitle>
@@ -106,12 +120,34 @@ export default function TestimonialForm({ testimonial }: Props) {
                             </div>
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="avatar">Foto (URL)</Label>
+                            <Label htmlFor="avatar_file">Foto Testimoni</Label>
                             <Input
-                                id="avatar"
-                                value={data.avatar ?? ""}
-                                onChange={(event) => setData("avatar", event.target.value)}
+                                id="avatar_file"
+                                type="file"
+                                accept="image/*"
+                                onChange={(event) => setData("avatar_file", event.target.files?.[0])}
                             />
+                            {errors.avatar_file && <p className="text-xs text-rose-500">{errors.avatar_file}</p>}
+                            {testimonial?.avatar_url && data.avatar !== "" && (
+                                <div className="flex items-center gap-4">
+                                    <img
+                                        src={testimonial.avatar_url}
+                                        alt={testimonial.author_name}
+                                        className="h-16 w-16 rounded-full object-cover"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            setData("avatar", "");
+                                            setData("avatar_file", undefined);
+                                        }}
+                                    >
+                                        Hapus Foto
+                                    </Button>
+                                </div>
+                            )}
                             {errors.avatar && <p className="text-xs text-rose-500">{errors.avatar}</p>}
                         </div>
                         <div className="grid gap-2">

@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import AppLayout from "@/layouts/app-layout";
 import { Head, Link, useForm } from "@inertiajs/react";
-import { FormEventHandler, useMemo } from "react";
+import { FormEventHandler, useEffect, useMemo } from "react";
 
 type Project = {
     id: number;
@@ -13,6 +13,7 @@ type Project = {
     slug: string;
     client_name?: string | null;
     cover_image?: string | null;
+    cover_image_url?: string | null;
     summary?: string | null;
     description?: string | null;
     started_at?: string | null;
@@ -31,6 +32,7 @@ export default function ProjectForm({ project }: Props) {
         slug: project?.slug ?? "",
         client_name: project?.client_name ?? "",
         cover_image: project?.cover_image ?? "",
+        cover_image_file: undefined as File | undefined,
         summary: project?.summary ?? "",
         description: project?.description ?? "",
         started_at: project?.started_at ? project.started_at.slice(0, 10) : "",
@@ -41,6 +43,23 @@ export default function ProjectForm({ project }: Props) {
     const { data, setData, processing, errors } = form;
     const generalError = (errors as typeof errors & { general?: string }).general;
 
+    useEffect(() => {
+        if (project) {
+            return;
+        }
+
+        const trimmed = data.name.trim();
+        const slug = trimmed
+            ? trimmed
+                  .toLowerCase()
+                  .replace(/[^a-z0-9\s-]/g, "")
+                  .replace(/\s+/g, "-")
+                  .replace(/-+/g, "-")
+            : "";
+
+        setData("slug", slug);
+    }, [data.name, project, setData]);
+
     const action = useMemo(() => {
         return project
             ? route("admin.projects.update", project.id)
@@ -50,11 +69,23 @@ export default function ProjectForm({ project }: Props) {
     const submit: FormEventHandler<HTMLFormElement> = (event) => {
         event.preventDefault();
 
-        if (project) {
-            form.put(action, { preserveScroll: true });
-        } else {
-            form.post(action, { preserveScroll: true });
-        }
+        form.transform((formData) => {
+            const transformed = {
+                ...formData,
+                cover_image_file: formData.cover_image_file ?? undefined,
+            };
+
+            return project ? { ...transformed, _method: "put" } : transformed;
+        });
+
+        form.post(action, {
+            forceFormData: true,
+            preserveScroll: true,
+            onFinish: () => {
+                setData("cover_image_file", undefined);
+                form.transform((data) => data);
+            },
+        });
     };
 
     return (
@@ -66,7 +97,7 @@ export default function ProjectForm({ project }: Props) {
                         &larr; Kembali ke daftar proyek
                     </Link>
                 </div>
-                <form onSubmit={submit}>
+                <form onSubmit={submit} encType="multipart/form-data">
                 <Card>
                     <CardHeader>
                         <CardTitle>{title}</CardTitle>
@@ -107,12 +138,34 @@ export default function ProjectForm({ project }: Props) {
                             {errors.client_name && <p className="text-xs text-rose-500">{errors.client_name}</p>}
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="cover_image">Cover Image (URL)</Label>
+                            <Label htmlFor="cover_image_file">Cover Image</Label>
                             <Input
-                                id="cover_image"
-                                value={data.cover_image ?? ""}
-                                onChange={(event) => setData("cover_image", event.target.value)}
+                                id="cover_image_file"
+                                type="file"
+                                accept="image/*"
+                                onChange={(event) => setData("cover_image_file", event.target.files?.[0])}
                             />
+                            {errors.cover_image_file && <p className="text-xs text-rose-500">{errors.cover_image_file}</p>}
+                            {project?.cover_image_url && data.cover_image !== "" && (
+                                <div className="flex items-center gap-4">
+                                    <img
+                                        src={project.cover_image_url}
+                                        alt={project.name}
+                                        className="h-16 w-16 rounded object-cover"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            setData("cover_image", "");
+                                            setData("cover_image_file", undefined);
+                                        }}
+                                    >
+                                        Hapus Cover
+                                    </Button>
+                                </div>
+                            )}
                             {errors.cover_image && <p className="text-xs text-rose-500">{errors.cover_image}</p>}
                         </div>
                         <div className="grid gap-2">

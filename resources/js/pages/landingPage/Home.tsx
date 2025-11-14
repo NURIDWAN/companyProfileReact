@@ -4,10 +4,14 @@ import { FinalCTA } from "@/components/ui/landingPageComponent/home/finalCTA";
 import { HeroModern } from "@/components/ui/landingPageComponent/home/HeroHome";
 import { Services } from "@/components/ui/landingPageComponent/home/service";
 import { Testimonial } from "@/components/ui/landingPageComponent/home/testimonial";
+import { TeamShowcase } from "@/components/ui/landingPageComponent/home/team-showcase";
 import LandingPageLayout from "@/layouts/landingPage-layouts";
 import { usePage } from "@inertiajs/react";
 import { motion } from "framer-motion";
 import type { PageProps } from "@inertiajs/core";
+
+type SectionKey = "hero" | "about" | "services" | "testimonials" | "articles" | "final_cta" | "metrics" | "team";
+type SectionVisibility = Partial<Record<SectionKey, boolean>>;
 
 type HomePageProps = PageProps & {
     services?: Array<{
@@ -58,10 +62,23 @@ type HomePageProps = PageProps & {
         button_link?: string | null;
     };
     metrics?: Array<{ value: string; label: string }>;
+    teamMembers?: Array<{
+        id: number;
+        name: string;
+        role?: string | null;
+        photo?: string | null;
+        linkedin?: string | null;
+        bio?: string | null;
+    }>;
+    sections?: SectionVisibility;
 };
 
 export default function HomePage() {
-    const { services, articles, testimonials, hero, about, finalCta, metrics } = usePage<HomePageProps>().props;
+    const { services, articles, testimonials, hero, about, finalCta, metrics, teamMembers, sections } =
+        usePage<HomePageProps>().props;
+    const visibility = sections ?? {};
+    const isEnabled = (key: SectionKey) => visibility[key] ?? true;
+    const metricData = isEnabled("metrics") && metrics ? metrics : [];
 
     return (
         <LandingPageLayout>
@@ -70,12 +87,15 @@ export default function HomePage() {
                 animate="show"
                 className="space-y-16"
             >
-                <HeroModern content={hero} />
-                <About content={about} />
-                <Services services={services} />
-                <Testimonial testimonials={testimonials} metrics={metrics} />
-                <LatestArticles articles={articles} />
-                <FinalCTA content={finalCta} />
+                {isEnabled("hero") && <HeroModern content={hero ?? undefined} />}
+                {isEnabled("about") && <About content={about} />}
+                {isEnabled("services") && <Services services={services} />}
+                {isEnabled("testimonials") && (
+                    <Testimonial testimonials={testimonials} metrics={metricData ?? []} />
+                )}
+                {isEnabled("team") && (teamMembers?.length ?? 0) > 0 && <TeamShowcase members={teamMembers} />}
+                {isEnabled("articles") && <LatestArticles articles={articles} />}
+                {isEnabled("final_cta") && <FinalCTA content={finalCta} />}
             </motion.div>
         </LandingPageLayout>
     );

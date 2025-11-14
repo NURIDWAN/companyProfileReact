@@ -1,8 +1,9 @@
 import { Link, usePage } from "@inertiajs/react";
-import { useMemo } from "react";
+import { ComponentType, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Moon, Sun } from "lucide-react";
+import { Menu, Moon, Sun, type LucideProps } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { useAppearance } from "@/hooks/use-appearance";
 import { cn } from "@/lib/utils";
 import { primaryNavLinks } from "@/config/navigation";
@@ -48,6 +49,11 @@ export function CompanyNavbar() {
     const brandProps = branding as BrandingInfo | undefined;
     const brandName = brandProps?.name ?? 'Harmony Strategic Group';
     const brandTagline = brandProps?.tagline ?? undefined;
+    const brandLogo = brandProps?.logo_url ?? null;
+    const logoIconName = brandProps?.logo_icon ?? undefined;
+
+    const iconCollection = LucideIcons as Record<string, ComponentType<LucideProps>>;
+    const LogoIcon = logoIconName ? iconCollection[logoIconName] : undefined;
 
     const initials = brandName
         .split(' ')
@@ -61,12 +67,28 @@ export function CompanyNavbar() {
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-16 items-center justify-between px-4 md:px-6">
                 {/* Logo */}
-                <Link href="/" className="flex items-center space-x-2">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white font-semibold">
-                        {initials || 'LC'}
-                    </div>
+                <Link href="/" className="flex items-center space-x-3">
+                    {brandLogo ? (
+                        <span className="relative inline-flex h-10 w-10 overflow-hidden rounded-full border border-border bg-card">
+                            <img
+                                src={brandLogo}
+                                alt={brandName}
+                                className="h-full w-full object-cover"
+                                loading="lazy"
+                            />
+                        </span>
+                    ) : (
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white font-semibold">
+                            {LogoIcon ? <LogoIcon className="h-5 w-5" /> : (initials || 'LC')}
+                        </div>
+                    )}
                     <div className="flex flex-col">
-                        <span className="text-base font-semibold text-foreground">{brandName}</span>
+                        <div className="flex items-center gap-1">
+                            {LogoIcon && (
+                                <LogoIcon className="h-4 w-4 text-blue-600" />
+                            )}
+                            <span className="text-base font-semibold text-foreground">{brandName}</span>
+                        </div>
                         {brandTagline ? (
                             <span className="text-xs text-muted-foreground line-clamp-1">{brandTagline}</span>
                         ) : null}

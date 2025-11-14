@@ -14,6 +14,7 @@ type TeamMember = {
     name: string;
     role: string;
     photo?: string | null;
+    photo_url?: string | null;
     email?: string | null;
     phone?: string | null;
     linkedin?: string | null;
@@ -32,6 +33,7 @@ export default function TeamMemberForm({ member }: Props) {
         name: member?.name ?? "",
         role: member?.role ?? "",
         photo: member?.photo ?? "",
+        photo_file: undefined as File | undefined,
         email: member?.email ?? "",
         phone: member?.phone ?? "",
         linkedin: member?.linkedin ?? "",
@@ -50,11 +52,23 @@ export default function TeamMemberForm({ member }: Props) {
     const submit: FormEventHandler<HTMLFormElement> = (event) => {
         event.preventDefault();
 
-        if (member) {
-            form.put(action, { preserveScroll: true });
-        } else {
-            form.post(action, { preserveScroll: true });
-        }
+        form.transform((formData) => {
+            const transformed = {
+                ...formData,
+                photo_file: formData.photo_file ?? undefined,
+            };
+
+            return member ? { ...transformed, _method: "put" } : transformed;
+        });
+
+        form.post(action, {
+            forceFormData: true,
+            preserveScroll: true,
+            onFinish: () => {
+                setData("photo_file", undefined);
+                form.transform((data) => data);
+            },
+        });
     };
 
     return (
@@ -66,7 +80,7 @@ export default function TeamMemberForm({ member }: Props) {
                         &larr; Kembali ke daftar tim
                     </Link>
                 </div>
-                <form onSubmit={submit}>
+                <form onSubmit={submit} encType="multipart/form-data">
                 <Card>
                     <CardHeader>
                         <CardTitle>{title}</CardTitle>
@@ -129,12 +143,34 @@ export default function TeamMemberForm({ member }: Props) {
                                 {errors.linkedin && <p className="text-xs text-rose-500">{errors.linkedin}</p>}
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="photo">Foto (URL)</Label>
+                                <Label htmlFor="photo_file">Foto Anggota</Label>
                                 <Input
-                                    id="photo"
-                                    value={data.photo ?? ""}
-                                    onChange={(event) => setData("photo", event.target.value)}
+                                    id="photo_file"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(event) => setData("photo_file", event.target.files?.[0])}
                                 />
+                                {errors.photo_file && <p className="text-xs text-rose-500">{errors.photo_file}</p>}
+                                {member?.photo_url && data.photo !== "" && (
+                                    <div className="flex items-center gap-4">
+                                        <img
+                                            src={member.photo_url}
+                                            alt={member?.name ?? "Foto anggota"}
+                                            className="h-16 w-16 rounded-full object-cover"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                setData("photo", "");
+                                                setData("photo_file", undefined);
+                                            }}
+                                        >
+                                            Hapus Foto
+                                        </Button>
+                                    </div>
+                                )}
                                 {errors.photo && <p className="text-xs text-rose-500">{errors.photo}</p>}
                             </div>
                         </div>

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class BlogPost extends Model
 {
@@ -26,6 +27,8 @@ class BlogPost extends Model
         'published_at' => 'datetime',
     ];
 
+    protected $appends = ['cover_image_url'];
+
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
@@ -33,9 +36,24 @@ class BlogPost extends Model
 
     public function scopePublished($query)
     {
-        return $query
-            ->where('is_published', true)
-            ->whereNotNull('published_at')
-            ->where('published_at', '<=', now());
+        return $query->where('is_published', true);
+    }
+
+    public function getCoverImageUrlAttribute(): ?string
+    {
+        return $this->resolveImageUrl($this->cover_image);
+    }
+
+    protected function resolveImageUrl(?string $path): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+
+        if (Storage::disk('public')->exists($path)) {
+            return Storage::disk('public')->url($path);
+        }
+
+        return $path;
     }
 }

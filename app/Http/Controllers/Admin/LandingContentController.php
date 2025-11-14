@@ -201,6 +201,15 @@ class LandingContentController extends Controller
                 ->values()
                 ->all(),
         ];
+        $sectionDefaults = $this->landingSectionDefaults();
+        $storedSections = $this->setting('landing.sections', []);
+        $sectionVisibility = collect($sectionDefaults)
+            ->mapWithKeys(function ($default, $key) use ($storedSections) {
+                $value = is_array($storedSections) ? ($storedSections[$key] ?? $default) : $default;
+
+                return [$key => (bool) $value];
+            })
+            ->toArray();
 
         return Inertia::render($isSettingsContext ? 'settings/content' : 'admin/landing/Index', [
             'hero' => [
@@ -232,6 +241,7 @@ class LandingContentController extends Controller
             'serviceFaqs' => $serviceFaqs,
             'languages' => $languages,
             'defaultLanguage' => config('landing.default_language', 'id'),
+            'sectionVisibility' => $sectionVisibility,
             'routes' => $this->contextRoutes($isSettingsContext),
         ]);
     }
@@ -572,6 +582,23 @@ class LandingContentController extends Controller
         );
 
         return redirect()->route($this->redirectRoute($request))->with('success', 'Navigasi landing berhasil diperbarui.');
+    }
+
+    public function updateSectionVisibility(Request $request): RedirectResponse
+    {
+        $defaults = $this->landingSectionDefaults();
+        $rules = collect(array_keys($defaults))
+            ->mapWithKeys(fn ($key) => [$key => ['required', 'boolean']])
+            ->toArray();
+
+        $data = $request->validate($rules);
+        $payload = collect($defaults)
+            ->mapWithKeys(fn ($default, $key) => [$key => (bool) ($data[$key] ?? $default)])
+            ->toArray();
+
+        $this->saveSetting('landing.sections', $payload);
+
+        return redirect()->route($this->redirectRoute($request))->with('success', 'Pengaturan section landing berhasil diperbarui.');
     }
 
     public function updateServiceHero(Request $request): RedirectResponse
@@ -1034,6 +1061,19 @@ class LandingContentController extends Controller
         return $metrics;
     }
 
+    protected function landingSectionDefaults(): array
+    {
+        return config('landing.home_sections', [
+            'hero' => true,
+            'about' => true,
+            'services' => true,
+            'testimonials' => true,
+            'articles' => true,
+            'final_cta' => true,
+            'metrics' => true,
+        ]);
+    }
+
     protected function contextRoutes(bool $isSettings): array
     {
         if ($isSettings) {
@@ -1056,6 +1096,7 @@ class LandingContentController extends Controller
                 'serviceProcess' => 'settings.content.service.process.update',
                 'serviceAdvantages' => 'settings.content.service.advantages.update',
                 'serviceFaqs' => 'settings.content.service.faqs.update',
+                'sections' => 'settings.content.sections.update',
             ];
         }
 
@@ -1078,6 +1119,7 @@ class LandingContentController extends Controller
             'serviceProcess' => 'admin.landing.service.process.update',
             'serviceAdvantages' => 'admin.landing.service.advantages.update',
             'serviceFaqs' => 'admin.landing.service.faqs.update',
+            'sections' => 'admin.landing.sections.update',
         ];
     }
 

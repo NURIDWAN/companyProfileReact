@@ -39,16 +39,40 @@ class LandingController extends Controller
         $aboutSetting = $this->setting('landing.about', []);
         $ctaSetting = $this->setting('landing.final_cta', []);
         $metricsSetting = $this->setting('landing.metrics', []);
+        $sections = $this->landingSections();
+
+        $services = $sections['services']
+            ? $this->servicePayload(Service::query()->active()->orderBy('display_order')->limit(6)->get())
+            : [];
+        $articles = $sections['articles']
+            ? $this->articlePayload(
+                BlogPost::query()
+                    ->published()
+                    ->orderByRaw('COALESCE(published_at, created_at) DESC')
+                    ->orderByDesc('id')
+                    ->limit(3)
+                    ->with('author:id,name')
+                    ->get()
+            )
+            : [];
+        $testimonials = $sections['testimonials']
+            ? $this->testimonialPayload(Testimonial::query()->where('is_active', true)->latest()->limit(6)->get())
+            : [];
+
+        $teamMembers = $sections['team']
+            ? $this->teamPayload(TeamMember::query()->where('is_active', true)->orderBy('display_order')->limit(4)->get())
+            : [];
 
         return Inertia::render('landingPage/Home', [
-            'services' => $this->servicePayload(Service::query()->active()->orderBy('display_order')->limit(6)->get()),
-            'articles' => $this->articlePayload(BlogPost::query()->published()->latest('published_at')->limit(3)->with('author:id,name')->get()),
-            'testimonials' => $this->testimonialPayload(Testimonial::query()->where('is_active', true)->latest()->limit(6)->get()),
-            'teamMembers' => $this->teamPayload(TeamMember::query()->where('is_active', true)->orderBy('display_order')->limit(4)->get()),
-            'hero' => $this->transformHero($heroSetting),
-            'about' => $this->transformAbout($aboutSetting),
-            'finalCta' => $this->transformFinalCta($ctaSetting),
-            'metrics' => $this->transformMetrics($metricsSetting),
+            'services' => $services,
+            'articles' => $articles,
+            'testimonials' => $testimonials,
+            'teamMembers' => $teamMembers,
+            'hero' => $sections['hero'] ? $this->transformHero($heroSetting) : null,
+            'about' => $sections['about'] ? $this->transformAbout($aboutSetting) : null,
+            'finalCta' => $sections['final_cta'] ? $this->transformFinalCta($ctaSetting) : null,
+            'metrics' => $sections['metrics'] ? $this->transformMetrics($metricsSetting) : [],
+            'sections' => $sections,
             'seo' => $this->seo('home'),
         ]);
     }
@@ -76,6 +100,13 @@ class LandingController extends Controller
         $statistics = $this->transformAboutStatistics($this->setting('about.statistics', []));
         $team = $this->transformAboutTeam($this->setting('about.team', []));
         $cta = $this->transformAboutCta($this->setting('about.cta', []));
+        $teamMembers = $this->teamPayload(
+            TeamMember::query()
+                ->where('is_active', true)
+                ->orderBy('display_order')
+                ->limit(6)
+                ->get()
+        );
 
         return Inertia::render('landingPage/About', [
             'overview' => $overview,
@@ -83,6 +114,7 @@ class LandingController extends Controller
             'values' => $values,
             'statistics' => $statistics,
             'team' => $team,
+            'teamMembers' => $teamMembers,
             'cta' => $cta,
             'seo' => $this->seo('about'),
         ]);
@@ -140,7 +172,15 @@ class LandingController extends Controller
         ], $this->setting('blog.hero', []));
 
         return Inertia::render('landingPage/Blog', [
-            'articles' => $this->articlePayload(BlogPost::query()->published()->latest('published_at')->with('author:id,name')->get()),
+            'articles' => $this->articlePayload(
+                BlogPost::query()
+                    ->published()
+                    ->orderByRaw('COALESCE(published_at, created_at) DESC')
+                    ->orderByDesc('id')
+                    ->limit(36)
+                    ->with('author:id,name')
+                    ->get()
+            ),
             'blogHero' => $this->transformSection($blogHeroSetting),
             'seo' => $this->seo('blog'),
         ]);
@@ -255,7 +295,8 @@ class LandingController extends Controller
             BlogPost::query()
                 ->published()
                 ->where('id', '<>', $blogPost->id)
-                ->latest('published_at')
+                ->orderByRaw('COALESCE(published_at, created_at) DESC')
+                ->orderByDesc('id')
                 ->limit(4)
                 ->with('author:id,name')
                 ->get()
@@ -296,7 +337,7 @@ class LandingController extends Controller
             'author_name' => $testimonial->author_name,
             'author_role' => $this->translateIfNeeded($testimonial->author_role),
             'company' => $this->translateIfNeeded($testimonial->company),
-            'avatar' => $testimonial->avatar,
+            'avatar' => $testimonial->avatar_url ?? $this->imageUrl($testimonial->avatar),
             'quote' => $this->translateIfNeeded($testimonial->quote),
             'rating' => $testimonial->rating,
         ])->all();
@@ -308,7 +349,7 @@ class LandingController extends Controller
             'id' => $member->id,
             'name' => $member->name,
             'role' => $this->translateIfNeeded($member->role),
-            'photo' => $member->photo,
+            'photo' => $member->photo_url ?? $this->imageUrl($member->photo),
             'linkedin' => $member->linkedin,
             'bio' => $this->translateIfNeeded($member->bio),
         ])->all();
@@ -327,6 +368,29 @@ class LandingController extends Controller
     private function projectPayload(Collection $projects): array
     {
         return $projects->map(fn (Project $project) => $this->transformProject($project))->all();
+    }
+
+    private function landingSections(): array
+    {
+        $defaults = config('landing.home_sections', [
+            'hero' => true,
+            'about' => true,
+            'services' => true,
+            'testimonials' => true,
+            'articles' => true,
+            'final_cta' => true,
+            'metrics' => true,
+        ]);
+
+        $stored = CompanySetting::query()->where('key', 'landing.sections')->value('value') ?? [];
+
+        if (!is_array($stored)) {
+            $stored = [];
+        }
+
+        return collect($defaults)
+            ->mapWithKeys(fn ($default, $key) => [$key => (bool) ($stored[$key] ?? $default)])
+            ->toArray();
     }
 
     private function setting(string $key, $default = [])
@@ -769,6 +833,7 @@ class LandingController extends Controller
             'gallery' => $gallery,
             'variants' => $variants,
             'purchase_url' => $this->translateIfNeeded($product->purchase_url),
+            'whatsapp_number' => $product->whatsapp_number,
         ];
     }
 
@@ -812,7 +877,7 @@ class LandingController extends Controller
             'slug' => $post->slug,
             'excerpt' => $this->translateIfNeeded($post->excerpt),
             'cover_image' => $this->imageUrl($post->cover_image),
-            'published_at' => optional($post->published_at)->toIso8601String(),
+            'published_at' => optional($post->published_at ?? $post->created_at)->toIso8601String(),
             'author' => $post->author?->name,
         ];
 

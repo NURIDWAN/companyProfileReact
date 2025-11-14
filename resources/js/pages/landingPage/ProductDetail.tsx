@@ -9,6 +9,24 @@ import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/ui/landingPageComponent/product/productCard';
 import type { Product } from '@/types';
 
+const normalizeWhatsappNumber = (value?: string | null): string | null => {
+    if (!value) {
+        return null;
+    }
+
+    const digits = value.replace(/\D/g, '');
+
+    if (!digits) {
+        return null;
+    }
+
+    if (digits.startsWith('0')) {
+        return `62${digits.slice(1)}`;
+    }
+
+    return digits;
+};
+
 type ProductDetailPageProps = PageProps & {
     product: Product;
     relatedProducts?: Product[];
@@ -53,8 +71,12 @@ export default function ProductDetailPage() {
 
     const whatsappLink = useMemo(() => {
         const message = encodeURIComponent(`Halo Harmony Strategic Group, saya ingin berdiskusi tentang ${product.name}.`);
-        return `https://wa.me/?text=${message}`;
-    }, [product.name]);
+        const normalized = normalizeWhatsappNumber(product.whatsapp_number);
+        const baseUrl = normalized ? `https://wa.me/${normalized}` : 'https://wa.me';
+        const separator = normalized ? '?' : '/?';
+
+        return `${baseUrl}${separator}text=${message}`;
+    }, [product.name, product.whatsapp_number]);
 
     return (
         <LandingPageLayout>

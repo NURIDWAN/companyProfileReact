@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { usePage, Link } from '@inertiajs/react';
 import type { PageProps } from '@inertiajs/core';
 import { Calendar, Clock, Search, User, ArrowUpRight } from 'lucide-react';
@@ -125,9 +125,34 @@ function ArticleCard({ article }: { article: ArticleItem }) {
     );
 }
 
+function QuickArticleCard({ article }: { article: ArticleItem }) {
+    const cover = article.cover_image ?? coverFallback;
+
+    return (
+        <Link
+            href={`/blog/${article.slug}`}
+            className="group flex items-center gap-4 rounded-3xl border border-slate-200/60 bg-white/70 p-4 shadow-sm transition hover:-translate-y-1 hover:border-indigo-200 dark:border-white/10 dark:bg-slate-900/70"
+        >
+            <div className="relative h-16 w-16 overflow-hidden rounded-2xl bg-slate-100">
+                <img src={cover} alt={article.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+            </div>
+            <div className="flex-1 space-y-1">
+                <p className="text-xs font-medium uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">{formatDate(article.published_at)}</p>
+                <p className="line-clamp-2 text-sm font-semibold text-slate-900 dark:text-white">{article.title}</p>
+            </div>
+            <ArrowUpRight className="h-5 w-5 text-slate-400 transition group-hover:text-indigo-500 dark:text-slate-500" />
+        </Link>
+    );
+}
+
 export default function BlogPage() {
     const { articles = [], blogHero } = usePage<BlogPageProps>().props;
     const [search, setSearch] = useState('');
+    const [visibleCount, setVisibleCount] = useState(9);
+
+    useEffect(() => {
+        setVisibleCount(9);
+    }, [search]);
 
     const filteredArticles = useMemo(() => {
         const term = search.trim().toLowerCase();
@@ -141,10 +166,13 @@ export default function BlogPage() {
     }, [articles, search]);
 
     const featuredArticle = filteredArticles[0] ?? articles[0];
-    const spotlightArticles = filteredArticles.filter((article) => article.id !== featuredArticle?.id).slice(0, 2);
-    const otherArticles = filteredArticles.filter(
-        (article) => article.id !== featuredArticle?.id && !spotlightArticles.some((spot) => spot.id === article.id),
-    );
+    const articlesWithoutFeatured = featuredArticle ? filteredArticles.filter((article) => article.id !== featuredArticle.id) : filteredArticles;
+    const spotlightArticles = articlesWithoutFeatured.slice(0, 2);
+    const quickInsights = articlesWithoutFeatured.slice(2, 6);
+    const remainingArticles = articlesWithoutFeatured.slice(6);
+    const gridArticles = remainingArticles.slice(0, visibleCount);
+    const canLoadMore = remainingArticles.length > visibleCount;
+    const hasAnyArticle = Boolean(featuredArticle || spotlightArticles.length || quickInsights.length || gridArticles.length);
     const lastUpdated = articles.find((article) => article.published_at)?.published_at ?? new Date().toISOString();
 
     const heroBadge = blogHero?.badge ?? 'Insight';
@@ -188,8 +216,10 @@ export default function BlogPage() {
                 </section>
 
                 {featuredArticle ? (
-                    <section className="grid gap-6 lg:grid-cols-[2fr,1fr]">
-                        <FeaturedArticle article={featuredArticle} />
+                    <section className="grid gap-6 lg:grid-cols-3">
+                        <div className="lg:col-span-2">
+                            <FeaturedArticle article={featuredArticle} />
+                        </div>
                         <div className="space-y-4">
                             {spotlightArticles.length ? (
                                 spotlightArticles.map((article) => <SpotlightCard key={article.id} article={article} />)
@@ -202,25 +232,55 @@ export default function BlogPage() {
                     </section>
                 ) : null}
 
+                {quickInsights.length ? (
+                    <section className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Kilasan Insight</h2>
+                                <p className="text-sm text-muted-foreground dark:text-slate-400">Ringkasan cepat dari artikel lain yang tidak boleh dilewatkan.</p>
+                            </div>
+                            <Badge className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-200">
+                                {quickInsights.length} pilihan
+                            </Badge>
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-2">
+                            {quickInsights.map((article) => (
+                                <QuickArticleCard key={article.id} article={article} />
+                            ))}
+                        </div>
+                    </section>
+                ) : null}
+
                 <section className="space-y-6">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div>
-                            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Artikel Terbaru</h2>
+                            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Semua Artikel</h2>
                             <p className="text-sm text-muted-foreground dark:text-slate-400">
-                                {filteredArticles.length ? 'Kurasi ide dan studi kasus terbaru.' : 'Tidak ditemukan artikel dengan kata kunci tersebut.'}
+                                {hasAnyArticle
+                                    ? 'Telusuri seluruh arsip insight kami. Klik load more untuk melihat artikel lainnya.'
+                                    : 'Tidak ditemukan artikel dengan kata kunci tersebut.'}
                             </p>
                         </div>
                         <Button variant="outline" className="rounded-full border-slate-200 text-sm dark:border-white/20 dark:text-white" asChild>
                             <a href="/contact">Diskusikan Insight</a>
                         </Button>
                     </div>
-                    {otherArticles.length ? (
-                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                            {otherArticles.map((article) => (
-                                <ArticleCard key={article.id} article={article} />
-                            ))}
-                        </div>
-                    ) : !featuredArticle ? (
+                    {gridArticles.length ? (
+                        <>
+                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                {gridArticles.map((article) => (
+                                    <ArticleCard key={article.id} article={article} />
+                                ))}
+                            </div>
+                            {canLoadMore ? (
+                                <div className="flex justify-center">
+                                    <Button variant="secondary" className="rounded-full px-6" onClick={() => setVisibleCount((count) => count + 6)}>
+                                        Muat 6 artikel lagi
+                                    </Button>
+                                </div>
+                            ) : null}
+                        </>
+                    ) : !hasAnyArticle ? (
                         <div className="rounded-3xl border border-dashed border-slate-200/80 p-10 text-center text-sm text-muted-foreground dark:border-white/10 dark:text-slate-300">
                             Artikel blog belum tersedia. Tambahkan melalui panel admin untuk mulai berbagi insight.
                         </div>

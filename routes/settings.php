@@ -38,6 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::post('settings/content/final-cta', [LandingContentController::class, 'updateFinalCta'])->name('settings.content.cta.update');
     Route::post('settings/content/metrics', [LandingContentController::class, 'updateMetrics'])->name('settings.content.metrics.update');
     Route::post('settings/content/navigation', [LandingContentController::class, 'updateNavigation'])->name('settings.content.navigation.update');
+    Route::post('settings/content/sections', [LandingContentController::class, 'updateSectionVisibility'])->name('settings.content.sections.update');
     Route::post('settings/content/product-cta', [LandingContentController::class, 'updateProductCta'])->name('settings.content.product-cta.update');
     Route::post('settings/content/product-stats', [LandingContentController::class, 'updateProductStats'])->name('settings.content.product-stats.update');
     Route::post('settings/content/product/hero', [LandingContentController::class, 'updateProductHero'])->name('settings.content.product.hero.update');

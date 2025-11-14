@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { usePage, Link } from '@inertiajs/react';
 import type { PageProps } from '@inertiajs/core';
 import { Calendar, ArrowLeft, User } from 'lucide-react';
@@ -25,6 +26,20 @@ type BlogDetailProps = PageProps & {
 export default function BlogDetailPage() {
     const { article, relatedArticles = [] } = usePage<BlogDetailProps>().props;
     const cover = article.cover_image ?? 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1200';
+    const inlineImages = useMemo(() => {
+        if (!article.body) return [];
+        const matches: string[] = [];
+        const regex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
+        let match;
+        while ((match = regex.exec(article.body)) !== null) {
+            const url = match[1];
+            if (url && !matches.includes(url)) {
+                matches.push(url);
+            }
+        }
+
+        return matches;
+    }, [article.body]);
 
     return (
         <LandingPageLayout>
@@ -52,9 +67,25 @@ export default function BlogDetailPage() {
 
                 <img src={cover} alt={article.title} className="w-full rounded-2xl object-cover shadow-lg" />
 
-                <article className="prose prose-lg max-w-none dark:prose-invert">
+                <article className="prose prose-lg max-w-none dark:prose-invert prose-img:rounded-2xl prose-img:shadow-lg prose-img:w-full">
                     <div dangerouslySetInnerHTML={{ __html: article.body ?? '<p>Konten akan segera tersedia.</p>' }} />
                 </article>
+
+                {inlineImages.length > 0 && (
+                    <section className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-2xl font-semibold text-gray-900">Galeri Artikel</h2>
+                            <p className="text-sm text-gray-500">{inlineImages.length} gambar di dalam konten ini.</p>
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-3">
+                            {inlineImages.map((src) => (
+                                <div key={src} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+                                    <img src={src} alt={article.title} className="h-48 w-full object-cover" loading="lazy" />
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
 
                 {relatedArticles.length > 0 && (
                     <div className="space-y-4">

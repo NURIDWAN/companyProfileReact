@@ -4,7 +4,7 @@ import AboutCompany, { type AboutOverviewContent } from '@/components/ui/landing
 import VisionMissionSection, { type AboutVisionContent } from '@/components/ui/landingPageComponent/about/visionmision';
 import CoreValuesSection, { type CoreValue } from '@/components/ui/landingPageComponent/about/CoreValues';
 import StatisticsSection, { type StatisticsContent } from '@/components/ui/landingPageComponent/about/Statistics';
-import ManagementTeamSection, { type TeamContent } from '@/components/ui/landingPageComponent/about/ManagementTeam';
+import ManagementTeamSection, { type TeamContent, type TeamMemberCardProps } from '@/components/ui/landingPageComponent/about/ManagementTeam';
 import CTASection, { type AboutCtaContent } from '@/components/ui/landingPageComponent/about/CTASection';
 import React from 'react';
 
@@ -14,11 +14,12 @@ type AboutPageProps = {
     values: CoreValue[];
     statistics: StatisticsContent;
     team: TeamContent;
+    teamMembers?: TeamMemberCardProps[];
     cta: AboutCtaContent;
 };
 
 export default function AboutPage() {
-    const { overview, vision, values, statistics, team, cta } = usePage<AboutPageProps>().props;
+    const { overview, vision, values, statistics, team, teamMembers = [], cta } = usePage<AboutPageProps>().props;
 
     return (
         <LandingPageLayout>
@@ -26,7 +27,7 @@ export default function AboutPage() {
             <VisionMissionSection content={vision} />
             <CoreValuesSection values={values} />
             <StatisticsSection content={statistics} />
-            <ManagementTeamSection content={team} />
+            <ManagementTeamSection content={team} members={teamMembers} />
             <CTASection content={cta} />
         </LandingPageLayout>
     );

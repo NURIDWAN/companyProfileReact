@@ -8,7 +8,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Throwable;
 use Inertia\Inertia;
@@ -21,9 +23,13 @@ class CompanySettingController extends Controller
     {
         $settings = $this->loadSettings();
 
+        $logoImage = data_get($settings, 'company.logo_image');
         $company = [
             'name' => data_get($settings, 'company.name', ''),
             'tagline' => data_get($settings, 'company.tagline', ''),
+            'logo_icon' => data_get($settings, 'company.logo_icon', ''),
+            'logo_image' => $logoImage ?? '',
+            'logo_url' => $this->resolveImageUrl($logoImage),
         ];
 
         $address = array_merge(
@@ -41,6 +47,8 @@ class CompanySettingController extends Controller
                 'phone' => '',
                 'email' => '',
                 'whatsapp' => '',
+                'map_label' => 'Lokasi',
+                'map_embed_url' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126915.123456789!2d106.700!3d-6.200',
             ],
             data_get($settings, 'company.contacts', []) ?? [],
         );
@@ -344,11 +352,34 @@ class CompanySettingController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'tagline' => ['nullable', 'string', 'max:255'],
+            'logo_icon' => ['nullable', 'string', 'max:60'],
+            'logo_image' => ['nullable', 'string', 'max:500'],
+            'logo_image_file' => ['nullable', 'image', 'max:4096'],
         ]);
 
-        DB::transaction(function () use ($data) {
+        $logoPath = CompanySetting::query()->where('key', 'company.logo_image')->value('value');
+
+        if ($file = $request->file('logo_image_file')) {
+            if ($logoPath && Str::startsWith($logoPath, 'branding/')) {
+                Storage::disk('public')->delete($logoPath);
+            }
+
+            $logoPath = $file->store('branding', 'public');
+        } elseif (($data['logo_image'] ?? null) === '') {
+            if ($logoPath && Str::startsWith($logoPath, 'branding/')) {
+                Storage::disk('public')->delete($logoPath);
+            }
+
+            $logoPath = null;
+        } else {
+            $logoPath = $data['logo_image'] ?? $logoPath;
+        }
+
+        DB::transaction(function () use ($data, $logoPath) {
             $this->saveSetting('company.name', $data['name'], 'company');
             $this->saveSetting('company.tagline', $data['tagline'], 'company');
+            $this->saveSetting('company.logo_icon', $data['logo_icon'] ?? null, 'company');
+            $this->saveSetting('company.logo_image', $logoPath, 'company');
 
             $this->updateFooterContent(function (array $footer) use ($data) {
                 $footer['company'] = [
@@ -385,13 +416,22 @@ class CompanySettingController extends Controller
             'phone' => ['nullable', 'string', 'max:60'],
             'email' => ['nullable', 'email', 'max:120'],
             'whatsapp' => ['nullable', 'string', 'max:60'],
+            'map_label' => ['nullable', 'string', 'max:120'],
+            'map_embed_url' => ['nullable', 'string', 'max:2048'],
         ]);
 
         DB::transaction(function () use ($data) {
             $this->saveSetting('company.contacts', $data, 'contact');
 
             $this->updateFooterContent(function (array $footer) use ($data) {
-                $footer['contacts'] = array_filter($data, fn ($value) => $value !== null && $value !== '');
+                $existingAddress = data_get($footer, 'contacts.address');
+
+                $footer['contacts'] = array_filter([
+                    'phone' => $data['phone'] ?? null,
+                    'email' => $data['email'] ?? null,
+                    'whatsapp' => $data['whatsapp'] ?? null,
+                    'address' => $existingAddress,
+                ], fn ($value) => $value !== null && $value !== '');
 
                 return $footer;
             });
@@ -722,6 +762,19 @@ class CompanySettingController extends Controller
             });
 
         return $settings;
+    }
+
+    protected function resolveImageUrl(?string $path): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+
+        if (Storage::disk('public')->exists($path)) {
+            return Storage::disk('public')->url($path);
+        }
+
+        return $path;
     }
 
     private function validatedData(Request $request, ?CompanySetting $setting = null): array

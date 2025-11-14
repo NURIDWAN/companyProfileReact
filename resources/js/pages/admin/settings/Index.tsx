@@ -1,5 +1,5 @@
 import { useForm, Head } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { ChangeEvent, FormEventHandler, useEffect, useState } from 'react';
 
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,9 @@ import InputError from '@/components/input-error';
 interface CompanyProfile {
     name: string;
     tagline: string;
+    logo_icon?: string;
+    logo_image?: string;
+    logo_url?: string | null;
 }
 
 interface CompanyAddress {
@@ -32,6 +35,8 @@ interface CompanyContacts {
     phone: string;
     email: string;
     whatsapp: string;
+    map_label?: string;
+    map_embed_url?: string;
 }
 
 interface CompanySocials {
@@ -220,9 +225,20 @@ export default function SettingsIndex({
     serviceAdvantages,
     serviceFaqs,
 }: SettingsIndexProps) {
-    const companyForm = useForm(company);
+    const companyForm = useForm({
+        ...company,
+        logo_icon: company.logo_icon ?? '',
+        logo_image: company.logo_image ?? '',
+        logo_image_file: undefined as File | undefined,
+    });
     const addressForm = useForm(address);
-    const contactsForm = useForm(contacts);
+    const contactsForm = useForm({
+        phone: contacts.phone ?? '',
+        email: contacts.email ?? '',
+        whatsapp: contacts.whatsapp ?? '',
+        map_label: contacts.map_label ?? '',
+        map_embed_url: contacts.map_embed_url ?? '',
+    });
     const socialsForm = useForm(socials);
     const footerCtaForm = useForm(footerCta);
     const footerLegalForm = useForm(footerLegal);
@@ -239,11 +255,79 @@ export default function SettingsIndex({
     const serviceProcessForm = useForm<ServiceProcessForm>(serviceProcess);
     const serviceAdvantagesForm = useForm<ServiceAdvantagesForm>(serviceAdvantages);
     const serviceFaqsForm = useForm<ServiceFaqsForm>(serviceFaqs);
+    const [logoPreview, setLogoPreview] = useState<string | null>(company.logo_url ?? null);
+    const [logoObjectUrl, setLogoObjectUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (logoObjectUrl) {
+                URL.revokeObjectURL(logoObjectUrl);
+            }
+        };
+    }, [logoObjectUrl]);
+
+    const handleLogoUrlChange = (value: string) => {
+        companyForm.setData('logo_image', value);
+
+        if (logoObjectUrl) {
+            URL.revokeObjectURL(logoObjectUrl);
+            setLogoObjectUrl(null);
+        }
+
+        if (value) {
+            setLogoPreview(value);
+            companyForm.setData('logo_image_file', undefined);
+        } else if (!companyForm.data.logo_image_file) {
+            setLogoPreview(company.logo_url ?? null);
+        }
+    };
+
+    const handleLogoFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+
+        companyForm.setData('logo_image_file', file ?? undefined);
+
+        if (logoObjectUrl) {
+            URL.revokeObjectURL(logoObjectUrl);
+            setLogoObjectUrl(null);
+        }
+
+        if (file) {
+            const url = URL.createObjectURL(file);
+            setLogoPreview(url);
+            setLogoObjectUrl(url);
+            companyForm.setData('logo_image', '');
+        } else if (companyForm.data.logo_image) {
+            setLogoPreview(companyForm.data.logo_image);
+        } else {
+            setLogoPreview(company.logo_url ?? null);
+        }
+    };
+
+    const clearLogo = () => {
+        if (logoObjectUrl) {
+            URL.revokeObjectURL(logoObjectUrl);
+            setLogoObjectUrl(null);
+        }
+
+        setLogoPreview(null);
+        companyForm.setData('logo_image', '');
+        companyForm.setData('logo_image_file', undefined);
+    };
 
     const submitCompany: FormEventHandler<HTMLFormElement> = (event) => {
         event.preventDefault();
+        companyForm.transform((formData) => ({
+            ...formData,
+            logo_image_file: formData.logo_image_file ?? undefined,
+        }));
+
         companyForm.post(route('admin.settings.company.update'), {
             preserveScroll: true,
+            forceFormData: true,
+            onFinish: () => {
+                companyForm.transform((data) => data);
+            },
         });
     };
 
@@ -386,7 +470,7 @@ export default function SettingsIndex({
                         </p>
                     </header>
 
-                    <form onSubmit={submitCompany} className="space-y-4">
+                    <form onSubmit={submitCompany} className="space-y-4" encType="multipart/form-data">
                         <Card>
                             <CardHeader>
                                 <CardTitle>Profil Perusahaan</CardTitle>
@@ -409,6 +493,53 @@ export default function SettingsIndex({
                                         onChange={(event) => companyForm.setData('tagline', event.target.value)}
                                     />
                                     <InputError message={companyForm.errors.tagline} />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="company-logo-icon">Ikon Judul (opsional)</Label>
+                                    <Input
+                                        id="company-logo-icon"
+                                        value={companyForm.data.logo_icon ?? ''}
+                                        onChange={(event) => companyForm.setData('logo_icon', event.target.value)}
+                                        placeholder="Misal: Sparkles, Layers, Stars"
+                                    />
+                                    <p className="text-xs text-muted-foreground">Gunakan nama ikon Lucide (CamelCase). Ikon ini tampil di samping judul situs.</p>
+                                    <InputError message={companyForm.errors.logo_icon} />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="company-logo-url">Logo (URL)</Label>
+                                    <Input
+                                        id="company-logo-url"
+                                        value={companyForm.data.logo_image ?? ''}
+                                        onChange={(event) => handleLogoUrlChange(event.target.value)}
+                                        placeholder="https://contoh.com/logo.svg"
+                                    />
+                                    <p className="text-xs text-muted-foreground">Tempel URL gambar jika logo dihosting di tempat lain.</p>
+                                    <InputError message={companyForm.errors.logo_image} />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="company-logo-file">Upload Logo</Label>
+                                    <Input
+                                        id="company-logo-file"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleLogoFileChange}
+                                    />
+                                    <p className="text-xs text-muted-foreground">Format PNG, JPG, atau SVG dengan ukuran maks 4MB.</p>
+                                    <InputError message={companyForm.errors.logo_image_file} />
+                                    {logoPreview ? (
+                                        <div className="flex items-center gap-4">
+                                            <span className="inline-flex h-16 w-16 overflow-hidden rounded-full border border-dashed border-border bg-card">
+                                                <img
+                                                    src={logoPreview}
+                                                    alt="Logo preview"
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            </span>
+                                            <Button type="button" variant="outline" size="sm" onClick={clearLogo}>
+                                                Hapus Logo
+                                            </Button>
+                                        </div>
+                                    ) : null}
                                 </div>
                             </CardContent>
                             <CardFooter className="flex items-center justify-between gap-2">
@@ -509,14 +640,37 @@ export default function SettingsIndex({
                                     </div>
                                 </div>
                                 <div className="grid gap-2 md:w-1/2">
-                                    <Label htmlFor="contact-whatsapp">WhatsApp</Label>
-                                    <Input
-                                        id="contact-whatsapp"
-                                        value={contactsForm.data.whatsapp ?? ''}
-                                        onChange={(event) => contactsForm.setData('whatsapp', event.target.value)}
-                                    />
-                                    <InputError message={contactsForm.errors.whatsapp} />
-                                </div>
+                                <Label htmlFor="contact-whatsapp">WhatsApp</Label>
+                                <Input
+                                    id="contact-whatsapp"
+                                    value={contactsForm.data.whatsapp ?? ''}
+                                    onChange={(event) => contactsForm.setData('whatsapp', event.target.value)}
+                                />
+                                <InputError message={contactsForm.errors.whatsapp} />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="contact-map-label">Judul lokasi</Label>
+                                <Input
+                                    id="contact-map-label"
+                                    value={contactsForm.data.map_label ?? ''}
+                                    onChange={(event) => contactsForm.setData('map_label', event.target.value)}
+                                    placeholder="Lokasi Kantor"
+                                />
+                                <InputError message={contactsForm.errors.map_label} />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="contact-map-embed">URL embed Google Maps</Label>
+                                <Input
+                                    id="contact-map-embed"
+                                    value={contactsForm.data.map_embed_url ?? ''}
+                                    onChange={(event) => contactsForm.setData('map_embed_url', event.target.value)}
+                                    placeholder="https://www.google.com/maps/embed?pb=..."
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Salin nilai <code>src</code> dari embed Google Maps untuk menampilkan peta pada halaman kontak.
+                                </p>
+                                <InputError message={contactsForm.errors.map_embed_url} />
+                            </div>
                             </CardContent>
                             <CardFooter className="flex items-center justify-between gap-2">
                                 {contactsForm.recentlySuccessful ? (

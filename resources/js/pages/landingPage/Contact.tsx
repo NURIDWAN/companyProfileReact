@@ -32,6 +32,8 @@ type CompanyContacts = {
   phone?: string;
   email?: string;
   whatsapp?: string;
+  map_label?: string;
+  map_embed_url?: string;
 };
 
 export default function ContactPage() {
@@ -53,6 +55,8 @@ export default function ContactPage() {
   const addressParts = [addressSetting.line1, addressSetting.city, addressSetting.province, addressSetting.postal_code]
     .filter(Boolean)
     .join(", ");
+  const mapLabel = contactsSetting.map_label ?? "Lokasi";
+  const mapEmbedUrl = contactsSetting.map_embed_url;
 
   const recaptchaEnabled = import.meta.env.VITE_RECAPTCHA_ENABLED !== 'false';
   const recaptchaRef = React.useRef<RecaptchaFieldHandle>(null);
@@ -141,16 +145,23 @@ export default function ContactPage() {
               <Separator />
 
               <div className="mt-2">
-                <p className="font-medium mb-2">Lokasi</p>
-                <div className="aspect-video w-full rounded-md overflow-hidden">
-                  <iframe
-                    title="map"
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126915.123456789!2d106.700!3d-6.200"
-                    className="w-full h-full"
-                    allowFullScreen
-                    loading="lazy"
-                  ></iframe>
-                </div>
+                <p className="font-medium mb-2">{mapLabel}</p>
+                {mapEmbedUrl ? (
+                  <div className="aspect-video w-full rounded-md overflow-hidden">
+                    <iframe
+                      title="map"
+                      src={mapEmbedUrl}
+                      className="w-full h-full"
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    ></iframe>
+                  </div>
+                ) : (
+                  <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+                    Lokasi belum ditentukan. Silakan tambahkan URL embed Google Maps melalui menu pengaturan konten.
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

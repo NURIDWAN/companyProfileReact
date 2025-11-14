@@ -32,6 +32,8 @@ export type FooterLink = { label: string; href: string };
 export interface BrandingInfo {
     name?: string;
     tagline?: string;
+    logo_url?: string | null;
+    logo_icon?: string | null;
 }
 
 export interface CompanyAddress {
@@ -45,6 +47,8 @@ export interface CompanyContactsInfo {
     phone?: string | null;
     email?: string | null;
     whatsapp?: string | null;
+    map_label?: string | null;
+    map_embed_url?: string | null;
 }
 
 export interface FooterColumn {
@@ -166,6 +170,7 @@ export interface Product {
     price_range?: ProductPriceRange | null;
     variants?: ProductPriceVariant[];
     purchase_url?: string | null;
+    whatsapp_number?: string | null;
 }
 
 export interface JobApplication {

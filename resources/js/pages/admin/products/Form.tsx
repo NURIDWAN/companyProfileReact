@@ -30,6 +30,7 @@ type Product = {
     }> | null;
     gallery?: string[] | null;
     purchase_url?: string | null;
+    whatsapp_number?: string | null;
     category?: string | null;
     clients?: number | null;
     rating?: number | null;
@@ -70,6 +71,7 @@ export default function ProductForm({ product }: Props) {
             { name: "", price: "", compare_at_price: "", sku: "", stock: "" },
         ],
         purchase_url: product?.purchase_url ?? "",
+        whatsapp_number: product?.whatsapp_number ?? "",
         clients: product?.clients ? String(product.clients) : "",
         rating: product?.rating ? String(product.rating) : "",
         popular: product?.popular ?? false,
@@ -147,36 +149,27 @@ export default function ProductForm({ product }: Props) {
     const submit: FormEventHandler<HTMLFormElement> = (event) => {
         event.preventDefault();
 
-        form.transform((formData) => ({
-            ...formData,
-            cover_image_file: formData.cover_image_file ?? undefined,
-            thumbnail_file: formData.thumbnail_file ?? undefined,
-            gallery_files: formData.gallery_files ?? [],
-        }));
+        form.transform((formData) => {
+            const transformed = {
+                ...formData,
+                cover_image_file: formData.cover_image_file ?? undefined,
+                thumbnail_file: formData.thumbnail_file ?? undefined,
+                gallery_files: formData.gallery_files ?? [],
+            };
 
-        if (product) {
-            form.put(action, {
-                forceFormData: true,
-                preserveScroll: true,
-                onFinish: () => {
-                    setData("cover_image_file", undefined);
-                    setData("thumbnail_file", undefined);
-                    setData("gallery_files", []);
-                    form.transform((data) => data);
-                },
-            });
-        } else {
-            form.post(action, {
-                forceFormData: true,
-                preserveScroll: true,
-                onFinish: () => {
-                    setData("cover_image_file", undefined);
-                    setData("thumbnail_file", undefined);
-                    setData("gallery_files", []);
-                    form.transform((data) => data);
-                },
-            });
-        }
+            return product ? { ...transformed, _method: "put" } : transformed;
+        });
+
+        form.post(action, {
+            forceFormData: true,
+            preserveScroll: true,
+            onFinish: () => {
+                setData("cover_image_file", undefined);
+                setData("thumbnail_file", undefined);
+                setData("gallery_files", []);
+                form.transform((data) => data);
+            },
+        });
     };
 
     return (
@@ -362,6 +355,19 @@ export default function ProductForm({ product }: Props) {
                                 onChange={(event) => setData("purchase_url", event.target.value)}
                             />
                             {errors.purchase_url && <p className="text-xs text-rose-500">{errors.purchase_url}</p>}
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="whatsapp_number">Nomor WhatsApp Produk</Label>
+                            <Input
+                                id="whatsapp_number"
+                                value={data.whatsapp_number ?? ""}
+                                onChange={(event) => setData("whatsapp_number", event.target.value)}
+                                placeholder="Contoh: 628123456789"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Gunakan format internasional tanpa spasi atau tanda baca (misal 628123456789).
+                            </p>
+                            {errors.whatsapp_number && <p className="text-xs text-rose-500">{errors.whatsapp_number}</p>}
                         </div>
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">

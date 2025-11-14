@@ -49,6 +49,7 @@ class ProductFactory extends Factory
                 })
                 ->all(),
             'purchase_url' => $this->faker->url(),
+            'whatsapp_number' => $this->faker->numerify('62812########'),
             'clients' => $this->faker->numberBetween(1, 200),
             'rating' => $this->faker->randomFloat(1, 3, 5),
             'popular' => $this->faker->boolean(),

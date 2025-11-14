@@ -110,6 +110,8 @@ it('updates footer contacts through company contacts form', function () {
             'phone' => '+62 811 1234 567',
             'email' => 'cs@example.com',
             'whatsapp' => '',
+            'map_label' => 'Lokasi Kantor',
+            'map_embed_url' => 'https://maps.example.com/embed',
         ])
         ->assertRedirect(route('admin.settings.index'));
 
@@ -117,6 +119,10 @@ it('updates footer contacts through company contacts form', function () {
 
     expect(data_get($footer, 'contacts.phone'))->toBe('+62 811 1234 567');
     expect(data_get($footer, 'contacts.email'))->toBe('cs@example.com');
+
+    $contactsSetting = CompanySetting::where('key', 'company.contacts')->value('value');
+    expect(data_get($contactsSetting, 'map_label'))->toBe('Lokasi Kantor');
+    expect(data_get($contactsSetting, 'map_embed_url'))->toBe('https://maps.example.com/embed');
 });
 
 it('updates footer CTA content', function () {

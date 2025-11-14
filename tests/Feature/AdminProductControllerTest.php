@@ -36,6 +36,7 @@ it('can create a product with uploaded images', function () {
             ],
         ],
         'purchase_url' => 'https://shop.example.com/crm-platform',
+        'whatsapp_number' => '+62 811-2233-4455',
         'clients' => 10,
         'rating' => 4.5,
         'popular' => true,
@@ -51,6 +52,7 @@ it('can create a product with uploaded images', function () {
         'clients' => 10,
         'popular' => true,
         'demo' => true,
+        'whatsapp_number' => '+62 811-2233-4455',
     ]);
 
     $product = Product::firstOrFail();
@@ -100,6 +102,7 @@ it('can update a product and replace images', function () {
             ],
         ],
         'purchase_url' => 'https://shop.example.com/crm-platform-enterprise',
+        'whatsapp_number' => '0811992233',
         'clients' => 20,
         'rating' => 4.7,
         'popular' => true,
@@ -119,6 +122,7 @@ it('can update a product and replace images', function () {
     expect(data_get($product->price_variants, '0.price'))->toEqual(3500000.0);
     expect($product->price)->toEqual(3500000.0);
     expect($product->purchase_url)->toBe('https://shop.example.com/crm-platform-enterprise');
+    expect($product->whatsapp_number)->toBe('0811992233');
 
     Storage::disk('public')->assertExists($product->cover_image);
     Storage::disk('public')->assertExists($product->thumbnail);

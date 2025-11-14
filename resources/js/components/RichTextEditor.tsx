@@ -1,6 +1,7 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { useEffect } from 'react';
+import Image from '@tiptap/extension-image';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 
 type RichTextEditorProps = {
     value?: string | null;
@@ -10,8 +11,19 @@ type RichTextEditorProps = {
 };
 
 export function RichTextEditor({ value = '', onChange, placeholder, className }: RichTextEditorProps) {
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const editor = useEditor({
-        extensions: [StarterKit],
+        extensions: [
+            StarterKit,
+            Image.configure({
+                HTMLAttributes: {
+                    class: 'my-4 rounded-xl shadow-sm',
+                },
+            }),
+        ],
         content: value || '',
         editorProps: {
             attributes: {
@@ -23,6 +35,46 @@ export function RichTextEditor({ value = '', onChange, placeholder, className }:
             onChange(editor.getHTML());
         },
     });
+
+    const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        if (!editor) return;
+
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        setUploadError(null);
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+            const response = await fetch(route('admin.blog-posts.upload-image'), {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data?.message ?? 'Gagal mengunggah gambar');
+            }
+
+            editor.chain().focus().setImage({ src: data.url }).run();
+        } catch (error) {
+            console.error(error);
+            setUploadError(error instanceof Error ? error.message : 'Terjadi kesalahan saat mengunggah gambar.');
+        } finally {
+            setIsUploading(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        }
+    };
 
     useEffect(() => {
         if (!editor) return;
@@ -72,7 +124,17 @@ export function RichTextEditor({ value = '', onChange, placeholder, className }:
                 <button type="button" className="rte-btn" onClick={() => editor.chain().focus().clearContent().run()}>
                     Clear
                 </button>
+                <button
+                    type="button"
+                    className="rte-btn"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                >
+                    {isUploading ? 'Mengunggah…' : 'Tambah Gambar'}
+                </button>
+                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
             </div>
+            {uploadError ? <p className="text-xs text-rose-500">{uploadError}</p> : null}
             <div className="rounded-md border border-input bg-background">
                 {placeholder ? <div className="px-3 pt-2 text-xs text-muted-foreground">{placeholder}</div> : null}
                 <EditorContent editor={editor} />

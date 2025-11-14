@@ -8,6 +8,24 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { itemVariants } from '@/utils/animations';
 import type { Product } from '@/types';
 
+const normalizeWhatsappNumber = (value?: string | null): string | null => {
+    if (!value) {
+        return null;
+    }
+
+    const digits = value.replace(/\D/g, '');
+
+    if (!digits) {
+        return null;
+    }
+
+    if (digits.startsWith('0')) {
+        return `62${digits.slice(1)}`;
+    }
+
+    return digits;
+};
+
 interface ProductCardProps {
     product: Product;
 }
@@ -77,8 +95,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
     const whatsappLink = useMemo(() => {
         const message = encodeURIComponent(`Halo Harmony Strategic Group, saya tertarik dengan produk ${product.name}.`);
-        return `https://wa.me/?text=${message}`;
-    }, [product.name]);
+        const normalized = normalizeWhatsappNumber(product.whatsapp_number);
+        const baseUrl = normalized ? `https://wa.me/${normalized}` : 'https://wa.me';
+        const separator = normalized ? '?' : '/?';
+
+        return `${baseUrl}${separator}text=${message}`;
+    }, [product.name, product.whatsapp_number]);
 
     const featurePreview = product.features?.slice(0, 3) ?? [];
 

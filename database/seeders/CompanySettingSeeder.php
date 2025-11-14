@@ -38,6 +38,8 @@ class CompanySettingSeeder extends Seeder
                     'phone' => '+62 21 555 8890',
                     'email' => 'hello@harmonygroup.id',
                     'whatsapp' => '+62 811 7788 990',
+                    'map_label' => 'Lokasi Kantor',
+                    'map_embed_url' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126915.123456789!2d106.700!3d-6.200',
                 ],
                 'group' => 'contact',
             ],

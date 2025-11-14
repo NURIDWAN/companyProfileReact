@@ -41,4 +41,11 @@ return [
         'secret' => env('RECAPTCHA_SECRET_KEY'),
     ],
 
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-2.0-flash'),
+        'endpoint' => env('GEMINI_API_ENDPOINT', 'https://generativelanguage.googleapis.com'),
+        'version' => env('GEMINI_API_VERSION', 'v1beta'),
+    ],
+
 ];

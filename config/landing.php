@@ -34,6 +34,16 @@ return [
             'flag' => '🇪🇸',
         ],
     ],
+    'home_sections' => [
+        'hero' => true,
+        'about' => true,
+        'services' => true,
+        'testimonials' => true,
+        'team' => true,
+        'articles' => true,
+        'final_cta' => true,
+        'metrics' => true,
+    ],
     'navigation' => [
         [
             'key' => 'home',
