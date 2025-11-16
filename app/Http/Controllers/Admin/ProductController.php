@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\GeminiRequest;
+use App\Jobs\ProcessGeminiRequest;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +32,41 @@ class ProductController extends Controller
     public function create(): Response
     {
         return Inertia::render('admin/products/Form');
+    }
+
+    public function enrich(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'category' => ['nullable', 'string', 'max:120'],
+            'price' => ['nullable', 'numeric', 'min:0'],
+            'features' => ['nullable', 'array'],
+            'features.*' => ['nullable', 'string', 'max:255'],
+            'target_market' => ['nullable', 'string', 'max:255'],
+            'tone' => ['nullable', 'string', 'max:255'],
+            'value_proposition' => ['nullable', 'string', 'max:255'],
+            'call_to_action' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $data['features'] = $this->cleanList(collect($data['features'] ?? []));
+
+        $model = config('services.gemini.model', 'gemini-2.0-flash');
+
+        $geminiRequest = GeminiRequest::create([
+            'user_id' => $request->user()?->id,
+            'type' => 'product',
+            'model' => $model,
+            'summary' => Str::limit($data['name'], 120),
+            'options' => $data,
+        ]);
+
+        ProcessGeminiRequest::dispatch($geminiRequest);
+
+        return response()->json([
+            'request_id' => $geminiRequest->uuid,
+            'status' => $geminiRequest->status,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -104,6 +142,15 @@ class ProductController extends Controller
             'thumbnail_file' => ['nullable', 'image', 'max:2048'],
             'excerpt' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'meta_title' => ['nullable', 'string', 'max:255'],
+            'meta_description' => ['nullable', 'string'],
+            'og_title' => ['nullable', 'string', 'max:255'],
+            'marketing_summary' => ['nullable', 'string'],
+            'marketing_highlights' => ['nullable', 'string'],
+            'faqs' => ['nullable', 'array'],
+            'faqs.*.question' => ['nullable', 'string', 'max:255'],
+            'faqs.*.answer' => ['nullable', 'string'],
+            'cta_variants' => ['nullable', 'string'],
             'category' => ['nullable', 'string', 'max:100'],
             'features' => ['nullable', 'string'],
             'price' => ['nullable', 'numeric', 'min:0'],
@@ -126,11 +173,16 @@ class ProductController extends Controller
             'is_active' => ['nullable'],
         ]);
 
-        $data['features'] = collect(preg_split('/\r?\n/', $request->input('features', '')))
-            ->map(fn ($line) => trim($line))
-            ->filter()
-            ->values()
-            ->all();
+        $data['marketing_summary'] = $request->filled('marketing_summary')
+            ? trim((string) $request->input('marketing_summary'))
+            : null;
+
+        $data['marketing_highlights'] = $this->normalizeLines($request->input('marketing_highlights'));
+
+        $data['faqs'] = $this->prepareFaqs(collect($request->input('faqs', [])));
+        $data['cta_variants'] = $this->normalizeLines($request->input('cta_variants'));
+
+        $data['features'] = $this->normalizeLines($request->input('features'));
 
         $data['price'] = $request->filled('price') ? (float) $request->input('price') : null;
         $data['clients'] = $request->filled('clients') ? (int) $request->input('clients') : null;
@@ -185,6 +237,57 @@ class ProductController extends Controller
         unset($data['cover_image_file'], $data['thumbnail_file'], $data['gallery_files']);
 
         return $data;
+    }
+
+    private function normalizeLines(?string $value): array
+    {
+        if (!$value) {
+            return [];
+        }
+
+        return $this->cleanList(collect(preg_split('/\r?\n/', $value)));
+    }
+
+    /**
+     * @param  Collection<int, mixed>  $items
+     * @return array<int, array{question: string, answer: string}>
+     */
+    private function prepareFaqs(Collection $items): array
+    {
+        return $items
+            ->map(function ($item) {
+                if (!is_array($item)) {
+                    return null;
+                }
+
+                $question = trim((string) ($item['question'] ?? ''));
+                $answer = trim((string) ($item['answer'] ?? ''));
+
+                if ($question === '' || $answer === '') {
+                    return null;
+                }
+
+                return [
+                    'question' => $question,
+                    'answer' => $answer,
+                ];
+            })
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  Collection<int, mixed>|array<int, mixed>  $items
+     * @return array<int, string>
+     */
+    private function cleanList(Collection|array $items): array
+    {
+        return collect($items)
+            ->map(fn ($item) => trim((string) $item))
+            ->filter()
+            ->values()
+            ->all();
     }
 
     private function prepareGallery(Collection $existing, Collection $files, ?Product $product): Collection

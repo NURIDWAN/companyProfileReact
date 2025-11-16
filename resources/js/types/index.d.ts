@@ -157,6 +157,13 @@ export interface Product {
     excerpt?: string | null;
     category?: Category | string | null;
     features?: string[];
+    marketing_summary?: string | null;
+    marketing_highlights?: string[];
+    faqs?: Array<{ question: string; answer: string }>;
+    meta_title?: string | null;
+    meta_description?: string | null;
+    og_title?: string | null;
+    cta_variants?: string[];
     rating?: number | null;
     clients?: number | null;
     popular?: boolean;

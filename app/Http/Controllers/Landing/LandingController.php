@@ -236,9 +236,12 @@ class LandingController extends Controller
             'product' => $productData,
             'relatedProducts' => $relatedProducts,
             'seo' => $this->seo('product_detail', [
-                'title' => $product->name,
-                'description' => $product->excerpt ?? Str::limit(strip_tags($product->description ?? ''), 150),
+                'title' => $product->meta_title ?? $product->name,
+                'description' => $product->meta_description
+                    ?? $product->excerpt
+                    ?? Str::limit(strip_tags($product->description ?? ''), 150),
                 'image' => $productData['cover_image'] ?? $productData['thumbnail'] ?? null,
+                'og_title' => $product->og_title ?? $product->meta_title ?? $product->name,
             ]),
         ]);
     }
@@ -306,8 +309,11 @@ class LandingController extends Controller
             'article' => $article,
             'relatedArticles' => $relatedArticles,
             'seo' => $this->seo('blog_detail', [
-                'title' => $blogPost->title,
-                'description' => $blogPost->excerpt ?? Str::limit(strip_tags($blogPost->body ?? ''), 150),
+                'title' => $blogPost->meta_title ?? $blogPost->title,
+                'description' => $blogPost->meta_description
+                    ?? $blogPost->excerpt
+                    ?? Str::limit(strip_tags($blogPost->body ?? ''), 150),
+                'og_title' => $blogPost->og_title ?? $blogPost->meta_title ?? $blogPost->title,
                 'image' => $article['cover_image'] ?? null,
             ]),
         ]);
@@ -822,8 +828,35 @@ class LandingController extends Controller
             'thumbnail' => $product->thumbnail_url ?? $this->imageUrl($product->thumbnail),
             'excerpt' => $this->translateIfNeeded($product->excerpt),
             'description' => $this->translateIfNeeded($product->description),
+            'meta_title' => $this->translateIfNeeded($product->meta_title),
+            'meta_description' => $this->translateIfNeeded($product->meta_description),
+            'og_title' => $this->translateIfNeeded($product->og_title),
             'category' => $this->translateIfNeeded($product->category),
             'features' => $this->translateList($features),
+            'marketing_summary' => $this->translateIfNeeded($product->marketing_summary),
+            'marketing_highlights' => $this->translateList($product->marketing_highlights ?? []),
+            'faqs' => collect($product->faqs ?? [])
+                ->map(function ($faq) {
+                    if (!is_array($faq)) {
+                        return null;
+                    }
+
+                    $question = $this->translateIfNeeded($faq['question'] ?? null);
+                    $answer = $this->translateIfNeeded($faq['answer'] ?? null);
+
+                    if (!$question || !$answer) {
+                        return null;
+                    }
+
+                    return [
+                        'question' => $question,
+                        'answer' => $answer,
+                    ];
+                })
+                ->filter()
+                ->values()
+                ->all(),
+            'cta_variants' => $this->translateList($product->cta_variants ?? []),
             'price' => $product->price,
             'price_range' => $priceRange,
             'clients' => $product->clients,
@@ -879,6 +912,10 @@ class LandingController extends Controller
             'cover_image' => $this->imageUrl($post->cover_image),
             'published_at' => optional($post->published_at ?? $post->created_at)->toIso8601String(),
             'author' => $post->author?->name,
+            'meta_title' => $this->translateIfNeeded($post->meta_title),
+            'meta_description' => $this->translateIfNeeded($post->meta_description),
+            'og_title' => $this->translateIfNeeded($post->og_title),
+            'cta_variants' => $this->translateList($post->cta_variants ?? []),
         ];
 
         if ($withBody) {

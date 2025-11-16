@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ProcessGeminiRequest;
 use App\Models\BlogPost;
+use App\Models\GeminiRequest;
 use App\Models\User;
-use App\Services\GeminiBlogGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +23,7 @@ use Inertia\Response;
 
 class BlogPostController extends Controller
 {
-    public function generate(Request $request, GeminiBlogGenerator $generator): JsonResponse
+    public function generate(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'topic' => ['required', 'string', 'max:255'],
@@ -31,21 +32,25 @@ class BlogPostController extends Controller
             'keywords' => ['nullable', 'string', 'max:500'],
             'call_to_action' => ['nullable', 'string', 'max:255'],
             'word_count' => ['nullable', 'integer', 'min:300', 'max:1500'],
+            'preset' => ['nullable', 'string', 'max:120'],
         ]);
 
-        try {
-            $result = $generator->generate($validated);
-        } catch (Throwable $e) {
-            Log::error('Gagal generate artikel dengan Gemini', [
-                'message' => $e->getMessage(),
-            ]);
+        $model = config('services.gemini.model', 'gemini-2.0-flash');
 
-            return response()->json([
-                'message' => 'Gagal menghubungi layanan Gemini. Periksa API key atau coba ulang beberapa saat lagi.',
-            ], 422);
-        }
+        $geminiRequest = GeminiRequest::create([
+            'user_id' => $request->user()?->id,
+            'type' => 'blog',
+            'model' => $model,
+            'summary' => Str::limit($validated['topic'], 120),
+            'options' => $validated,
+        ]);
 
-        return response()->json($result);
+        ProcessGeminiRequest::dispatch($geminiRequest);
+
+        return response()->json([
+            'request_id' => $geminiRequest->uuid,
+            'status' => $geminiRequest->status,
+        ]);
     }
 
     public function uploadImage(Request $request): JsonResponse
@@ -147,6 +152,10 @@ class BlogPostController extends Controller
             ],
             'excerpt' => ['nullable', 'string', 'max:255'],
             'body' => ['nullable', 'string'],
+            'meta_title' => ['nullable', 'string', 'max:255'],
+            'meta_description' => ['nullable', 'string'],
+            'og_title' => ['nullable', 'string', 'max:255'],
+            'cta_variants' => ['nullable', 'string'],
             'cover_image' => ['nullable', 'string', 'max:255'],
             'cover_image_file' => ['nullable', 'image', 'max:4096'],
             'is_published' => ['nullable'],
@@ -183,6 +192,8 @@ class BlogPostController extends Controller
 
         unset($data['cover_image_file']);
 
+        $data['cta_variants'] = $this->normalizeLines($request->input('cta_variants'));
+
         return $data;
     }
 
@@ -192,5 +203,18 @@ class BlogPostController extends Controller
             ->select('id', 'name')
             ->orderBy('name')
             ->get();
+    }
+
+    private function normalizeLines(?string $value): array
+    {
+        if (!$value) {
+            return [];
+        }
+
+        return collect(preg_split('/\r?\n/', $value))
+            ->map(fn ($line) => trim($line))
+            ->filter()
+            ->values()
+            ->all();
     }
 }

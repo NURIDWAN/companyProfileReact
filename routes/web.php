@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\LandingContentController;
 use App\Http\Controllers\Admin\JobApplicationController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\GeminiRequestController;
 use App\Http\Controllers\Landing\LandingController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -95,6 +96,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->except(['show'])
             ->middleware('can:manage-users');
         Route::resource('services', ServiceController::class);
+        Route::get('gemini-requests/{geminiRequest:uuid}', [GeminiRequestController::class, 'show'])->name('gemini-requests.show');
+        Route::get('gemini/status', [GeminiRequestController::class, 'health'])->name('gemini.status');
+        Route::post('products/enrich', [ProductController::class, 'enrich'])->name('products.enrich');
         Route::resource('products', ProductController::class);
         Route::resource('projects', ProjectController::class);
         Route::resource('job-positions', JobPositionController::class);

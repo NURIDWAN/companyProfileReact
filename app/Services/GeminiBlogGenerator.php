@@ -84,13 +84,17 @@ class GeminiBlogGenerator
             'slug' => $slug,
             'excerpt' => $excerpt,
             'body' => $body,
+            'meta_title' => trim((string) Arr::get($decoded, 'meta_title', '')),
+            'meta_description' => trim((string) Arr::get($decoded, 'meta_description', '')),
+            'og_title' => trim((string) Arr::get($decoded, 'og_title', '')),
             'outline' => $this->normalizeArray(Arr::get($decoded, 'outline')),
             'keywords' => $this->normalizeArray(Arr::get($decoded, 'keywords')),
+            'cta_variants' => $this->normalizeArray(Arr::get($decoded, 'cta_variants')),
         ];
     }
 
     /**
-     * @param  array{topic?: string, tone?: string|null, keywords?: string|null, call_to_action?: string|null, audience?: string|null, word_count?: int|null}  $options
+     * @param  array{topic?: string, tone?: string|null, keywords?: string|null, call_to_action?: string|null, audience?: string|null, word_count?: int|null, preset?: string|null}  $options
      */
     private function buildPrompt(array $options): string
     {
@@ -101,10 +105,13 @@ class GeminiBlogGenerator
         $wordCount = (int) ($options['word_count'] ?? 650);
         $wordCount = max(300, min(1500, $wordCount));
         $keywords = $this->normalizeKeywords($options['keywords'] ?? null);
+        $preset = trim((string) ($options['preset'] ?? ''));
 
         $keywordBlock = $keywords
             ? "Gunakan kata kunci berikut secara alami: {$keywords}."
             : 'Prioritaskan kata kunci relevan terkait solusi digital agency, software house, dan transformasi digital.';
+
+        $presetInstruction = $this->presetInstruction($preset);
 
         return <<<PROMPT
 Kamu adalah copywriter senior di perusahaan layanan teknologi end-to-end (web, mobile, ERP, dan konsultasi produk digital) yang berbasis di Indonesia.
@@ -116,6 +123,7 @@ Ekspektasi konten:
 - Struktur harus memiliki judul utama, paragraf pembuka, beberapa subjudul H2/H3, bullet list (jika relevan), dan penutup dengan CTA "{$cta}".
 - {$keywordBlock}
 - Soroti keunggulan layanan kustom software development, kolaborasi jangka panjang, serta dukungan konsultasi strategis.
+- {$presetInstruction}
 
 Output-kan data DALAM FORMAT JSON dengan struktur:
 {
@@ -123,6 +131,10 @@ Output-kan data DALAM FORMAT JSON dengan struktur:
   "slug": "slug-seo-friendly",
   "excerpt": "Ringkasan 1-2 kalimat",
   "body_html": "<p>Konten lengkap dalam HTML dengan <h2>, <h3>, <p>, <ul>, <ol> sesuai kebutuhan</p>",
+  "meta_title": "Judul SEO maksimal 60 karakter",
+  "meta_description": "Meta description 140-160 karakter",
+  "og_title": "Judul pendek untuk Open Graph",
+  "cta_variants": ["CTA 1", "CTA 2"],
   "outline": ["Bagian 1", "Bagian 2", "..."],
   "keywords": ["keyword 1", "keyword 2", "..."]
 }
@@ -210,5 +222,15 @@ PROMPT;
         ));
 
         return implode(', ', $items);
+    }
+
+    private function presetInstruction(?string $preset): string
+    {
+        return match ($preset) {
+            'friendly-startup' => 'Gunakan gaya hangat dan optimistis layaknya startup SaaS yang dekat dengan klien.',
+            'enterprise' => 'Gunakan bahasa formal dengan penekanan pada mitigasi risiko dan ROI tingkat enterprise.',
+            'public-sector' => 'Tegaskan komitmen pada transparansi, kepatuhan regulasi, dan dampak sosial untuk sektor publik.',
+            default => 'Gunakan gaya profesional yang persuasif tanpa melebih-lebihkan klaim.',
+        };
     }
 }

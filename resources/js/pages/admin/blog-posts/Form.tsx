@@ -6,9 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import AppLayout from "@/layouts/app-layout";
 import { Head, Link, useForm } from "@inertiajs/react";
-import { FormEventHandler, useEffect, useMemo, useState } from "react";
+import { FormEventHandler, useCallback, useEffect, useMemo, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { RichTextEditor } from "@/components/RichTextEditor";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type BlogPost = {
     id: number;
@@ -21,6 +23,10 @@ type BlogPost = {
     is_published: boolean;
     published_at?: string | null;
     author_id?: number | null;
+    meta_title?: string | null;
+    meta_description?: string | null;
+    og_title?: string | null;
+    cta_variants?: string[] | null;
 };
 
 type AiFormState = {
@@ -30,6 +36,7 @@ type AiFormState = {
     keywords: string;
     call_to_action: string;
     word_count: string;
+    preset: string;
 };
 
 type GenerationPayload = {
@@ -39,12 +46,50 @@ type GenerationPayload = {
     body?: string;
     outline?: string[];
     keywords?: string[];
+    meta_title?: string;
+    meta_description?: string;
+    og_title?: string;
+    cta_variants?: string[];
 };
 
 type GenerationMeta = {
     outline: string[];
     keywords: string[];
 };
+
+const blogPresets: Array<{
+    id: string;
+    label: string;
+    tone: string;
+    audience: string;
+    call_to_action: string;
+    description: string;
+}> = [
+    {
+        id: "friendly-startup",
+        label: "Friendly Startup",
+        tone: "hangat, optimistis, penuh energi",
+        audience: "founder startup dan pemilik bisnis digital",
+        call_to_action: "Diskusikan ide Anda dengan tim kami",
+        description: "Cocok untuk artikel ringan dan menginspirasi dengan sentuhan storytelling.",
+    },
+    {
+        id: "enterprise",
+        label: "Enterprise & Korporasi",
+        tone: "formal, strategis, fokus ROI",
+        audience: "C-level dan direktur perusahaan enterprise",
+        call_to_action: "Jadwalkan sesi konsultasi strategis",
+        description: "Tekankan mitigasi risiko dan dampak bisnis terukur.",
+    },
+    {
+        id: "public-sector",
+        label: "Sektor Publik",
+        tone: "profesional, mengedepankan kepatuhan",
+        audience: "pejabat pemda/BUMN",
+        call_to_action: "Pelajari cara kami mendampingi instansi Anda",
+        description: "Soroti transparansi, keberlanjutan, dan manfaat sosial.",
+    },
+];
 
 interface Props {
     post?: BlogPost;
@@ -63,6 +108,10 @@ export default function BlogPostForm({ post, users = [] }: Props) {
         cover_image_file: undefined as File | undefined,
         is_published: post?.is_published ?? false,
         published_at: post?.published_at?.slice(0, 16) ?? "",
+        meta_title: post?.meta_title ?? "",
+        meta_description: post?.meta_description ?? "",
+        og_title: post?.og_title ?? "",
+        cta_variants: post?.cta_variants?.length ? post.cta_variants.join("\n") : "",
     });
 
     const defaultAiForm = useMemo<AiFormState>(
@@ -73,6 +122,7 @@ export default function BlogPostForm({ post, users = [] }: Props) {
             keywords: "",
             call_to_action: "Jadwalkan konsultasi dengan tim kami",
             word_count: "700",
+            preset: "friendly-startup",
         }),
         [post],
     );
@@ -82,6 +132,10 @@ export default function BlogPostForm({ post, users = [] }: Props) {
     const [aiError, setAiError] = useState<string | null>(null);
     const [aiSuccess, setAiSuccess] = useState<string | null>(null);
     const [aiLoading, setAiLoading] = useState(false);
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [selectedPreset, setSelectedPreset] = useState(defaultAiForm.preset);
+    const [geminiStatus, setGeminiStatus] = useState<{ status: string; message?: string } | null>(null);
+    const [pollingId, setPollingId] = useState<string | null>(null);
 
     const { data, setData, processing, errors } = form;
     const generalError = (errors as typeof errors & { general?: string }).general;
@@ -92,9 +146,31 @@ export default function BlogPostForm({ post, users = [] }: Props) {
 
     useEffect(() => {
         setAiForm({ ...defaultAiForm });
+        setSelectedPreset(defaultAiForm.preset);
     }, [defaultAiForm]);
 
-    const applyGeneration = (payload: GenerationPayload) => {
+    useEffect(() => {
+        const fetchStatus = async () => {
+            try {
+                const response = await fetch(route("admin.gemini.status"), {
+                    headers: {
+                        Accept: "application/json",
+                    },
+                });
+
+                if (response.ok) {
+                    const payload = (await response.json()) as { status: string; message?: string };
+                    setGeminiStatus(payload);
+                }
+            } catch (error) {
+                console.warn("Gemini status unavailable", error);
+            }
+        };
+
+        fetchStatus();
+    }, []);
+
+    const applyGeneration = useCallback((payload: GenerationPayload) => {
         if (payload.title) {
             setData("title", payload.title);
         }
@@ -111,13 +187,66 @@ export default function BlogPostForm({ post, users = [] }: Props) {
             setData("body", payload.body);
         }
 
+        if (payload.meta_title) {
+            setData("meta_title", payload.meta_title);
+        }
+
+        if (payload.meta_description) {
+            setData("meta_description", payload.meta_description);
+        }
+
+        if (payload.og_title) {
+            setData("og_title", payload.og_title);
+        }
+
+        if (payload.cta_variants?.length) {
+            setData("cta_variants", payload.cta_variants.join("\n"));
+        }
+
         setAiMeta({
             outline: payload.outline ?? [],
             keywords: payload.keywords ?? [],
         });
 
         setAiSuccess("Konten berhasil diisikan dari Gemini. Pastikan untuk meninjaunya sebelum disimpan.");
-    };
+    }, [setData]);
+
+    const pollGeminiRequest = useCallback((requestId: string) => {
+        const poll = async () => {
+            try {
+                const response = await fetch(route("admin.gemini-requests.show", requestId), {
+                    headers: {
+                        Accept: "application/json",
+                    },
+                });
+
+                const payload = (await response.json()) as {
+                    status: string;
+                    result?: GenerationPayload;
+                    error_message?: string;
+                };
+
+                if (payload.status === "completed" && payload.result) {
+                    applyGeneration(payload.result);
+                    setAiLoading(false);
+                    setPollingId(null);
+                } else if (payload.status === "failed") {
+                    setAiError(payload.error_message ?? "Permintaan Gemini gagal diproses.");
+                    setAiLoading(false);
+                    setPollingId(null);
+                } else {
+                    setTimeout(poll, 1500);
+                }
+            } catch (error) {
+                console.error(error);
+                setAiError("Gagal memeriksa status permintaan Gemini.");
+                setAiLoading(false);
+                setPollingId(null);
+            }
+        };
+
+        poll();
+    }, [applyGeneration]);
 
     const handleGenerate = async () => {
         if (!aiForm.topic.trim()) {
@@ -145,36 +274,46 @@ export default function BlogPostForm({ post, users = [] }: Props) {
                 body: JSON.stringify(requestBody),
             });
 
-            let payload: (GenerationPayload & { message?: string }) | null = null;
+            const payload = (await response.json()) as { request_id?: string; message?: string };
 
-            try {
-                payload = (await response.json()) as GenerationPayload & { message?: string };
-            } catch (error) {
-                console.error(error);
+            if (!response.ok || !payload?.request_id) {
+                throw new Error(payload?.message ?? "Gagal mengantrekan permintaan ke Gemini.");
             }
 
-            if (!response.ok || !payload) {
-                throw new Error(payload?.message ?? "Gagal menghasilkan konten dari Gemini.");
-            }
-
-            applyGeneration(payload);
+            setPollingId(payload.request_id);
+            pollGeminiRequest(payload.request_id);
         } catch (error) {
             console.error(error);
             setAiError(error instanceof Error ? error.message : "Terjadi kesalahan saat menghubungi Gemini.");
-        } finally {
             setAiLoading(false);
         }
     };
 
     const handleResetGenerator = () => {
         setAiForm({ ...defaultAiForm });
+        setSelectedPreset(defaultAiForm.preset);
         setAiMeta({ outline: [], keywords: [] });
         setAiError(null);
         setAiSuccess(null);
+        setPollingId(null);
+        setAiLoading(false);
     };
 
     const updateAiForm = <K extends keyof AiFormState>(field: K, value: AiFormState[K]) => {
         setAiForm((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handlePresetChange = (value: string) => {
+        setSelectedPreset(value);
+        const preset = blogPresets.find((item) => item.id === value);
+
+        setAiForm((prev) => ({
+            ...prev,
+            preset: value,
+            tone: preset?.tone ?? prev.tone,
+            audience: preset?.audience ?? prev.audience,
+            call_to_action: preset?.call_to_action ?? prev.call_to_action,
+        }));
     };
 
     const submit: FormEventHandler<HTMLFormElement> = (event) => {
@@ -199,14 +338,20 @@ export default function BlogPostForm({ post, users = [] }: Props) {
         });
     };
 
+    const presetInfo = blogPresets.find((preset) => preset.id === selectedPreset);
+    const requestButtonLabel = aiLoading ? (pollingId ? "Memproses..." : "Meminta Gemini...") : "Generate via Gemini";
+
     return (
         <AppLayout>
             <Head title={title} />
             <div className="space-y-6 p-4">
-                <div className="mb-2">
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
                     <Link href={route("admin.blog-posts.index")} className="text-sm text-muted-foreground hover:text-foreground">
                         &larr; Kembali ke daftar artikel
                     </Link>
+                    <Button type="button" variant="outline" onClick={() => setPreviewOpen(true)}>
+                        Preview
+                    </Button>
                 </div>
                 <Card>
                     <CardHeader>
@@ -216,6 +361,31 @@ export default function BlogPostForm({ post, users = [] }: Props) {
                         </p>
                     </CardHeader>
                     <CardContent className="grid gap-4 md:grid-cols-2">
+                        {geminiStatus?.status === "error" && (
+                            <div className="md:col-span-2">
+                                <Alert variant="destructive">
+                                    <AlertDescription>
+                                        Gemini tidak dapat diakses saat ini. {geminiStatus.message ?? "Periksa API key atau kuota terlebih dahulu."}
+                                    </AlertDescription>
+                                </Alert>
+                            </div>
+                        )}
+                        <div className="grid gap-2">
+                            <Label>Preset Nada & Audiens</Label>
+                            <Select value={selectedPreset} onValueChange={handlePresetChange}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Pilih preset" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {blogPresets.map((preset) => (
+                                        <SelectItem key={preset.id} value={preset.id}>
+                                            {preset.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">{presetInfo?.description ?? "Sesuaikan nada secara manual jika diperlukan."}</p>
+                        </div>
                         <div className="md:col-span-2 grid gap-2">
                             <Label htmlFor="ai-topic">Topik Utama</Label>
                             <Input
@@ -306,11 +476,12 @@ export default function BlogPostForm({ post, users = [] }: Props) {
                     <CardFooter className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                         <div className="space-y-1 text-sm">
                             {aiError && <p className="text-rose-500">{aiError}</p>}
-                            {aiSuccess && <p className="text-emerald-600 dark:text-emerald-400">{aiSuccess}</p>}
-                            {!aiError && !aiSuccess && (
-                                <p className="text-xs text-muted-foreground">
-                                    Hasil Gemini akan langsung mengisi form artikel di bawah ini.
-                                </p>
+                            {!aiError && aiSuccess && <p className="text-emerald-600 dark:text-emerald-400">{aiSuccess}</p>}
+                            {!aiError && !aiSuccess && pollingId && (
+                                <p className="text-xs text-muted-foreground">Permintaan sedang diproses di antrean Gemini...</p>
+                            )}
+                            {!aiError && !aiSuccess && !pollingId && (
+                                <p className="text-xs text-muted-foreground">Hasil Gemini akan langsung mengisi form artikel di bawah ini.</p>
                             )}
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -318,7 +489,7 @@ export default function BlogPostForm({ post, users = [] }: Props) {
                                 Reset
                             </Button>
                             <Button type="button" onClick={handleGenerate} disabled={aiLoading}>
-                                {aiLoading ? "Meminta Gemini..." : "Generate via Gemini"}
+                                {requestButtonLabel}
                             </Button>
                         </div>
                     </CardFooter>
@@ -390,6 +561,50 @@ export default function BlogPostForm({ post, users = [] }: Props) {
                                 />
                                 {errors.body && <p className="text-xs text-rose-500">{errors.body}</p>}
                             </div>
+                            <div className="space-y-4 rounded-lg border border-dashed border-muted p-4">
+                                <div>
+                                    <p className="text-sm font-medium text-foreground">SEO & CTA Otomatis</p>
+                                    <p className="text-xs text-muted-foreground">Gemini mengisi bagian ini, namun Anda tetap dapat menyesuaikannya.</p>
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="meta_title">Meta Title</Label>
+                                    <Input
+                                        id="meta_title"
+                                        value={data.meta_title ?? ""}
+                                        onChange={(event) => setData("meta_title", event.target.value)}
+                                    />
+                                    {errors.meta_title && <p className="text-xs text-rose-500">{errors.meta_title}</p>}
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="meta_description">Meta Description</Label>
+                                    <Textarea
+                                        id="meta_description"
+                                        className="min-h-[100px]"
+                                        value={data.meta_description ?? ""}
+                                        onChange={(event) => setData("meta_description", event.target.value)}
+                                    />
+                                    {errors.meta_description && <p className="text-xs text-rose-500">{errors.meta_description}</p>}
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="og_title">OG Title</Label>
+                                    <Input
+                                        id="og_title"
+                                        value={data.og_title ?? ""}
+                                        onChange={(event) => setData("og_title", event.target.value)}
+                                    />
+                                    {errors.og_title && <p className="text-xs text-rose-500">{errors.og_title}</p>}
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="cta_variants">CTA Variants (pisahkan dengan enter)</Label>
+                                    <Textarea
+                                        id="cta_variants"
+                                        className="min-h-[80px]"
+                                        value={data.cta_variants ?? ""}
+                                        onChange={(event) => setData("cta_variants", event.target.value)}
+                                    />
+                                    {errors.cta_variants && <p className="text-xs text-rose-500">{errors.cta_variants}</p>}
+                                </div>
+                            </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="cover_image_file">Cover Image</Label>
                                 <Input
@@ -449,6 +664,44 @@ export default function BlogPostForm({ post, users = [] }: Props) {
                     </Card>
                 </form>
             </div>
+            <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+                <DialogContent className="max-w-4xl">
+                    <DialogHeader>
+                        <DialogTitle>Preview Artikel</DialogTitle>
+                    </DialogHeader>
+                    <div className="max-h-[70vh] overflow-y-auto space-y-4">
+                        <div>
+                            <p className="text-sm text-muted-foreground">
+                                Pratinjau ini menggunakan data yang belum disimpan untuk membantu proses kurasi.
+                            </p>
+                        </div>
+                        <div className="space-y-3 rounded-2xl border bg-white/50 p-4 dark:border-white/10 dark:bg-slate-900/40">
+                            <span className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-500">Blog Preview</span>
+                            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">{data.title || "Judul artikel"}</h2>
+                            <p className="text-muted-foreground">{data.excerpt || "Ringkasan artikel akan tampil di sini."}</p>
+                            <div className="prose max-w-none rounded-xl border bg-background/50 p-4 dark:prose-invert dark:border-white/5">
+                                <div
+                                    dangerouslySetInnerHTML={{
+                                        __html: data.body && data.body.trim().length > 0 ? data.body : "<p>Konten artikel akan muncul di sini.</p>",
+                                    }}
+                                />
+                            </div>
+                            {data.cta_variants && data.cta_variants.trim().length > 0 && (
+                                <div>
+                                    <p className="text-sm font-medium text-foreground">CTA Variants</p>
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                        {data.cta_variants.split(/\r?\n/).filter(Boolean).map((cta) => (
+                                            <span key={cta} className="rounded-full border border-blue-200 px-3 py-1 text-xs text-blue-600 dark:border-blue-500/40 dark:text-blue-200">
+                                                {cta}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }

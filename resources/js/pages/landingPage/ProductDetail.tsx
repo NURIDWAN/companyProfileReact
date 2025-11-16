@@ -81,6 +81,12 @@ export default function ProductDetailPage() {
 
     const defaultDescription = 'Solusi siap pakai untuk mendukung peningkatan operasi dan layanan bisnis Anda.';
     const descriptionHtml = sanitizeRichText(product.description) || sanitizeRichText(`<p>${defaultDescription}</p>`);
+    const marketingSummaryHtml = sanitizeRichText(product.marketing_summary);
+    const marketingHighlights = product.marketing_highlights ?? [];
+    const faqEntries = product.faqs ?? [];
+    const ctaVariants = product.cta_variants ?? [];
+    const primaryCtaLabel = ctaVariants[0] ?? 'Hubungi Sales';
+    const secondaryCtas = ctaVariants.slice(1);
 
     return (
         <LandingPageLayout>
@@ -124,7 +130,7 @@ export default function ProductDetailPage() {
                                     </a>
                                 </Button>
                                 <Button size="lg" variant="outline" className="border-blue-200 text-blue-600" asChild>
-                                    <Link href="/contact">Hubungi Sales</Link>
+                                    <Link href="/contact">{primaryCtaLabel}</Link>
                                 </Button>
                                 {purchaseUrl && (
                                     <Button
@@ -151,7 +157,39 @@ export default function ProductDetailPage() {
                                     ))}
                                 </div>
                             )}
+                            {secondaryCtas.length > 0 && (
+                                <div className="flex flex-wrap gap-2">
+                                    {secondaryCtas.map((cta) => (
+                                        <span key={cta} className="rounded-full border border-blue-100 px-3 py-1 text-xs font-semibold text-blue-600">
+                                            {cta}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
                         </div>
+
+                        {(marketingSummaryHtml || marketingHighlights.length > 0) && (
+                            <Card className="border-blue-100 bg-blue-50/70 dark:border-blue-900/40 dark:bg-blue-950/30">
+                                <CardContent className="space-y-4 p-5">
+                                    <div className="space-y-1">
+                                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">Insight AI</p>
+                                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Ringkasan Solusi</h3>
+                                    </div>
+                                    {marketingSummaryHtml && (
+                                        <div className="richtext-view text-sm text-gray-700 dark:text-gray-200">
+                                            <div dangerouslySetInnerHTML={{ __html: marketingSummaryHtml }} />
+                                        </div>
+                                    )}
+                                    {marketingHighlights.length > 0 && (
+                                        <ul className="list-disc space-y-1 pl-5 text-sm text-gray-800 dark:text-gray-200">
+                                            {marketingHighlights.map((item) => (
+                                                <li key={item}>{item}</li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        )}
 
                         {variants.length > 0 && (
                             <Card>
@@ -248,6 +286,29 @@ export default function ProductDetailPage() {
                         </div>
                     </CardContent>
                 </Card>
+
+                {faqEntries.length > 0 && (
+                    <Card>
+                        <CardContent className="space-y-5 p-6">
+                            <h2 className="text-2xl font-semibold text-gray-900">Pertanyaan Umum</h2>
+                            <div className="space-y-4">
+                                {faqEntries.map((faq, index) => {
+                                    const answerHtml = sanitizeRichText(faq.answer);
+                                    return (
+                                        <div key={`${faq.question}-${index}`} className="rounded-2xl border border-slate-100 p-4 dark:border-white/10">
+                                            <p className="text-base font-semibold text-gray-900 dark:text-white">{faq.question}</p>
+                                            {answerHtml && (
+                                                <div className="richtext-view mt-2 text-sm text-gray-600 dark:text-gray-300">
+                                                    <div dangerouslySetInnerHTML={{ __html: answerHtml }} />
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
 
                 {relatedProducts.length > 0 && (
                     <div className="space-y-4">
