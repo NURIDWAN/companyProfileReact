@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/ui/landingPageComponent/product/productCard';
 import type { Product } from '@/types';
+import { sanitizeRichText } from '@/utils/sanitize-html';
 
 const normalizeWhatsappNumber = (value?: string | null): string | null => {
     if (!value) {
@@ -78,6 +79,9 @@ export default function ProductDetailPage() {
         return `${baseUrl}${separator}text=${message}`;
     }, [product.name, product.whatsapp_number]);
 
+    const defaultDescription = 'Solusi siap pakai untuk mendukung peningkatan operasi dan layanan bisnis Anda.';
+    const descriptionHtml = sanitizeRichText(product.description) || sanitizeRichText(`<p>${defaultDescription}</p>`);
+
     return (
         <LandingPageLayout>
             <div className="mx-auto max-w-6xl space-y-10 p-6">
@@ -85,9 +89,9 @@ export default function ProductDetailPage() {
                     <div className="space-y-4">
                         <p className="text-sm uppercase text-blue-600">Produk Digital</p>
                         <h1 className="text-4xl font-bold text-gray-900">{product.name}</h1>
-                        <p className="text-lg text-gray-600">
-                            {product.description ?? 'Solusi siap pakai untuk mendukung peningkatan operasi dan layanan bisnis Anda.'}
-                        </p>
+                        <div className="richtext-view text-lg text-gray-600 dark:text-gray-300">
+                            <div dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
+                        </div>
                         <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                             <span className="flex items-center gap-2">
                                 <Users className="h-4 w-4" />

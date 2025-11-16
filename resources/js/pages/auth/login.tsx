@@ -6,17 +6,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RecaptchaField, type RecaptchaFieldHandle } from '@/components/RecaptchaField';
 import AuthSplitLayout from '@/layouts/auth/auth-split-layout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { LoaderCircle, Lock, ShieldCheck, Sparkles } from 'lucide-react';
 import { FormEventHandler, useCallback, useRef } from 'react';
+import type { CompanyContactsInfo, SharedData } from '@/types';
 
 interface LoginProps {
     status?: string;
 }
 
-const recaptchaEnabled = import.meta.env.VITE_RECAPTCHA_ENABLED !== 'false';
-const supportEmail = 'hello@harmonygroup.id';
+type LoginPageProps = SharedData & {
+    settings?: Record<string, unknown>;
+};
 
+const recaptchaEnabled = import.meta.env.VITE_RECAPTCHA_ENABLED !== 'false';
 const highlights = [
     {
         title: 'Keamanan Berlapis',
@@ -36,6 +39,18 @@ const highlights = [
 ];
 
 export default function Login({ status }: LoginProps) {
+    const { settings, branding, name: appName, companyContacts } = usePage<LoginPageProps>().props;
+    const defaultCompanyName = 'Harmony Strategic Group';
+    const defaultTagline = 'Portal internal untuk tim inti Harmony.';
+    const companyName =
+        (settings?.['company.name'] as string | undefined) ?? branding?.name ?? appName ?? defaultCompanyName;
+    const companyTagline =
+        (settings?.['company.tagline'] as string | undefined) ?? branding?.tagline ?? defaultTagline;
+    const consoleLabel = companyName.toLowerCase().includes('console') ? companyName : `${companyName} Console`;
+    const contactsSetting =
+        (settings?.['company.contacts'] as CompanyContactsInfo | undefined) ?? (companyContacts as CompanyContactsInfo | undefined);
+    const supportEmail = contactsSetting?.email ?? 'hello@harmonygroup.id';
+
     const recaptchaRef = useRef<RecaptchaFieldHandle>(null);
     const { data, setData, post, processing, errors, setError } = useForm({
         email: '',
@@ -67,7 +82,7 @@ export default function Login({ status }: LoginProps) {
     );
 
     return (
-        <AuthSplitLayout title="Harmony Strategic Group" description="Portal internal untuk tim inti Harmony.">
+        <AuthSplitLayout title={companyName} description={companyTagline}>
             <Head title="Log in" />
 
             <div className="space-y-8 rounded-[28px] border border-white/70 bg-white/90 p-8 shadow-[0_20px_80px_rgba(15,23,42,0.15)] dark:border-white/10 dark:bg-slate-900/80">
@@ -76,7 +91,7 @@ export default function Login({ status }: LoginProps) {
                         Portal Admin
                     </Badge>
                     <div>
-                        <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Masuk ke Harmony Console</h2>
+                        <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Masuk ke {consoleLabel}</h2>
                         <p className="mt-1 text-sm text-muted-foreground">
                             Kredensial akun dibagikan oleh tim IT. Gunakan perangkat terpercaya untuk menjaga keamanan data.
                         </p>

@@ -1,6 +1,6 @@
 import AppLogoIcon from '@/components/app-logo-icon';
 import { type SharedData } from '@/types';
-import { Link, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 
 interface AuthLayoutProps {
@@ -10,6 +10,11 @@ interface AuthLayoutProps {
 
 export default function AuthSplitLayout({ children, title, description }: PropsWithChildren<AuthLayoutProps>) {
     const { name, quote } = usePage<SharedData>().props;
+    const headingTitle = title ?? name;
+    const portalLabel = headingTitle?.toLowerCase().includes('console')
+        ? headingTitle
+        : `${headingTitle ?? 'Portal'} Console`;
+    const descriptionText = description ?? 'Portal internal untuk tim inti Anda.';
 
     return (
         <div className="flex min-h-dvh flex-col lg:flex-row">
@@ -46,9 +51,9 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
             <div className="flex w-full flex-1 items-center justify-center bg-[#f7f7f5] px-6 py-10 sm:px-10 lg:px-16">
                 <div className="w-full max-w-lg space-y-6">
                     <div className="space-y-1 text-left">
-                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Harmony Console</p>
-                        <h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
-                        <p className="text-sm text-muted-foreground">{description}</p>
+                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">{portalLabel}</p>
+                        <h1 className="text-2xl font-semibold text-slate-900">{headingTitle}</h1>
+                        <p className="text-sm text-muted-foreground">{descriptionText}</p>
                     </div>
                     {children}
                 </div>
