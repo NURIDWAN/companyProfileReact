@@ -6,6 +6,7 @@ import { Calendar, ArrowLeft, User } from 'lucide-react';
 import LandingPageLayout from '@/layouts/landingPage-layouts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { sanitizeRichText } from '@/utils/sanitize-html';
 
 interface ArticleItem {
     id: number;
@@ -41,6 +42,9 @@ export default function BlogDetailPage() {
         return matches;
     }, [article.body]);
 
+    const sanitizedBody =
+        sanitizeRichText(article.body) || sanitizeRichText('<p>Konten akan segera tersedia.</p>');
+
     return (
         <LandingPageLayout>
             <div className="mx-auto max-w-4xl space-y-10 p-6">
@@ -67,8 +71,8 @@ export default function BlogDetailPage() {
 
                 <img src={cover} alt={article.title} className="w-full rounded-2xl object-cover shadow-lg" />
 
-                <article className="prose prose-lg max-w-none dark:prose-invert prose-img:rounded-2xl prose-img:shadow-lg prose-img:w-full">
-                    <div dangerouslySetInnerHTML={{ __html: article.body ?? '<p>Konten akan segera tersedia.</p>' }} />
+                <article className="richtext-view prose prose-lg max-w-none dark:prose-invert prose-img:rounded-2xl prose-img:shadow-lg prose-img:w-full">
+                    <div dangerouslySetInnerHTML={{ __html: sanitizedBody }} />
                 </article>
 
                 {inlineImages.length > 0 && (
