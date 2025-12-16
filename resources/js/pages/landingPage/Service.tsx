@@ -788,12 +788,22 @@ export default function ServicesPage() {
         <LandingPageLayout>
             <ServicesHeroSection hero={heroContent} />
             <TrustedBySection />
-            <DynamicServicesSummary services={services} copy={summaryCopy} />
-            <ServiceHighlightsSection />
-            <OurServicesSection copy={offeringsCopy} items={highlightItems} />
-            <TechStackSection data={techStackData} />
+            <div id="pendampingan-akreditasi">
+                <DynamicServicesSummary services={services} copy={summaryCopy} />
+            </div>
+            <div id="permohonan-data">
+                <ServiceHighlightsSection />
+            </div>
+            <div id="konsultasi-mutu">
+                <OurServicesSection copy={offeringsCopy} items={highlightItems} />
+            </div>
+            <div id="pengaduan">
+                <TechStackSection data={techStackData} />
+            </div>
             <OurProcessSection data={processData} />
-            <WhyChooseUsSection data={advantagesData} />
+            <div id="kritik-saran">
+                <WhyChooseUsSection data={advantagesData} />
+            </div>
             <FaqSection data={faqData} />
         </LandingPageLayout>
     );

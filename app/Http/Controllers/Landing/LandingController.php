@@ -15,6 +15,7 @@ use App\Models\Project;
 use App\Models\Service;
 use App\Models\TeamMember;
 use App\Models\Testimonial;
+use App\Models\Page;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Notification;
@@ -33,10 +34,42 @@ class LandingController extends Controller
         $this->defaultLanguage = config('landing.default_language', config('app.locale'));
     }
 
+    private function pageSectionData(string $pageSlug, string $type): ?array
+    {
+        $page = Page::query()
+            ->where('slug', $pageSlug)
+            ->with(['sections' => function ($q) {
+                $q->where('is_active', true)->orderBy('display_order');
+            }])
+            ->first();
+
+        if (!$page) {
+            return null;
+        }
+
+        foreach ($page->sections as $section) {
+            if (!$section->content) {
+                continue;
+            }
+            try {
+                $parsed = json_decode($section->content, true);
+            } catch (\Throwable $e) {
+                continue;
+            }
+            if (is_array($parsed) && ($parsed['__type'] ?? null) === $type) {
+                return $parsed;
+            }
+        }
+
+        return null;
+    }
+
     public function home(): Response
     {
-        $heroSetting = $this->setting('landing.hero', []);
-        $aboutSetting = $this->setting('landing.about', []);
+        $heroSetting = $this->pageSectionData('home', 'hero_home') ?? $this->setting('landing.hero', []);
+        $aboutSetting = $this->pageSectionData('home', 'about_intro') ?? $this->setting('landing.about', []);
+        $serviceOverview = $this->pageSectionData('home', 'service_overview');
+        $ctaSection = $this->pageSectionData('home', 'cta_home') ?? $this->setting('landing.final_cta', []);
         $ctaSetting = $this->setting('landing.final_cta', []);
         $metricsSetting = $this->setting('landing.metrics', []);
         $sections = $this->landingSections();
@@ -70,7 +103,12 @@ class LandingController extends Controller
             'teamMembers' => $teamMembers,
             'hero' => $sections['hero'] ? $this->transformHero($heroSetting) : null,
             'about' => $sections['about'] ? $this->transformAbout($aboutSetting) : null,
-            'finalCta' => $sections['final_cta'] ? $this->transformFinalCta($ctaSetting) : null,
+            'servicesContent' => $serviceOverview ? [
+                'heading' => $serviceOverview['heading'] ?? null,
+                'description' => $serviceOverview['description'] ?? null,
+                'highlights' => $serviceOverview['highlights'] ?? [],
+            ] : null,
+            'finalCta' => $sections['final_cta'] ? $this->transformFinalCta($ctaSection ?: $ctaSetting) : null,
             'metrics' => $sections['metrics'] ? $this->transformMetrics($metricsSetting) : [],
             'sections' => $sections,
             'seo' => $this->seo('home'),
@@ -79,9 +117,11 @@ class LandingController extends Controller
 
     public function services(): Response
     {
+        $heroSection = $this->pageSectionData('service', 'service_hero') ?? $this->setting('service.hero', []);
+
         return Inertia::render('landingPage/Service', [
             'services' => $this->servicePayload(Service::query()->active()->orderBy('display_order')->get()),
-            'hero' => $this->transformServiceHero($this->setting('service.hero', [])),
+            'hero' => $this->transformServiceHero($heroSection),
             'summarySection' => $this->transformSection($this->setting('service.summary', [])),
             'offeringsSection' => $this->transformOfferingsSection($this->setting('service.offerings', [])),
             'techStackSection' => $this->transformTechStackSection($this->setting('service.tech_stack', [])),
@@ -413,20 +453,20 @@ class LandingController extends Controller
     {
         return [
             'heading' => $this->localizedText($hero['heading'] ?? null),
-            'subheading' => $this->localizedText($hero['subheading'] ?? null),
+            'subheading' => $this->localizedText($hero['subheading'] ?? $hero['description'] ?? null),
             'primary_label' => $this->localizedText($hero['primary_label'] ?? null),
             'primary_link' => $this->localizedText($hero['primary_link'] ?? null),
             'secondary_label' => $this->localizedText($hero['secondary_label'] ?? null),
             'secondary_link' => $this->localizedText($hero['secondary_link'] ?? null),
-            'image_url' => $this->imageUrl($hero['image'] ?? null),
+            'image_url' => $this->imageUrl($hero['image'] ?? $hero['hero_image'] ?? null),
         ];
     }
 
     private function transformAbout(array $about): array
     {
         return [
-            'title' => $this->localizedText($about['title'] ?? null),
-            'description' => $this->localizedText($about['description'] ?? null),
+            'title' => $this->localizedText($about['title'] ?? $about['heading'] ?? null),
+            'description' => $this->localizedText($about['description'] ?? $about['subheading'] ?? null),
             'highlights' => $this->localizedList($about['highlights'] ?? []),
             'image_url' => $this->imageUrl($about['image'] ?? null),
         ];

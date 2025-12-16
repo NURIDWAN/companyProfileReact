@@ -7,6 +7,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Select,
     SelectContent,
@@ -182,6 +183,14 @@ interface ServiceFaqsForm {
     }[];
 }
 
+interface SecuritySettings {
+    otp: {
+        enabled: boolean;
+        expires_minutes: number;
+        resend_cooldown: number;
+    };
+}
+
 interface SettingsIndexProps {
     company: CompanyProfile;
     address: CompanyAddress;
@@ -202,6 +211,7 @@ interface SettingsIndexProps {
     serviceProcess: ServiceProcessForm;
     serviceAdvantages: ServiceAdvantagesForm;
     serviceFaqs: ServiceFaqsForm;
+    security: SecuritySettings;
 }
 
 export default function SettingsIndex({
@@ -224,6 +234,7 @@ export default function SettingsIndex({
     serviceProcess,
     serviceAdvantages,
     serviceFaqs,
+    security,
 }: SettingsIndexProps) {
     const companyForm = useForm({
         ...company,
@@ -255,6 +266,11 @@ export default function SettingsIndex({
     const serviceProcessForm = useForm<ServiceProcessForm>(serviceProcess);
     const serviceAdvantagesForm = useForm<ServiceAdvantagesForm>(serviceAdvantages);
     const serviceFaqsForm = useForm<ServiceFaqsForm>(serviceFaqs);
+    const securityForm = useForm({
+        otp_enabled: security.otp.enabled,
+        otp_expires_minutes: String(security.otp.expires_minutes),
+        otp_resend_cooldown: String(security.otp.resend_cooldown),
+    });
     const [logoPreview, setLogoPreview] = useState<string | null>(company.logo_url ?? null);
     const [logoObjectUrl, setLogoObjectUrl] = useState<string | null>(null);
 
@@ -348,6 +364,13 @@ export default function SettingsIndex({
     const submitSocials: FormEventHandler<HTMLFormElement> = (event) => {
         event.preventDefault();
         socialsForm.post(route('admin.settings.socials.update'), {
+            preserveScroll: true,
+        });
+    };
+
+    const submitSecurity: FormEventHandler<HTMLFormElement> = (event) => {
+        event.preventDefault();
+        securityForm.post(route('admin.settings.security.otp'), {
             preserveScroll: true,
         });
     };
@@ -680,6 +703,67 @@ export default function SettingsIndex({
                                 )}
                                 <Button type="submit" disabled={contactsForm.processing}>
                                     {contactsForm.processing ? 'Menyimpan...' : 'Simpan kontak'}
+                                </Button>
+                            </CardFooter>
+                        </Card>
+                    </form>
+
+                    <form onSubmit={submitSecurity} className="space-y-4">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Keamanan & OTP Login</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="flex items-start gap-3 rounded-lg border border-dashed border-muted p-4">
+                                    <Checkbox
+                                        id="otp-enabled"
+                                        checked={Boolean(securityForm.data.otp_enabled)}
+                                        onCheckedChange={(checked) => securityForm.setData('otp_enabled', Boolean(checked))}
+                                    />
+                                    <div>
+                                        <Label htmlFor="otp-enabled" className="text-base font-semibold">
+                                            Aktifkan OTP via Email
+                                        </Label>
+                                        <p className="text-xs text-muted-foreground">
+                                            Saat aktif, setiap login admin akan dimintai kode OTP yang dikirim ke email. Nonaktifkan bila tidak diperlukan.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="grid gap-4 md:grid-cols-2">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="otp-expires">Masa berlaku OTP (menit)</Label>
+                                        <Input
+                                            id="otp-expires"
+                                            type="number"
+                                            min={1}
+                                            max={60}
+                                            value={securityForm.data.otp_expires_minutes}
+                                            onChange={(event) => securityForm.setData('otp_expires_minutes', event.target.value)}
+                                        />
+                                        <InputError message={securityForm.errors.otp_expires_minutes} />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="otp-resend">Jeda kirim ulang (detik)</Label>
+                                        <Input
+                                            id="otp-resend"
+                                            type="number"
+                                            min={15}
+                                            max={600}
+                                            value={securityForm.data.otp_resend_cooldown}
+                                            onChange={(event) => securityForm.setData('otp_resend_cooldown', event.target.value)}
+                                        />
+                                        <InputError message={securityForm.errors.otp_resend_cooldown} />
+                                    </div>
+                                </div>
+                            </CardContent>
+                            <CardFooter className="flex items-center justify-between gap-2">
+                                {securityForm.recentlySuccessful ? (
+                                    <p className="text-sm text-muted-foreground">Tersimpan.</p>
+                                ) : (
+                                    <span />
+                                )}
+                                <Button type="submit" disabled={securityForm.processing}>
+                                    {securityForm.processing ? 'Menyimpan...' : 'Simpan pengaturan'}
                                 </Button>
                             </CardFooter>
                         </Card>

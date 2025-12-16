@@ -14,7 +14,10 @@ use App\Http\Controllers\Admin\JobApplicationController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\GeminiRequestController;
+use App\Http\Controllers\Admin\PageController as AdminPageController;
+use App\Http\Controllers\Admin\MenuItemController;
 use App\Http\Controllers\Landing\LandingController;
+use App\Http\Controllers\Landing\PageController as LandingPageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -30,6 +33,9 @@ Route::group([], function () {
     Route::get('/', [LandingController::class, 'home'])
         ->middleware('landing.page:home')
         ->name('home');
+
+    // Redirect /home ke root agar home hanya diakses lewat /
+    Route::redirect('/home', '/')->name('home.redirect');
 
     Route::get('/about', [LandingController::class, 'about'])
         ->middleware('landing.page:about')
@@ -79,7 +85,6 @@ Route::group([], function () {
     Route::post('/contact', [LandingController::class, 'submitContact'])
         ->middleware('landing.page:contact')
         ->name('contact.store');
-
 });
 
 
@@ -118,6 +123,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('settings/address', [CompanySettingController::class, 'updateAddress'])->name('settings.address.update');
         Route::post('settings/contacts', [CompanySettingController::class, 'updateContacts'])->name('settings.contacts.update');
         Route::post('settings/socials', [CompanySettingController::class, 'updateSocials'])->name('settings.socials.update');
+        Route::post('settings/security/otp', [CompanySettingController::class, 'updateSecurity'])->name('settings.security.otp');
         Route::post('settings/footer/cta', [CompanySettingController::class, 'updateFooterCta'])->name('settings.footer.cta.update');
         Route::post('settings/footer/legal', [CompanySettingController::class, 'updateFooterLegal'])->name('settings.footer.legal.update');
         Route::post('settings/about/overview', [CompanySettingController::class, 'updateAboutOverview'])->name('settings.about.overview.update');
@@ -146,6 +152,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('landing/service/process', [LandingContentController::class, 'updateServiceProcess'])->name('landing.service.process.update');
         Route::post('landing/service/advantages', [LandingContentController::class, 'updateServiceAdvantages'])->name('landing.service.advantages.update');
         Route::post('landing/service/faqs', [LandingContentController::class, 'updateServiceFaqs'])->name('landing.service.faqs.update');
+        Route::resource('pages', AdminPageController::class);
+        Route::resource('menus', MenuItemController::class)->only(['index', 'store', 'destroy']);
+        Route::get('menus/page/{page}/sections', [MenuItemController::class, 'sections'])->name('menus.page.sections');
+        Route::patch('menus/{menu}/status', [MenuItemController::class, 'updateStatus'])->name('menus.status');
+        Route::put('menus/page/{page}/sections', [MenuItemController::class, 'updatePageSections'])->name('menus.page-sections');
+        Route::post('menus/reorder', [MenuItemController::class, 'reorder'])->name('menus.reorder');
+        Route::post('menus/page/{page}/sections/reorder', [MenuItemController::class, 'reorderSections'])->name('menus.sections.reorder');
+        Route::post('menus/reset', [MenuItemController::class, 'reset'])->name('menus.reset');
     });
 });
 
@@ -157,3 +171,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 */
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
+
+// Catch-all untuk halaman statis dengan slug tanpa prefix (ditempatkan paling akhir)
+Route::get('/{slug}', [LandingPageController::class, 'show'])
+    ->where('slug', '^(?!admin|dashboard|settings|login|register|password|logout|api|storage|sanctum|_ignition).+$')
+    ->name('pages.show');

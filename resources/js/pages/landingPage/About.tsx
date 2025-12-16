@@ -23,11 +23,21 @@ export default function AboutPage() {
 
     return (
         <LandingPageLayout>
-            <AboutCompany content={overview} />
-            <VisionMissionSection content={vision} />
-            <CoreValuesSection values={values} />
-            <StatisticsSection content={statistics} />
-            <ManagementTeamSection content={team} members={teamMembers} />
+            <div id="profil">
+                <AboutCompany content={overview} />
+            </div>
+            <div id="visi-misi">
+                <VisionMissionSection content={vision} />
+            </div>
+            <div id="akreditasi-institusi">
+                <CoreValuesSection values={values} />
+            </div>
+            <div id="sambutan">
+                <StatisticsSection content={statistics} />
+            </div>
+            <div id="struktur-organisasi">
+                <ManagementTeamSection content={team} members={teamMembers} />
+            </div>
             <CTASection content={cta} />
         </LandingPageLayout>
     );
