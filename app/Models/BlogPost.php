@@ -18,6 +18,10 @@ class BlogPost extends Model
         'excerpt',
         'body',
         'cover_image',
+        'meta_title',
+        'meta_description',
+        'og_title',
+        'cta_variants',
         'is_published',
         'published_at',
     ];
@@ -25,6 +29,7 @@ class BlogPost extends Model
     protected $casts = [
         'is_published' => 'boolean',
         'published_at' => 'datetime',
+        'cta_variants' => 'array',
     ];
 
     protected $appends = ['cover_image_url'];

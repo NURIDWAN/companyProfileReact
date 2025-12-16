@@ -27,9 +27,19 @@ const mainNavGroups: NavGroup[] = [
                 icon: LayoutGrid,
             },
             {
+                title: 'Menu Website',
+                href: '/admin/menus',
+                icon: Folder,
+            },
+            {
                 title: 'Layanan',
                 href: '/admin/services',
                 icon: Cog,
+            },
+            {
+                title: 'Halaman',
+                href: '/admin/pages',
+                icon: FileText,
             },
             {
                 title: 'Produk',

@@ -36,6 +36,9 @@ class DatabaseSeeder extends Seeder
             ServicePageSettingSeeder::class,
             BlogPostSeeder::class,
             SitePresentationSeeder::class,
+            PageSeeder::class,
+            PageSectionSeeder::class,
+            MenuItemSeeder::class,
         ]);
     }
 }

@@ -17,6 +17,10 @@ interface ArticleItem {
     published_at?: string | null;
     author?: string | null;
     body?: string | null;
+    meta_title?: string | null;
+    meta_description?: string | null;
+    og_title?: string | null;
+    cta_variants?: string[] | null;
 }
 
 type BlogDetailProps = PageProps & {
@@ -44,6 +48,7 @@ export default function BlogDetailPage() {
 
     const sanitizedBody =
         sanitizeRichText(article.body) || sanitizeRichText('<p>Konten akan segera tersedia.</p>');
+    const ctaVariants = article.cta_variants ?? [];
 
     return (
         <LandingPageLayout>
@@ -74,6 +79,19 @@ export default function BlogDetailPage() {
                 <article className="richtext-view prose prose-lg max-w-none dark:prose-invert prose-img:rounded-2xl prose-img:shadow-lg prose-img:w-full">
                     <div dangerouslySetInnerHTML={{ __html: sanitizedBody }} />
                 </article>
+
+                {ctaVariants.length > 0 && (
+                    <section className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 dark:border-white/10 dark:bg-slate-900/30">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">CTA Rekomendasi</p>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                            {ctaVariants.map((cta) => (
+                                <span key={cta} className="rounded-full border border-blue-200 px-3 py-1 text-xs font-semibold text-blue-600 dark:border-blue-500/30 dark:text-blue-200">
+                                    {cta}
+                                </span>
+                            ))}
+                        </div>
+                    </section>
+                )}
 
                 {inlineImages.length > 0 && (
                     <section className="space-y-4">

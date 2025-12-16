@@ -22,6 +22,11 @@ type HomePageProps = PageProps & {
         excerpt?: string | null;
         description?: string | null;
     }>;
+    servicesContent?: {
+        heading?: string | null;
+        description?: string | null;
+        highlights?: string[];
+    };
     articles?: Array<{
         id: number;
         title: string;
@@ -74,7 +79,7 @@ type HomePageProps = PageProps & {
 };
 
 export default function HomePage() {
-    const { services, articles, testimonials, hero, about, finalCta, metrics, teamMembers, sections } =
+    const { services, servicesContent, articles, testimonials, hero, about, finalCta, metrics, teamMembers, sections } =
         usePage<HomePageProps>().props;
     const visibility = sections ?? {};
     const isEnabled = (key: SectionKey) => visibility[key] ?? true;
@@ -82,14 +87,31 @@ export default function HomePage() {
 
     return (
         <LandingPageLayout>
-            <motion.div 
+            <motion.div
                 initial="hidden"
                 animate="show"
                 className="space-y-16"
             >
-                {isEnabled("hero") && <HeroModern content={hero ?? undefined} />}
-                {isEnabled("about") && <About content={about} />}
-                {isEnabled("services") && <Services services={services} />}
+                {isEnabled("hero") && (
+                    <div id="hero">
+                        <HeroModern content={hero ?? undefined} />
+                    </div>
+                )}
+                {isEnabled("about") && (
+                    <div id="about-summary">
+                        <About content={about} />
+                    </div>
+                )}
+                {isEnabled("services") && (
+                    <div id="service-highlight">
+                        <Services
+                            services={services}
+                            heading={servicesContent?.heading}
+                            description={servicesContent?.description}
+                            highlights={servicesContent?.highlights}
+                        />
+                    </div>
+                )}
                 {isEnabled("testimonials") && (
                     <Testimonial testimonials={testimonials} metrics={metricData ?? []} />
                 )}

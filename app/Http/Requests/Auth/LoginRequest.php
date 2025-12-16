@@ -6,6 +6,7 @@ use App\Rules\RecaptchaV2;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 
@@ -53,6 +54,31 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+    }
+
+    public function validateCredentialsOnly(): User
+    {
+        $this->ensureIsNotRateLimited();
+
+        if (! Auth::validate($this->only('email', 'password'))) {
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => __('auth.failed'),
+            ]);
+        }
+
+        RateLimiter::clear($this->throttleKey());
+
+        $user = User::where('email', $this->string('email'))->first();
+
+        if (! $user) {
+            throw ValidationException::withMessages([
+                'email' => __('auth.failed'),
+            ]);
+        }
+
+        return $user;
     }
 
     /**

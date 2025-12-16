@@ -16,6 +16,13 @@ class Product extends Model
         'cover_image',
         'thumbnail',
         'excerpt',
+        'marketing_summary',
+        'marketing_highlights',
+        'faqs',
+        'meta_title',
+        'meta_description',
+        'og_title',
+        'cta_variants',
         'description',
         'category',
         'features',
@@ -41,6 +48,9 @@ class Product extends Model
         'popular' => 'boolean',
         'demo' => 'boolean',
         'is_active' => 'boolean',
+        'marketing_highlights' => 'array',
+        'faqs' => 'array',
+        'cta_variants' => 'array',
     ];
 
     protected $appends = ['cover_image_url', 'thumbnail_url'];

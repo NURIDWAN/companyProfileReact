@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import AppLayout from "@/layouts/app-layout";
 import { Head, Link, useForm } from "@inertiajs/react";
-import { FormEventHandler, useEffect, useMemo } from "react";
+import { FormEventHandler, useCallback, useEffect, useMemo, useState } from "react";
 import { RichTextEditor } from "@/components/RichTextEditor";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type Product = {
     id: number;
@@ -20,6 +22,13 @@ type Product = {
     excerpt?: string | null;
     description?: string | null;
     features?: string[] | null;
+    marketing_summary?: string | null;
+    marketing_highlights?: string[] | null;
+    faqs?: Array<{ question: string; answer: string }> | null;
+    meta_title?: string | null;
+    meta_description?: string | null;
+    og_title?: string | null;
+    cta_variants?: string[] | null;
     price?: number | null;
     price_variants?: Array<{
         name?: string | null;
@@ -43,6 +52,64 @@ interface Props {
     product?: Product;
 }
 
+type FaqItem = { question: string; answer: string };
+
+type AiFormState = {
+    target_market: string;
+    tone: string;
+    value_proposition: string;
+    call_to_action: string;
+    preset: string;
+};
+
+type EnrichmentPayload = {
+    marketing_summary?: string;
+    highlights?: string[];
+    faqs?: FaqItem[];
+    description?: string;
+    meta_title?: string;
+    meta_description?: string;
+    cta_variants?: string[];
+};
+
+const productPresets: Array<{
+    id: string;
+    label: string;
+    target_market: string;
+    tone: string;
+    value_proposition: string;
+    call_to_action: string;
+    description: string;
+}> = [
+    {
+        id: "saas-scaleup",
+        label: "SaaS Scale-up",
+        target_market: "startup dan scale-up teknologi di Asia Tenggara",
+        tone: "optimistis, data-driven, dan profesional",
+        value_proposition: "implementasi kustom yang cepat dengan dukungan tim lokal",
+        call_to_action: "Diskusikan kebutuhan platform Anda bersama tim kami",
+        description: "Tekankan time-to-market cepat dan dukungan kustomisasi untuk produk digital.",
+    },
+    {
+        id: "enterprise-modernization",
+        label: "Modernisasi Enterprise",
+        target_market: "divisi transformasi digital perusahaan enterprise",
+        tone: "formal, solutif, fokus pada mitigasi risiko",
+        value_proposition: "konsultasi end-to-end dengan tata kelola dan keamanan kelas enterprise",
+        call_to_action: "Jadwalkan sesi konsultasi strategi modernisasi",
+        description: "Soroti keandalan, compliance, dan support panjang.",
+    },
+    {
+        id: "public-sector",
+        label: "Sektor Publik",
+        target_market: "pemerintah daerah / BUMN",
+        tone: "tegas, akuntabel, menekankan dampak sosial",
+        value_proposition: "solusi digital transparan dengan onboarding dan pelatihan tim lapangan",
+        call_to_action: "Pelajari bagaimana kami membantu instansi Anda",
+        description: "Fokus pada kepatuhan regulasi, pelayanan publik, dan keberlanjutan.",
+    },
+];
+
 export default function ProductForm({ product }: Props) {
     const title = product ? "Edit Produk" : "Tambah Produk";
     const initialVariants = (product?.price_variants ?? []).map((variant) => ({
@@ -64,6 +131,12 @@ export default function ProductForm({ product }: Props) {
         gallery_files: [] as File[],
         excerpt: product?.excerpt ?? "",
         description: product?.description ?? "",
+        marketing_summary: product?.marketing_summary ?? "",
+        marketing_highlights: (product?.marketing_highlights ?? []).join("\n"),
+        meta_title: product?.meta_title ?? "",
+        meta_description: product?.meta_description ?? "",
+        og_title: product?.og_title ?? "",
+        cta_variants: product?.cta_variants?.length ? product.cta_variants.join("\n") : "",
         features: (product?.features ?? []).join("\n"),
         category: product?.category ?? "",
         price: product?.price ? String(product.price) : "",
@@ -77,9 +150,28 @@ export default function ProductForm({ product }: Props) {
         popular: product?.popular ?? false,
         demo: product?.demo ?? false,
         is_active: product?.is_active ?? true,
+        faqs: product?.faqs?.length ? product.faqs : [{ question: "", answer: "" }],
     });
 
     const { data, setData, processing, errors } = form;
+    const defaultAiForm = useMemo<AiFormState>(
+        () => ({
+            target_market: product?.category ?? "Perusahaan lintas industri di Indonesia",
+            tone: "Profesional dan meyakinkan",
+            value_proposition: "Layanan digital end-to-end yang fleksibel",
+            call_to_action: "Diskusikan kebutuhan Anda bersama tim kami",
+            preset: "saas-scaleup",
+        }),
+        [product],
+    );
+    const [aiForm, setAiForm] = useState<AiFormState>(defaultAiForm);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiError, setAiError] = useState<string | null>(null);
+    const [aiSuccess, setAiSuccess] = useState<string | null>(null);
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [selectedPreset, setSelectedPreset] = useState(defaultAiForm.preset);
+    const [geminiStatus, setGeminiStatus] = useState<{ status: string; message?: string } | null>(null);
+    const [pollingId, setPollingId] = useState<string | null>(null);
     const generalError = (errors as typeof errors & { general?: string }).general;
 
     useEffect(() => {
@@ -95,12 +187,38 @@ export default function ProductForm({ product }: Props) {
             setData("slug", slug);
         }
     }, [data.name, product, setData]);
+    useEffect(() => {
+        setAiForm(defaultAiForm);
+        setSelectedPreset(defaultAiForm.preset);
+    }, [defaultAiForm]);
+    useEffect(() => {
+        const fetchStatus = async () => {
+            try {
+                const response = await fetch(route("admin.gemini.status"), {
+                    headers: {
+                        Accept: "application/json",
+                    },
+                });
+
+                if (response.ok) {
+                    const payload = (await response.json()) as { status: string; message?: string };
+                    setGeminiStatus(payload);
+                }
+            } catch (error) {
+                console.warn("Tidak dapat memuat status Gemini", error);
+            }
+        };
+
+        fetchStatus();
+    }, []);
     const fieldError = (field: string) => (errors as Record<string, string | undefined>)[field];
     const galleryUrls = (data.gallery ?? []).length ? data.gallery ?? [] : [""];
     const variantRows =
         (data.price_variants ?? []).length
             ? data.price_variants ?? []
             : [{ name: "", price: "", compare_at_price: "", sku: "", stock: "" }];
+    const faqRows: FaqItem[] =
+        Array.isArray(data.faqs) && data.faqs.length ? (data.faqs as FaqItem[]) : [{ question: "", answer: "" }];
 
     const handleGalleryChange = (index: number, value: string) => {
         const updated = [...galleryUrls];
@@ -140,6 +258,171 @@ export default function ProductForm({ product }: Props) {
         );
     };
 
+    const updateFaq = (index: number, field: keyof FaqItem, value: string) => {
+        const updated = faqRows.map((faq, idx) =>
+            idx === index ? { ...faq, [field]: value } : faq,
+        );
+
+        setData("faqs", updated);
+    };
+
+    const addFaqRow = () => {
+        setData("faqs", [...faqRows, { question: "", answer: "" }]);
+    };
+
+    const removeFaqRow = (index: number) => {
+        const updated = faqRows.filter((_, idx) => idx !== index);
+        setData("faqs", updated.length ? updated : [{ question: "", answer: "" }]);
+    };
+
+    const applyEnrichment = useCallback((payload: EnrichmentPayload) => {
+        if (payload.description) {
+            setData("description", payload.description);
+        }
+
+        if (payload.marketing_summary) {
+            setData("marketing_summary", payload.marketing_summary);
+        }
+
+        if (payload.highlights?.length) {
+            setData("marketing_highlights", payload.highlights.join("\n"));
+        }
+
+        if (payload.faqs?.length) {
+            setData("faqs", payload.faqs);
+        }
+
+        if (payload.meta_title) {
+            setData("meta_title", payload.meta_title);
+        }
+
+        if (payload.meta_description) {
+            setData("meta_description", payload.meta_description);
+        }
+
+        if (payload.cta_variants?.length) {
+            setData("cta_variants", payload.cta_variants.join("\n"));
+        }
+
+        setAiSuccess("Konten berhasil diisikan dari Gemini. Silakan tinjau sebelum disimpan.");
+        setAiError(null);
+    }, [setData]);
+
+    const pollGeminiRequest = useCallback((requestId: string) => {
+        const poll = async () => {
+            try {
+                const response = await fetch(route("admin.gemini-requests.show", requestId), {
+                    headers: {
+                        Accept: "application/json",
+                    },
+                });
+
+                const payload = (await response.json()) as {
+                    status: string;
+                    result?: EnrichmentPayload;
+                    error_message?: string;
+                };
+
+                if (payload.status === "completed" && payload.result) {
+                    applyEnrichment(payload.result);
+                    setAiLoading(false);
+                    setPollingId(null);
+                } else if (payload.status === "failed") {
+                    setAiError(payload.error_message ?? "Permintaan Gemini gagal diproses.");
+                    setAiLoading(false);
+                    setPollingId(null);
+                } else {
+                    setTimeout(poll, 1500);
+                }
+            } catch (error) {
+                console.error(error);
+                setAiError("Gagal memeriksa status permintaan Gemini.");
+                setAiLoading(false);
+                setPollingId(null);
+            }
+        };
+
+        poll();
+    }, [applyEnrichment]);
+
+    const handleGenerateGemini = async () => {
+        if (!data.name.trim()) {
+            setAiError("Nama produk wajib diisi sebelum meminta Gemini.");
+            return;
+        }
+
+        setAiLoading(true);
+        setAiError(null);
+        setAiSuccess(null);
+
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") ?? "";
+            const featureList = data.features
+                ? data.features
+                      .split(/\r?\n/)
+                      .map((item) => item.trim())
+                      .filter((item) => item.length > 0)
+                : [];
+
+            const response = await fetch(route("admin.products.enrich"), {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    "X-CSRF-TOKEN": csrfToken,
+                },
+                body: JSON.stringify({
+                    ...aiForm,
+                    name: data.name,
+                    category: data.category,
+                    description: data.description,
+                    price: data.price ? Number(data.price) : undefined,
+                    features: featureList,
+                }),
+            });
+
+            const payload = (await response.json()) as { request_id?: string; message?: string };
+
+            if (!response.ok || !payload?.request_id) {
+                throw new Error(payload?.message ?? "Gagal mengantrekan permintaan ke Gemini.");
+            }
+
+            setPollingId(payload.request_id);
+            pollGeminiRequest(payload.request_id);
+        } catch (error) {
+            console.error(error);
+            setAiError(error instanceof Error ? error.message : "Terjadi kesalahan saat menghubungi Gemini.");
+            setAiLoading(false);
+        }
+    };
+
+    const handleResetGenerator = () => {
+        setAiForm(defaultAiForm);
+        setSelectedPreset(defaultAiForm.preset);
+        setAiError(null);
+        setAiSuccess(null);
+        setPollingId(null);
+        setAiLoading(false);
+    };
+
+    const updateAiForm = <K extends keyof AiFormState>(field: K, value: AiFormState[K]) => {
+        setAiForm((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handlePresetChange = (value: string) => {
+        setSelectedPreset(value);
+        const preset = productPresets.find((item) => item.id === value);
+
+        setAiForm((prev) => ({
+            ...prev,
+            preset: value,
+            target_market: preset?.target_market ?? prev.target_market,
+            tone: preset?.tone ?? prev.tone,
+            value_proposition: preset?.value_proposition ?? prev.value_proposition,
+            call_to_action: preset?.call_to_action ?? prev.call_to_action,
+        }));
+    };
+
     const action = useMemo(() => {
         return product
             ? route("admin.products.update", product.id)
@@ -172,15 +455,130 @@ export default function ProductForm({ product }: Props) {
         });
     };
 
+    const presetInfo = productPresets.find((preset) => preset.id === selectedPreset);
+    const requestButtonLabel = aiLoading ? (pollingId ? "Memproses..." : "Meminta Gemini...") : "Perkaya via Gemini";
+    const highlightList = data.marketing_highlights
+        ? data.marketing_highlights
+              .split(/\r?\n/)
+              .map((item) => item.trim())
+              .filter((item) => item.length > 0)
+        : [];
+    const ctaList = data.cta_variants
+        ? data.cta_variants
+              .split(/\r?\n/)
+              .map((item) => item.trim())
+              .filter((item) => item.length > 0)
+        : [];
+    const previewFaqs = faqRows.filter(
+        (faq) => faq.question.trim().length > 0 || faq.answer.trim().length > 0,
+    );
+
     return (
         <AppLayout>
             <Head title={title} />
             <div className="p-4">
-                <div className="mb-4">
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                     <Link href={route("admin.products.index")} className="text-sm text-muted-foreground hover:text-foreground">
                         &larr; Kembali ke daftar produk
                     </Link>
+                    <Button type="button" variant="outline" onClick={() => setPreviewOpen(true)}>
+                        Preview
+                    </Button>
                 </div>
+                <Card className="mb-6">
+                    <CardHeader>
+                        <CardTitle>Perkaya Konten Produk (Gemini)</CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                            Gunakan ringkasan otomatis untuk mengisi highlight pemasaran dan FAQ. Anda masih bisa mengubah hasilnya sebelum menyimpan.
+                        </p>
+                    </CardHeader>
+                    <CardContent className="grid gap-4 md:grid-cols-2">
+                        {geminiStatus?.status === "error" && (
+                            <div className="md:col-span-2">
+                                <Alert variant="destructive">
+                                    <AlertDescription>
+                                        Gemini tidak dapat diakses. {geminiStatus.message ?? "Pastikan API key/kuota masih tersedia."}
+                                    </AlertDescription>
+                                </Alert>
+                            </div>
+                        )}
+                        <div className="grid gap-2 md:col-span-2">
+                            <Label>Preset</Label>
+                            <Select value={selectedPreset} onValueChange={handlePresetChange}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Pilih preset" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {productPresets.map((preset) => (
+                                        <SelectItem key={preset.id} value={preset.id}>
+                                            {preset.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">{presetInfo?.description ?? "Sesuaikan parameter manual bila diperlukan."}</p>
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="ai-target-market">Target Market</Label>
+                            <Input
+                                id="ai-target-market"
+                                value={aiForm.target_market}
+                                onChange={(event) => updateAiForm("target_market", event.target.value)}
+                                placeholder="Contoh: perusahaan jasa keuangan di Indonesia"
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="ai-tone">Nada Tulisan</Label>
+                            <Input
+                                id="ai-tone"
+                                value={aiForm.tone}
+                                onChange={(event) => updateAiForm("tone", event.target.value)}
+                                placeholder="Profesional, persuasif, dan bersahabat"
+                            />
+                        </div>
+                        <div className="grid gap-2 md:col-span-2">
+                            <Label htmlFor="ai-value-prop">Nilai Utama</Label>
+                            <textarea
+                                id="ai-value-prop"
+                                className="min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                value={aiForm.value_proposition}
+                                onChange={(event) => updateAiForm("value_proposition", event.target.value)}
+                                placeholder="Contoh: implementasi cepat, dukungan konsultasi strategis, dan tim kustom development lokal."
+                            />
+                        </div>
+                        <div className="grid gap-2 md:col-span-2">
+                            <Label htmlFor="ai-cta">Call to Action</Label>
+                            <Input
+                                id="ai-cta"
+                                value={aiForm.call_to_action}
+                                onChange={(event) => updateAiForm("call_to_action", event.target.value)}
+                                placeholder="Diskusikan kebutuhan Anda bersama tim kami"
+                            />
+                        </div>
+                    </CardContent>
+                    <CardFooter className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                        <div className="space-y-1 text-sm">
+                            {aiError && <span className="text-rose-500">{aiError}</span>}
+                            {!aiError && aiSuccess && <span className="text-emerald-600">{aiSuccess}</span>}
+                            {!aiError && !aiSuccess && pollingId && (
+                                <span className="text-xs text-muted-foreground">Permintaan sedang diproses di antrean Gemini...</span>
+                            )}
+                            {!aiError && !aiSuccess && !pollingId && (
+                                <span className="text-xs text-muted-foreground">
+                                    Hasil Gemini akan otomatis mengisi ringkasan pemasaran, highlight, dan FAQ.
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            <Button type="button" variant="outline" onClick={handleResetGenerator} disabled={aiLoading}>
+                                Reset
+                            </Button>
+                            <Button type="button" onClick={handleGenerateGemini} disabled={aiLoading}>
+                                {requestButtonLabel}
+                            </Button>
+                        </div>
+                    </CardFooter>
+                </Card>
                 <form onSubmit={submit} encType="multipart/form-data">
                 <Card>
                     <CardHeader>
@@ -327,6 +725,133 @@ export default function ProductForm({ product }: Props) {
                                 onChange={(event) => setData("features", event.target.value)}
                             />
                             {errors.features && <p className="text-xs text-rose-500">{errors.features}</p>}
+                        </div>
+                        <div className="space-y-4 rounded-lg border border-dashed border-border p-4">
+                            <div>
+                                <p className="text-sm font-semibold text-foreground">Konten Pemasaran & FAQ</p>
+                                <p className="text-xs text-muted-foreground">
+                                    Bagian ini dapat diisi secara manual atau menggunakan tombol Gemini di atas.
+                                </p>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="marketing_summary">Ringkasan Pemasaran</Label>
+                                <textarea
+                                    id="marketing_summary"
+                                    className="min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                    value={data.marketing_summary ?? ""}
+                                    onChange={(event) => setData("marketing_summary", event.target.value)}
+                                />
+                                {errors.marketing_summary && (
+                                    <p className="text-xs text-rose-500">{errors.marketing_summary}</p>
+                                )}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="marketing_highlights">Highlight (pisahkan dengan enter)</Label>
+                                <textarea
+                                    id="marketing_highlights"
+                                    className="min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                    value={data.marketing_highlights ?? ""}
+                                    onChange={(event) => setData("marketing_highlights", event.target.value)}
+                                />
+                                {errors.marketing_highlights && (
+                                    <p className="text-xs text-rose-500">{errors.marketing_highlights}</p>
+                                )}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="meta_title">Meta Title</Label>
+                                <Input
+                                    id="meta_title"
+                                    value={data.meta_title ?? ""}
+                                    onChange={(event) => setData("meta_title", event.target.value)}
+                                />
+                                {errors.meta_title && <p className="text-xs text-rose-500">{errors.meta_title}</p>}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="meta_description">Meta Description</Label>
+                                <textarea
+                                    id="meta_description"
+                                    className="min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                    value={data.meta_description ?? ""}
+                                    onChange={(event) => setData("meta_description", event.target.value)}
+                                />
+                                {errors.meta_description && <p className="text-xs text-rose-500">{errors.meta_description}</p>}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="og_title">OG Title</Label>
+                                <Input
+                                    id="og_title"
+                                    value={data.og_title ?? ""}
+                                    onChange={(event) => setData("og_title", event.target.value)}
+                                />
+                                {errors.og_title && <p className="text-xs text-rose-500">{errors.og_title}</p>}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="cta_variants">CTA Variants (pisahkan dengan enter)</Label>
+                                <textarea
+                                    id="cta_variants"
+                                    className="min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                    value={data.cta_variants ?? ""}
+                                    onChange={(event) => setData("cta_variants", event.target.value)}
+                                />
+                                {errors.cta_variants && <p className="text-xs text-rose-500">{errors.cta_variants}</p>}
+                            </div>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-sm font-medium">FAQ Produk</Label>
+                                    <Button type="button" size="sm" variant="outline" onClick={addFaqRow}>
+                                        Tambah FAQ
+                                    </Button>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    Minimal 1 pertanyaan. Pastikan jawaban ringkas agar mudah dibaca calon klien.
+                                </p>
+                                <div className="space-y-3">
+                                    {faqRows.map((faq, index) => (
+                                        <div key={`faq-${index}`} className="space-y-3 rounded-xl border border-border p-4">
+                                            <div className="grid gap-2">
+                                                <Label htmlFor={`faq-question-${index}`}>Pertanyaan</Label>
+                                                <Input
+                                                    id={`faq-question-${index}`}
+                                                    value={faq.question}
+                                                    onChange={(event) => updateFaq(index, "question", event.target.value)}
+                                                    placeholder="Contoh: Apakah layanan ini bisa dikustom?"
+                                                />
+                                                {fieldError(`faqs.${index}.question`) && (
+                                                    <p className="text-xs text-rose-500">
+                                                        {fieldError(`faqs.${index}.question`)}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div className="grid gap-2">
+                                                <Label htmlFor={`faq-answer-${index}`}>Jawaban</Label>
+                                                <textarea
+                                                    id={`faq-answer-${index}`}
+                                                    className="min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                                    value={faq.answer}
+                                                    onChange={(event) => updateFaq(index, "answer", event.target.value)}
+                                                    placeholder="Tuliskan jawaban singkat namun meyakinkan."
+                                                />
+                                                {fieldError(`faqs.${index}.answer`) && (
+                                                    <p className="text-xs text-rose-500">
+                                                        {fieldError(`faqs.${index}.answer`)}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div className="flex justify-end">
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => removeFaqRow(index)}
+                                                    disabled={faqRows.length === 1}
+                                                >
+                                                    Hapus FAQ
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="category">Kategori</Label>
@@ -510,6 +1035,65 @@ export default function ProductForm({ product }: Props) {
                 </Card>
                 </form>
             </div>
+            <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+                <DialogContent className="max-w-4xl">
+                    <DialogHeader>
+                        <DialogTitle>Preview Produk</DialogTitle>
+                    </DialogHeader>
+                    <div className="max-h-[70vh] overflow-y-auto space-y-4">
+                        <div className="space-y-2 rounded-2xl border bg-white/60 p-4 dark:border-white/10 dark:bg-slate-900/50">
+                            <span className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-500">Product Preview</span>
+                            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">{data.name || "Nama produk"}</h2>
+                            <p className="text-muted-foreground">{data.excerpt || "Ringkasan produk akan tampil di sini."}</p>
+                            <div className="prose max-w-none rounded-xl border border-dashed bg-background/60 p-4 text-sm dark:prose-invert dark:border-white/10">
+                                <div
+                                    dangerouslySetInnerHTML={{
+                                        __html: data.description && data.description.trim().length > 0 ? data.description : "<p>Deskripsi produk akan tampil di sini.</p>",
+                                    }}
+                                />
+                            </div>
+                            {data.marketing_summary && (
+                                <div className="prose max-w-none rounded-xl bg-blue-50/70 p-4 text-sm dark:prose-invert dark:bg-blue-950/40">
+                                    <div dangerouslySetInnerHTML={{ __html: data.marketing_summary }} />
+                                </div>
+                            )}
+                            {highlightList.length > 0 && (
+                                <div>
+                                    <p className="text-sm font-medium text-foreground">Highlight</p>
+                                    <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                                        {highlightList.map((item) => (
+                                            <li key={item}>{item}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            {ctaList.length > 0 && (
+                                <div>
+                                    <p className="text-sm font-medium text-foreground">CTA Variants</p>
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                        {ctaList.map((cta) => (
+                                            <span key={cta} className="rounded-full border border-emerald-200 px-3 py-1 text-xs text-emerald-600 dark:border-emerald-500/40 dark:text-emerald-200">
+                                                {cta}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {previewFaqs.length > 0 && (
+                                <div className="space-y-3">
+                                    <p className="text-sm font-medium text-foreground">FAQ</p>
+                                    {previewFaqs.map((faq, index) => (
+                                        <div key={`${faq.question}-${index}`} className="rounded-xl border border-muted p-3 text-sm">
+                                            <p className="font-semibold text-foreground">{faq.question || "Pertanyaan"}</p>
+                                            <p className="text-muted-foreground">{faq.answer || "Jawaban akan muncul di sini."}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }

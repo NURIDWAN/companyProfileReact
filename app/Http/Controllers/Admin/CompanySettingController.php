@@ -228,6 +228,15 @@ class CompanySettingController extends Controller
             ],
         ], (array) ($settings['service.faqs'] ?? []));
 
+        $securityOtp = (array) ($settings['security.otp'] ?? []);
+        $security = [
+            'otp' => [
+                'enabled' => (bool) ($securityOtp['enabled'] ?? false),
+                'expires_minutes' => (int) ($securityOtp['expires_minutes'] ?? 10),
+                'resend_cooldown' => (int) ($securityOtp['resend_cooldown'] ?? 60),
+            ],
+        ];
+
         return Inertia::render('admin/settings/Index', [
             'company' => $company,
             'address' => $address,
@@ -248,7 +257,27 @@ class CompanySettingController extends Controller
             'serviceProcess' => $serviceProcess,
             'serviceAdvantages' => $serviceAdvantages,
             'serviceFaqs' => $serviceFaqs,
+            'security' => $security,
         ]);
+    }
+
+    public function updateSecurity(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'otp_enabled' => ['nullable', 'boolean'],
+            'otp_expires_minutes' => ['nullable', 'integer', 'between:1,60'],
+            'otp_resend_cooldown' => ['nullable', 'integer', 'between:15,600'],
+        ]);
+
+        $config = [
+            'enabled' => (bool) ($data['otp_enabled'] ?? false),
+            'expires_minutes' => (int) ($data['otp_expires_minutes'] ?? 10),
+            'resend_cooldown' => (int) ($data['otp_resend_cooldown'] ?? 60),
+        ];
+
+        $this->saveSetting('security.otp', $config, 'security');
+
+        return back()->with('success', 'Pengaturan keamanan berhasil diperbarui.');
     }
 
     public function downloadBackup(): StreamedResponse

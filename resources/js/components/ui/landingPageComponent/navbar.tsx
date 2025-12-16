@@ -1,8 +1,9 @@
-import { Link, usePage } from "@inertiajs/react";
+import { Link, usePage, router } from "@inertiajs/react";
 import { ComponentType, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Moon, Sun, type LucideProps } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import * as LucideIcons from "lucide-react";
 import { useAppearance } from "@/hooks/use-appearance";
 import { cn } from "@/lib/utils";
@@ -29,11 +30,19 @@ export function CompanyNavbar() {
         }));
     }, [navigation]);
 
+    const normalizePath = (href: string) => href.split("#")[0].replace(/\/+$/, "") || "/";
+    const currentPath = normalizePath(url);
+    const currentHash = typeof window !== "undefined" ? window.location.hash : "";
+
     const activeLinkKey = useMemo(() => {
-        return navItems.find((item) =>
-            item.href === "/" ? url === "/" : url.startsWith(item.href)
-        )?.key;
-    }, [url, navItems]);
+        return navItems.find((item) => {
+            const href = normalizePath(item.href);
+            if (href === "/") {
+                return currentPath === "/";
+            }
+            return currentPath.startsWith(href);
+        })?.key;
+    }, [currentPath, navItems]);
 
     const resolveLabel = (item: NavigationLink) => {
         const labels = item.labels ?? {};
@@ -42,6 +51,44 @@ export function CompanyNavbar() {
 
     const toggleDarkMode = () => {
         updateAppearance(appearance === "dark" ? "light" : "dark");
+    };
+
+    const handleNavClick = (event: React.MouseEvent, href: string) => {
+        if (typeof window === "undefined") return;
+        const [path, hash] = href.split("#");
+        const targetPath = normalizePath(path || "");
+        const currentPagePath = normalizePath(window.location.pathname);
+
+        // If there's a hash anchor
+        if (hash) {
+            // If we're on the same page, just scroll
+            if (currentPagePath === targetPath || (!path && currentPagePath === "/")) {
+                event.preventDefault();
+                const el = document.getElementById(hash);
+                if (el) {
+                    el.scrollIntoView({ behavior: "smooth", block: "start" });
+                    // Update URL hash without jumping
+                    window.history.pushState(null, '', `${window.location.pathname}#${hash}`);
+                }
+                return;
+            } else {
+                // Navigate to different page, then scroll to section
+                event.preventDefault();
+                router.get(href, {}, {
+                    preserveScroll: false,
+                    onSuccess: () => {
+                        // Wait for page to render, then scroll
+                        setTimeout(() => {
+                            const elem = document.getElementById(hash);
+                            if (elem) {
+                                elem.scrollIntoView({ behavior: "smooth", block: "start" });
+                            }
+                        }, 150);
+                    },
+                });
+                return;
+            }
+        }
     };
 
     const IconTheme = appearance === "dark" ? Moon : Sun;
@@ -99,17 +146,47 @@ export function CompanyNavbar() {
                 <nav className="hidden items-center space-x-2 lg:flex">
                     {navItems.map((navItem) => (
                         <div key={navItem.key} className="relative">
-                            <Link href={navItem.href}>
-                                <Button
-                                    variant="ghost"
-                                    className={cn("text-sm", {
-                                        "text-blue-600 font-semibold": activeLinkKey === navItem.key,
-                                        "text-foreground": activeLinkKey !== navItem.key,
-                                    })}
-                                >
-                                    {resolveLabel(navItem)}
-                                </Button>
-                            </Link>
+                            {Array.isArray((navItem as any).children) && (navItem as any).children.length ? (
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            className={cn("text-sm", {
+                                                "text-blue-600 font-semibold": activeLinkKey === navItem.key,
+                                                "text-foreground": activeLinkKey !== navItem.key,
+                                            })}
+                                        >
+                                            {resolveLabel(navItem)}
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="start">
+                                        <DropdownMenuItem asChild>
+                                            <Link href={navItem.href} onClick={(e) => handleNavClick(e, navItem.href)}>
+                                                {resolveLabel(navItem)}
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        {(navItem as any).children.map((child: any) => (
+                                            <DropdownMenuItem key={child.key} asChild>
+                                                <Link href={child.href} onClick={(e) => handleNavClick(e, child.href)}>
+                                                    {resolveLabel(child)}
+                                                </Link>
+                                            </DropdownMenuItem>
+                                        ))}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            ) : (
+                                <Link href={navItem.href} onClick={(e) => handleNavClick(e, navItem.href)}>
+                                    <Button
+                                        variant="ghost"
+                                        className={cn("text-sm", {
+                                            "text-blue-600 font-semibold": activeLinkKey === navItem.key,
+                                            "text-foreground": activeLinkKey !== navItem.key,
+                                        })}
+                                    >
+                                        {resolveLabel(navItem)}
+                                    </Button>
+                                </Link>
+                            )}
                             {activeLinkKey === navItem.key && (
                                 <div className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-blue-600" />
                             )}
@@ -139,6 +216,7 @@ export function CompanyNavbar() {
                                             key={navItem.key}
                                             href={navItem.href}
                                             className="w-full"
+                                            onClick={(e) => handleNavClick(e, navItem.href)}
                                         >
                                             <Button
                                                 variant="ghost"

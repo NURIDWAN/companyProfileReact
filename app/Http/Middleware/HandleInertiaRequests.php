@@ -3,6 +3,8 @@
 namespace App\Http\Middleware;
 
 use App\Models\CompanySetting;
+use App\Models\MenuItem;
+use App\Models\Page;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -67,14 +69,26 @@ class HandleInertiaRequests extends Middleware
 
     protected function navigation(): array
     {
-        $defaults = collect(config('landing.navigation', []));
-        $state = collect(
-            CompanySetting::query()->where('key', 'navigation.primary')->value('value') ?? []
-        );
-        $hasCustomState = $state->isNotEmpty();
+        $menuItems = MenuItem::query()
+            ->with('page')
+            ->active()
+            ->where('position', 'main')
+            ->orderBy('parent_id')
+            ->orderBy('display_order')
+            ->orderBy('title')
+            ->get()
+            ->groupBy('parent_id');
 
-        return [
-            'primary' => $defaults
+        $roots = $menuItems->get(null) ?? collect();
+
+        if ($roots->isEmpty()) {
+            $defaults = collect(config('landing.navigation', []));
+            $state = collect(
+                CompanySetting::query()->where('key', 'navigation.primary')->value('value') ?? []
+            );
+            $hasCustomState = $state->isNotEmpty();
+
+            $primary = $defaults
                 ->map(function (array $item) use ($state, $hasCustomState) {
                     $stateItem = $state->firstWhere('key', $item['key']) ?? [];
 
@@ -90,8 +104,71 @@ class HandleInertiaRequests extends Middleware
                 })
                 ->filter(fn ($item) => $item['active'])
                 ->sortBy('order')
-                ->values()
-                ->all(),
+                ->values();
+
+            $pageLinks = Page::query()
+                ->published()
+                ->whereNull('parent_id')
+                ->orderBy('display_order')
+                ->orderBy('title')
+                ->get()
+                ->map(function (Page $page, int $index) {
+                    return [
+                        'key' => 'page-' . $page->slug,
+                        'href' => '/' . $page->slug,
+                        'labels' => ['id' => $page->title, 'en' => $page->title],
+                        'order' => 100 + $index,
+                        'active' => true,
+                    ];
+                });
+
+            return [
+                'primary' => $primary->concat($pageLinks)->values()->all(),
+            ];
+        }
+
+        $primary = $roots
+            ->map(function (MenuItem $item) use ($menuItems) {
+                $href = match ($item->type) {
+                    'page' => $item->page ? '/' . $item->page->slug : $item->target,
+                    default => $item->target,
+                };
+
+                $children = ($menuItems->get($item->id) ?? collect())->where('is_active', true);
+
+                return [
+                    'key' => 'menu-' . $item->id,
+                    'href' => $href,
+                    'labels' => ['id' => $item->title, 'en' => $item->title],
+                    'order' => $item->display_order,
+                    'active' => $item->is_active,
+                    'children' => $children->map(function (MenuItem $child) {
+                        $childHref = match ($child->type) {
+                            'page' => $child->page ? '/' . $child->page->slug : $child->target,
+                            default => $child->target,
+                        };
+
+                        return [
+                            'key' => 'menu-' . $child->id,
+                            'href' => $childHref,
+                            'labels' => ['id' => $child->title, 'en' => $child->title],
+                            'order' => $child->display_order,
+                            'active' => $child->is_active,
+                        ];
+                    })
+                        ->filter(fn ($child) => $child['href'])
+                        ->sortBy('order')
+                        ->values()
+                        ->all(),
+                ];
+            })
+            ->filter(fn ($item) => $item['href'])
+            ->sortBy('order')
+            ->values()
+            ->all();
+
+        return [
+            'primary' => $primary,
         ];
     }
 

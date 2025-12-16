@@ -159,6 +159,19 @@
     .tiptap ol li {
         list-style-type: decimal;
     }
+    .tiptap pre {
+        padding: 0.75rem;
+        background: rgb(15 23 42 / 0.05);
+        border-radius: 0.75rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        overflow-x: auto;
+    }
+    .tiptap code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        background: rgb(15 23 42 / 0.05);
+        padding: 0.1rem 0.25rem;
+        border-radius: 0.25rem;
+    }
     .rte-btn {
         font-size: 0.75rem;
         text-transform: uppercase;
@@ -188,5 +201,18 @@
     }
     .richtext-view ol li {
         list-style-type: decimal;
+    }
+    .richtext-view pre {
+        padding: 0.75rem;
+        background: rgb(15 23 42 / 0.05);
+        border-radius: 0.75rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        overflow-x: auto;
+    }
+    .richtext-view code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        background: rgb(15 23 42 / 0.05);
+        padding: 0.1rem 0.25rem;
+        border-radius: 0.25rem;
     }
 }
