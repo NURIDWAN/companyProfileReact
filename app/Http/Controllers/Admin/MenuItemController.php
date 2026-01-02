@@ -58,6 +58,7 @@ class MenuItemController extends Controller
                             'id' => $item->page->id,
                             'title' => $item->page->title,
                             'slug' => $item->page->slug,
+                            'full_path' => $item->page->full_path,
                             'sections' => $item->page->sections?->map(function (PageSection $section) {
                                 return [
                                     'id' => $section->id,
@@ -77,7 +78,7 @@ class MenuItemController extends Controller
         return Inertia::render('admin/menus/Index', [
             'menus' => $menusByPosition,
             'pages' => Page::query()
-                ->select('id', 'title', 'slug')
+                ->select('id', 'title', 'slug', 'parent_id')
                 ->withCount([
                     'sections as sections_count' => function ($q) {
                         $q->where('is_active', true);
@@ -97,6 +98,8 @@ class MenuItemController extends Controller
                         'id' => $page->id,
                         'title' => $page->title,
                         'slug' => $page->slug,
+                        'parent_id' => $page->parent_id,
+                        'full_path' => $page->full_path,
                         'has_content' => ($page->sections_count ?? 0) > 0,
                         'sections' => $page->sections?->map(function (PageSection $section) {
                             return [
@@ -110,6 +113,16 @@ class MenuItemController extends Controller
                         })->values(),
                     ];
                 }),
+            'categories' => \App\Models\Category::query()
+                ->select('id', 'name', 'slug')
+                ->orderBy('name')
+                ->get()
+                ->map(fn($cat) => [
+                    'id' => $cat->id,
+                    'name' => $cat->name,
+                    'slug' => $cat->slug,
+                    'path' => '/blog/kategori/' . $cat->slug,
+                ]),
         ]);
     }
 

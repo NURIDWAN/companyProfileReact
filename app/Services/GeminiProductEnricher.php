@@ -25,7 +25,7 @@ class GeminiProductEnricher
     public function enrich(array $payload): array
     {
         $apiKey = $this->apiKey ?: config('services.gemini.key');
-        $model = $this->model ?: config('services.gemini.model', 'gemini-2.0-flash');
+        $model = $this->model ?: config('services.gemini.model', 'gemini-2.5-flash');
 
         if (!$apiKey) {
             throw new RuntimeException('Gemini API key is not configured.');
@@ -67,7 +67,7 @@ class GeminiProductEnricher
             throw new RuntimeException('Gemini response does not contain content.');
         }
 
-        $decoded = json_decode($textPayload, true);
+        $decoded = $this->decodeJsonPayload($textPayload);
 
         if (!is_array($decoded)) {
             throw new RuntimeException('Gemini response is not valid JSON.');
@@ -217,6 +217,36 @@ PROMPT;
             ->filter()
             ->values()
             ->all();
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function decodeJsonPayload(string $payload): ?array
+    {
+        $clean = trim($payload);
+
+        if (Str::startsWith($clean, '```')) {
+            $clean = preg_replace('/^```(?:json)?\\s*/i', '', $clean) ?? $clean;
+            $clean = preg_replace('/\\s*```$/', '', $clean) ?? $clean;
+        }
+
+        $decoded = json_decode($clean, true);
+        if (is_array($decoded)) {
+            return $decoded;
+        }
+
+        $start = strpos($clean, '{');
+        $end = strrpos($clean, '}');
+        if ($start !== false && $end !== false && $end > $start) {
+            $snippet = substr($clean, $start, $end - $start + 1);
+            $decoded = json_decode($snippet, true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        return null;
     }
 
     /**

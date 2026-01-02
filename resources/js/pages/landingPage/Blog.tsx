@@ -17,6 +17,13 @@ interface ArticleItem {
     cover_image?: string | null;
     published_at?: string | null;
     author?: string | null;
+    category?: { id: number; name: string; slug: string } | null;
+}
+
+interface CategoryItem {
+    id: number;
+    name: string;
+    slug: string;
 }
 
 type SectionCopy = {
@@ -27,6 +34,8 @@ type SectionCopy = {
 
 type BlogPageProps = PageProps & {
     articles?: ArticleItem[];
+    categories?: CategoryItem[];
+    currentCategory?: CategoryItem | null;
     blogHero?: SectionCopy;
 };
 
@@ -146,7 +155,7 @@ function QuickArticleCard({ article }: { article: ArticleItem }) {
 }
 
 export default function BlogPage() {
-    const { articles = [], blogHero } = usePage<BlogPageProps>().props;
+    const { articles = [], categories = [], currentCategory, blogHero } = usePage<BlogPageProps>().props;
     const [search, setSearch] = useState('');
     const [visibleCount, setVisibleCount] = useState(9);
 
@@ -213,6 +222,35 @@ export default function BlogPage() {
                             </span>
                         </div>
                     </div>
+                    {/* Category Filter Tabs */}
+                    {categories.length > 0 && (
+                        <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4 dark:border-white/5">
+                            <Link href="/blog">
+                                <Badge
+                                    variant={!currentCategory ? "default" : "outline"}
+                                    className={`cursor-pointer rounded-full px-4 py-1.5 text-sm transition ${!currentCategory
+                                            ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                                            : "border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600 dark:border-white/20 dark:text-slate-300"
+                                        }`}
+                                >
+                                    Semua
+                                </Badge>
+                            </Link>
+                            {categories.map((cat) => (
+                                <Link key={cat.id} href={`/blog/kategori/${cat.slug}`}>
+                                    <Badge
+                                        variant={currentCategory?.id === cat.id ? "default" : "outline"}
+                                        className={`cursor-pointer rounded-full px-4 py-1.5 text-sm transition ${currentCategory?.id === cat.id
+                                                ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                                                : "border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600 dark:border-white/20 dark:text-slate-300"
+                                            }`}
+                                    >
+                                        {cat.name}
+                                    </Badge>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
                 </section>
 
                 {featuredArticle ? (

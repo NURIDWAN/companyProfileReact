@@ -43,15 +43,20 @@ php artisan serve      # http://127.0.0.1:8000
 ---
 
 ## Fitur Utama
-- **Navigasi Lengkap**: Produk, Beranda, Layanan, Tentang Kami, Karier, Proyek, Blog, Kontak, Galeri.
+- **Navigasi Lengkap & Nested Dropdown**: Mendukung menu bertingkat (parent-child-grandchild) secara otomatis dari struktur Halaman dan Menu.
 - **Hero Section Dinamis**: CTA “Konsultasi Gratis” & “Lihat Portfolio”, statistik layanan/klien/pengalaman.
 - **Tentang Kami**: Sejarah perusahaan, deskripsi layanan, core values.
 - **Layanan Unggulan**: Web, Mobile, ERP + tautan detail layanan.
 - **Proyek / Portfolio**: Grid proyek unggulan lengkap dengan gambar, kategori, status live.
 - **Testimoni Klien**: Quote, rating, nama, dan jabatan.
 - **Keunggulan Kami**: Menyoroti tim, teknologi, support, keamanan, kemitraan.
-- **Blog & Insight**: Artikel terbaru beserta metadata (kategori, durasi baca, tanggal, views).
-- **AI Blog Generator**: Draf artikel otomatis via Gemini langsung dari panel admin.
+- **Blog & Insight**: 
+  - Artikel terbaru beserta metadata (durasi baca, tanggal, views).
+  - **Filter Kategori**: Mendukung filtrasi artikel berdasarkan kategori (Berita, Artikel, Pengumuman, dll) dengan UI tabs interaktif.
+- **AI Blog Generator (Gemini)**: 
+  - Mendukung model **gemini-2.5-flash** dengan token limit lebih tinggi (8192).
+  - Draf artikel otomatis (Judul, Outline, Body, Meta SEO) langsung dari panel admin.
+  - Recovery mechanism untuk memastikan format JSON yang valid.
 - **Call to Action**: Hubungi via telepon, email, WhatsApp + statistik tambahan.
 - **Footer Lengkap**: Logo, quick links, alamat kantor, sosmed, dan legal links.
 
@@ -65,17 +70,22 @@ php artisan serve      # http://127.0.0.1:8000
 3. Isi fitur produk per baris (otomatis dipisah menjadi bullet) dan tambahkan variasi harga di bagian *Variasi Harga*.
 4. Simpan; jika Anda mengunggah gambar baru saat edit, file lama otomatis dibersihkan.
 
-### 2. Portofolio Proyek
-1. Buka **Admin → Proyek**.
-2. Gunakan form untuk menyimpan detail klien, ringkasan, status dan tanggal mulai/selesai.
-3. Kosongkan kolom cover lalu simpan jika ingin menghapus gambar lama (akan dihapus dari storage).
+### 2. Manajemen Menu & Halaman
+1. **Menu Bertingkat (Nested Dropdown)**:
+   - Web mendukung dropdown hingga 3 level (Parent → Child → Grandchild).
+   - Buat halaman di **Admin → Halaman** dan set **Parent Halaman** untuk membuat hierarki (misal: Beranda → Hero Section → Detail Hero).
+   - Struktur ini otomatis muncul di navbar sebagai flyout menu.
+2. **Menu Website**:
+   - Atur urutan dan visibilitas menu di **Admin → Menu Website**.
 
 ### 3. Blog & Gemini Generator
 1. Masuk **Admin → Blog → Tulis Artikel**.
-2. Isi konten manual atau gunakan kartu **Generate Konten Otomatis (Gemini)**:
-   - Tuliskan topik, tone, audiens, CTA, dan kata kunci, lalu tekan **Generate**.
-   - Draft akan mengisi judul, slug, ringkasan, body, outline, dan kata kunci; lakukan edit sebelum simpan.
-3. Tandai **Publikasikan** untuk menerbitkan artikel; tanggal publish otomatis diisi jika dikosongkan.
+2. **Filter Kategori**: Artikel otomatis dikelompokkan berdasarkan kategori. Di halaman publik `/blog`, pengunjung bisa memfilter artikel dengan klik tabs kategori.
+3. **Generate Konten Otomatis (Gemini)**:
+   - Gunakan kartu generator di sisi kanan form.
+   - Isi topik, tone, audiens, CTA, dan keyword.
+   - Sistem menggunakan model **gemini-2.5-flash** untuk menghasilkan konten panjang & berkualitas.
+   - Hasil generate akan otomatis mengisi form (Judul, Slug, Body HTML, Meta SEO).
 
 ### 4. Testimoni Klien
 1. Akses **Admin → Testimoni**.
@@ -119,13 +129,13 @@ php artisan serve      # http://127.0.0.1:8000
 ---
 
 ## Teknologi & Arsitektur
-- **Backend**: Laravel 12 + Inertia server adapter, queue menggunakan `php artisan queue:listen`.
+- **Backend**: Laravel 12 + Inertia server adapter.
 - **Frontend**: React 19 + @inertiajs/react, Tailwind CSS 4, Radix UI, Lucide Icons, Framer Motion.
 - **Asset Pipeline**: Vite 7 dengan Laravel Vite Plugin, dukungan SSR (`resources/js/ssr.tsx`).
-- **Database**: MySQL/MariaDB default, SQLite siap pakai untuk dev (lihat `database/database.sqlite`).
-- **Storage**: Disk `public` atau S3; jalankan `php artisan storage:link` setelah deploy.
-- **Autentikasi**: Starter memakai Laravel Breeze (React-Inertia). Registrasi publik bisa dinonaktifkan.
-- **Mail & Notifikasi**: Gunakan driver SMTP default Laravel untuk form kontak/karier.
+- **Database**: MySQL/MariaDB default.
+- **AI Integration**: Google Gemini API via custom service class.
+- **Storage**: Disk `public` atau S3.
+- **Autentikasi**: Laravel Breeze (React-Inertia).
 
 ---
 
@@ -140,36 +150,35 @@ resources/
     hooks/, lib/, utils/, types/  # helper frontend
     ssr.tsx          # handler Inertia SSR
   views/app.blade.php # shell Blade untuk injeksi Inertia
+app/
+  Services/          # GeminiBlogGenerator, GeminiProductEnricher
+  Http/Middleware/   # HandleInertiaRequests (Global props)
 ```
-Komponen backend utama berada pada `app/`, konfigurasi ada di `config/`, dan seeder awal tersedia di `database/seeders`.
 
 ---
 
 ## Konfigurasi `.env` Penting
-- `APP_NAME`, `APP_URL`, `APP_ENV`, `APP_DEBUG`.
-- `DB_CONNECTION`, `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`.
-- `FILESYSTEM_DISK` (`public` atau `s3`), `AWS_*` bila memakai S3.
-- `MAIL_MAILER`, `MAIL_HOST`, `MAIL_FROM_ADDRESS`.
-- `RECAPTCHA_ENABLED`, `RECAPTCHA_SITE_KEY`, `RECAPTCHA_SECRET_KEY`, serta pasangan `VITE_RECAPTCHA_*`.
-- `QUEUE_CONNECTION=database/redis` bila memakai worker; aktifkan supervisor/systemd di produksi.
-
-Setelah mengubah nilai `.env`, jalankan `php artisan config:clear && php artisan config:cache` agar perubahan dibaca ulang.
+- `APP_NAME`, `APP_URL`, `APP_ENV`.
+- `DB_CONNECTION`, `DB_HOST`, `DB_DATABASE`, `DB_USER`, `DB_PASSWORD`.
+- `GEMINI_API_KEY`, `GEMINI_MODEL=gemini-2.5-flash` (PENTING untuk fitur blog).
+- `FILESYSTEM_DISK` (`public` atau `s3`).
 
 ---
 
 ## Google reCAPTCHA v2
 - Daftarkan kredensial **reCAPTCHA v2 (checkbox)**.
 - Isi `RECAPTCHA_SITE_KEY` + `RECAPTCHA_SECRET_KEY` dan mirror nilainya ke variabel `VITE_RECAPTCHA_SITE_KEY`.
-- Toggle `RECAPTCHA_ENABLED` & `VITE_RECAPTCHA_ENABLED` ke `false` jika ingin mematikannya sementara (misalnya di localhost).
-- Restart Vite (`npm run dev`) setiap kali kunci diganti agar script baru termuat.
-
+- Toggle `RECAPTCHA_ENABLED` & `VITE_RECAPTCHA_ENABLED` ke `false` jika ingin mematikannya sementara.
 
 ## Gemini Blog Generator
-- Aktifkan Gemini API di Google AI Studio lalu isi `.env` dengan `GEMINI_API_KEY=<key>`, `GEMINI_MODEL=gemini-2.0-flash` (atau model lain yang tersedia), dan bila perlu override `GEMINI_API_ENDPOINT` / `GEMINI_API_VERSION`.
-- Jalankan `php artisan config:clear` agar konfigurasi terbaca saat key diganti.
-- Buka panel **Admin → Blog → Tulis Artikel** dan gunakan kartu "Generate Konten Otomatis (Gemini)" untuk mendeskripsikan topik, audiens, tone, CTA, serta keyword.
-- Draft (judul, slug, ringkasan, konten HTML, outline, dan keyword) akan otomatis mengisi form artikel dan tetap bisa disunting sebelum disimpan/publish.
-- Semua request dicatat melalui log Laravel; pastikan quota API memadai agar tombol generate tidak gagal.
+- Aktifkan Gemini API di Google AI Studio.
+- Isi `.env`:
+  ```env
+  GEMINI_API_KEY=your_key_here
+  GEMINI_MODEL=gemini-2.5-flash
+  ```
+- **Catatan**: Model `gemini-2.5-flash` direkomendasikan karena memiliki window token yang lebih besar, mencegah respons terpotong saat generate artikel panjang.
+- Jalankan `php artisan config:clear` setelah mengubah `.env`.
 
 ---
 

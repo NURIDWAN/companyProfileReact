@@ -9,12 +9,12 @@ use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\TeamMemberController;
 use App\Http\Controllers\Admin\TestimonialController;
-use App\Http\Controllers\Admin\LandingContentController;
 use App\Http\Controllers\Admin\JobApplicationController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\GeminiRequestController;
 use App\Http\Controllers\Admin\PageController as AdminPageController;
+use App\Http\Controllers\Admin\ImageUploadController;
 use App\Http\Controllers\Admin\MenuItemController;
 use App\Http\Controllers\Landing\LandingController;
 use App\Http\Controllers\Landing\PageController as LandingPageController;
@@ -61,6 +61,9 @@ Route::group([], function () {
     Route::get('/blog', [LandingController::class, 'blog'])
         ->middleware('landing.page:blog')
         ->name('blog');
+    Route::get('/blog/kategori/{category:slug}', [LandingController::class, 'blogByCategory'])
+        ->middleware('landing.page:blog')
+        ->name('blog.category');
     Route::get('/blog/{blogPost:slug}', [LandingController::class, 'blogShow'])
         ->middleware('landing.page:blog')
         ->name('blog.show');
@@ -126,32 +129,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('settings/security/otp', [CompanySettingController::class, 'updateSecurity'])->name('settings.security.otp');
         Route::post('settings/footer/cta', [CompanySettingController::class, 'updateFooterCta'])->name('settings.footer.cta.update');
         Route::post('settings/footer/legal', [CompanySettingController::class, 'updateFooterLegal'])->name('settings.footer.legal.update');
-        Route::post('settings/about/overview', [CompanySettingController::class, 'updateAboutOverview'])->name('settings.about.overview.update');
-        Route::post('settings/about/vision', [CompanySettingController::class, 'updateAboutVision'])->name('settings.about.vision.update');
-        Route::post('settings/about/values', [CompanySettingController::class, 'updateAboutValues'])->name('settings.about.values.update');
-        Route::post('settings/about/statistics', [CompanySettingController::class, 'updateAboutStatistics'])->name('settings.about.statistics.update');
-        Route::post('settings/about/team', [CompanySettingController::class, 'updateAboutTeam'])->name('settings.about.team.update');
-        Route::post('settings/about/cta', [CompanySettingController::class, 'updateAboutCta'])->name('settings.about.cta.update');
-        Route::get('landing', [LandingContentController::class, 'edit'])->name('landing.edit');
-        Route::post('landing/hero', [LandingContentController::class, 'updateHero'])->name('landing.hero');
-        Route::post('landing/about', [LandingContentController::class, 'updateAbout'])->name('landing.about.update');
-        Route::post('landing/cta', [LandingContentController::class, 'updateFinalCta'])->name('landing.cta.update');
-        Route::post('landing/product-cta', [LandingContentController::class, 'updateProductCta'])->name('landing.product-cta.update');
-        Route::post('landing/metrics', [LandingContentController::class, 'updateMetrics'])->name('landing.metrics.update');
-        Route::post('landing/navigation', [LandingContentController::class, 'updateNavigation'])->name('landing.navigation.update');
-        Route::post('landing/sections', [LandingContentController::class, 'updateSectionVisibility'])->name('landing.sections.update');
-        Route::post('landing/product-stats', [LandingContentController::class, 'updateProductStats'])->name('landing.product-stats.update');
-        Route::post('landing/product/hero', [LandingContentController::class, 'updateProductHero'])->name('landing.product.hero.update');
-        Route::post('landing/project/hero', [LandingContentController::class, 'updateProjectHero'])->name('landing.project.hero.update');
-        Route::post('landing/career/hero', [LandingContentController::class, 'updateCareerHero'])->name('landing.career.hero.update');
-        Route::post('landing/blog/hero', [LandingContentController::class, 'updateBlogHero'])->name('landing.blog.hero.update');
-        Route::post('landing/service/hero', [LandingContentController::class, 'updateServiceHero'])->name('landing.service.hero.update');
-        Route::post('landing/service/summary', [LandingContentController::class, 'updateServiceSummary'])->name('landing.service.summary.update');
-        Route::post('landing/service/offerings', [LandingContentController::class, 'updateServiceOfferings'])->name('landing.service.offerings.update');
-        Route::post('landing/service/tech-stack', [LandingContentController::class, 'updateServiceTechStack'])->name('landing.service.tech-stack.update');
-        Route::post('landing/service/process', [LandingContentController::class, 'updateServiceProcess'])->name('landing.service.process.update');
-        Route::post('landing/service/advantages', [LandingContentController::class, 'updateServiceAdvantages'])->name('landing.service.advantages.update');
-        Route::post('landing/service/faqs', [LandingContentController::class, 'updateServiceFaqs'])->name('landing.service.faqs.update');
         Route::resource('pages', AdminPageController::class);
         Route::resource('menus', MenuItemController::class)->only(['index', 'store', 'destroy']);
         Route::get('menus/page/{page}/sections', [MenuItemController::class, 'sections'])->name('menus.page.sections');
@@ -160,6 +137,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('menus/reorder', [MenuItemController::class, 'reorder'])->name('menus.reorder');
         Route::post('menus/page/{page}/sections/reorder', [MenuItemController::class, 'reorderSections'])->name('menus.sections.reorder');
         Route::post('menus/reset', [MenuItemController::class, 'reset'])->name('menus.reset');
+
+        // Image upload routes
+        Route::post('upload/image', [ImageUploadController::class, 'upload'])->name('upload.image');
+        Route::delete('upload/image', [ImageUploadController::class, 'delete'])->name('upload.image.delete');
     });
 });
 
@@ -172,7 +153,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
 
-// Catch-all untuk halaman statis dengan slug tanpa prefix (ditempatkan paling akhir)
-Route::get('/{slug}', [LandingPageController::class, 'show'])
-    ->where('slug', '^(?!admin|dashboard|settings|login|register|password|logout|api|storage|sanctum|_ignition).+$')
+// Catch-all untuk halaman statis dengan path (termasuk nested path seperti tentang-kami/profil)
+Route::get('/{path}', [LandingPageController::class, 'show'])
+    ->where('path', '^(?!admin|dashboard|settings|login|register|password|logout|api|storage|sanctum|_ignition)[a-z0-9\-\/]+$')
     ->name('pages.show');

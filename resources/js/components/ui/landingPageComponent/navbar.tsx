@@ -3,7 +3,7 @@ import { ComponentType, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Moon, Sun, type LucideProps } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from "@/components/ui/dropdown-menu";
 import * as LucideIcons from "lucide-react";
 import { useAppearance } from "@/hooks/use-appearance";
 import { cn } from "@/lib/utils";
@@ -165,13 +165,35 @@ export function CompanyNavbar() {
                                                 {resolveLabel(navItem)}
                                             </Link>
                                         </DropdownMenuItem>
-                                        {(navItem as any).children.map((child: any) => (
-                                            <DropdownMenuItem key={child.key} asChild>
-                                                <Link href={child.href} onClick={(e) => handleNavClick(e, child.href)}>
-                                                    {resolveLabel(child)}
-                                                </Link>
-                                            </DropdownMenuItem>
-                                        ))}
+                                        {(navItem as any).children.map((child: any) =>
+                                            Array.isArray(child.children) && child.children.length ? (
+                                                <DropdownMenuSub key={child.key}>
+                                                    <DropdownMenuSubTrigger>
+                                                        {resolveLabel(child)}
+                                                    </DropdownMenuSubTrigger>
+                                                    <DropdownMenuSubContent>
+                                                        <DropdownMenuItem asChild>
+                                                            <Link href={child.href} onClick={(e) => handleNavClick(e, child.href)}>
+                                                                {resolveLabel(child)}
+                                                            </Link>
+                                                        </DropdownMenuItem>
+                                                        {child.children.map((grandchild: any) => (
+                                                            <DropdownMenuItem key={grandchild.key} asChild>
+                                                                <Link href={grandchild.href} onClick={(e) => handleNavClick(e, grandchild.href)}>
+                                                                    {resolveLabel(grandchild)}
+                                                                </Link>
+                                                            </DropdownMenuItem>
+                                                        ))}
+                                                    </DropdownMenuSubContent>
+                                                </DropdownMenuSub>
+                                            ) : (
+                                                <DropdownMenuItem key={child.key} asChild>
+                                                    <Link href={child.href} onClick={(e) => handleNavClick(e, child.href)}>
+                                                        {resolveLabel(child)}
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                            )
+                                        )}
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             ) : (

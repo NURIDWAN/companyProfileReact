@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CTASection from '@/components/ui/landingPageComponent/product/CTASection';
 import { ProductsGrid } from '@/components/ui/landingPageComponent/product/productsGrid';
-import { StatsSection } from '@/components/ui/landingPageComponent/product/statsSection';
 import LandingPageLayout from '@/layouts/landingPage-layouts';
 import { Category, Product } from '@/types';
 
@@ -25,18 +24,6 @@ type ProductCtaData = {
     contacts?: ProductCtaContact[];
 };
 
-type ProductStatsLabels = {
-    products?: string | null;
-    clients?: string | null;
-    rating?: string | null;
-    awards?: string | null;
-};
-
-type ProductStatsData = {
-    labels?: ProductStatsLabels;
-    awards?: number | null;
-};
-
 type SectionCopy = {
     badge?: string | null;
     heading?: string | null;
@@ -47,12 +34,11 @@ type ProductPageProps = PageProps & {
     products?: Product[];
     categories?: Category[];
     productCta?: ProductCtaData;
-    productStats?: ProductStatsData;
     productHero?: SectionCopy;
 };
 
 export default function ProductPage() {
-    const { products = [], categories = [], productCta, productStats, productHero } = usePage<ProductPageProps>().props;
+    const { products = [], categories = [], productCta, productHero } = usePage<ProductPageProps>().props;
 
     const [search, setSearch] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<Category | 'All'>('All');
@@ -104,33 +90,8 @@ export default function ProductPage() {
     const averageRating = products.length
         ? (products.reduce((sum, product) => sum + Number(product.rating ?? 0), 0) / products.length).toFixed(1)
         : '0.0';
-    const statsLabels = productStats?.labels ?? {};
-    const awardsCount = Number(productStats?.awards ?? 0);
 
     const formatNumber = (value: number) => new Intl.NumberFormat('id-ID').format(value);
-
-    const statsItems = [
-        {
-            icon: 'package' as const,
-            value: `${formatNumber(products.length)}+`,
-            label: statsLabels.products ?? 'Produk Unggulan',
-        },
-        {
-            icon: 'users' as const,
-            value: `${formatNumber(totalClients)}+`,
-            label: statsLabels.clients ?? 'Klien Puas',
-        },
-        {
-            icon: 'star' as const,
-            value: `${averageRating}`,
-            label: statsLabels.rating ?? 'Rating Rata-rata',
-        },
-        {
-            icon: 'award' as const,
-            value: `${formatNumber(awardsCount)}+`,
-            label: statsLabels.awards ?? 'Penghargaan',
-        },
-    ];
 
     const categoryStats = useMemo(() => {
         const counts = new Map<string, number>();
@@ -204,8 +165,6 @@ export default function ProductPage() {
                         </div>
                     </div>
                 </section>
-
-                <StatsSection items={statsItems} />
 
                 <section className="rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-xl ring-1 ring-slate-200/60 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/80 dark:ring-slate-800/70">
                     <form onSubmit={(event) => event.preventDefault()} className="grid gap-5 lg:grid-cols-6">
@@ -324,43 +283,7 @@ export default function ProductPage() {
 
                 <ProductsGrid products={filteredProducts} />
 
-                {categoryStats.length > 0 && (
-                    <section className="space-y-6 rounded-3xl border border-slate-200 bg-white/80 p-8 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                                <p className="text-sm uppercase tracking-wide text-blue-600">Jelajahi Kategori</p>
-                                <h2 className="text-2xl font-semibold text-slate-800 dark:text-white">
-                                    Temukan produk berdasarkan kebutuhan industri Anda
-                                </h2>
-                            </div>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-900 dark:text-blue-300 dark:hover:bg-blue-950/40"
-                            >
-                                Semua Kategori
-                            </Button>
-                        </div>
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                            {categoryStats.map(({ name, count }) => (
-                                <div
-                                    key={name}
-                                    className="group flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-4 transition hover:-translate-y-1 hover:border-blue-400 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900"
-                                >
-                                    <div className="space-y-1">
-                                        <p className="text-sm font-semibold text-slate-500 dark:text-slate-300">{name}</p>
-                                        <p className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-                                            {formatNumber(count)} produk
-                                        </p>
-                                    </div>
-                                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white dark:bg-slate-800 dark:text-blue-300 dark:group-hover:bg-blue-500 dark:group-hover:text-white">
-                                        {name.slice(0, 1).toUpperCase()}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
+
 
                 {productCta && <CTASection data={productCta} />}
             </div>

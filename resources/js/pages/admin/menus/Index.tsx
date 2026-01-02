@@ -58,11 +58,12 @@ type SectionPayload = {
     data?: Record<string, any>;
 };
 
-type PageWithSections = { id: number; title: string; slug: string; sections?: SectionPayload[] | null };
+type PageWithSections = { id: number; title: string; slug: string; full_path?: string; sections?: SectionPayload[] | null };
 
 interface Props {
     menus: Record<string, MenuItem[]>;
     pages: PageWithSections[];
+    categories?: { id: number; name: string; slug: string; path: string }[];
 }
 
 type TreeNode = MenuItem & { children: TreeNode[] };
@@ -84,11 +85,7 @@ const internalOptions = [
     { value: "/contact", label: "Kontak" },
 ];
 
-const categoryOptions = [
-    { value: "/blog/kategori/berita", label: "Kategori Berita" },
-    { value: "/blog/kategori/pengumuman", label: "Kategori Pengumuman" },
-    { value: "/blog/kategori/artikel", label: "Kategori Artikel" },
-];
+// Dynamic categories now come from props
 
 function buildTree(items: MenuItem[]): TreeNode[] {
     const map = new Map<number, TreeNode>();
@@ -250,7 +247,10 @@ function SortableMenuItem({
                             {node.title}
                         </span>
                         <span className="text-xs text-gray-500">
-                            {node.type.toUpperCase()} {node.target ? `· ${node.target}` : ""}
+                            {node.type.toUpperCase()}
+                            {node.type === "page" && node.page?.full_path
+                                ? ` · /${node.page.full_path}`
+                                : node.target ? ` · ${node.target}` : ""}
                         </span>
                     </div>
                 </div>
@@ -324,7 +324,10 @@ function ChildMenuItem({ node }: { node: TreeNode }) {
                             {node.title}
                         </span>
                         <span className="text-xs text-gray-500">
-                            {node.type.toUpperCase()} {node.target ? `· ${node.target}` : ""}
+                            {node.type.toUpperCase()}
+                            {node.type === "page" && node.page?.full_path
+                                ? ` · /${node.page.full_path}`
+                                : node.target ? ` · ${node.target}` : ""}
                         </span>
                     </div>
                 </div>
@@ -518,12 +521,17 @@ function MenuTree({
     );
 }
 
-export default function MenuIndex({ menus, pages }: Props) {
+export default function MenuIndex({ menus, pages, categories = [] }: Props) {
     const [activeTab, setActiveTab] = useState<string>("main");
     const [openAccordion, setOpenAccordion] = useState<string>("page");
     const [resetDialogOpen, setResetDialogOpen] = useState(false);
     const [resetting, setResetting] = useState(false);
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
+
+    const categoryOptions = useMemo(() =>
+        categories.map(cat => ({ value: cat.path, label: `Kategori ${cat.name}` })),
+        [categories]
+    );
 
     const positionItems = useMemo(() => menus[activeTab] ?? [], [menus, activeTab]);
     const tree = useMemo(() => buildTree(positionItems), [positionItems]);

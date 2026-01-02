@@ -13,6 +13,7 @@ class BlogPost extends Model
 
     protected $fillable = [
         'author_id',
+        'category_id',
         'title',
         'slug',
         'excerpt',
@@ -37,6 +38,11 @@ class BlogPost extends Model
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 
     public function scopePublished($query)

@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Administrator',
                 'password' => bcrypt('password'),
             ]
-        ); 
+        );
 
         $this->call([
             RolePermissionSeeder::class,
@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             CompanySettingSeeder::class,
             LandingPageSettingSeeder::class,
             ServicePageSettingSeeder::class,
+            CategorySeeder::class,
             BlogPostSeeder::class,
             SitePresentationSeeder::class,
             PageSeeder::class,

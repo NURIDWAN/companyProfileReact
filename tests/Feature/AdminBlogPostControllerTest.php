@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\BlogPost;
+use App\Models\Category;
 
 it('can create a blog post', function () {
     $admin = actingAsAdmin();
@@ -17,6 +18,28 @@ it('can create a blog post', function () {
 
     $response->assertRedirect(route('admin.blog-posts.index'));
     $this->assertDatabaseHas('blog_posts', ['title' => 'Artikel Transformasi']);
+});
+
+it('can create a blog post with category', function () {
+    $admin = actingAsAdmin();
+    $category = Category::factory()->create(['name' => 'Berita', 'slug' => 'berita']);
+
+    $response = $this->actingAs($admin)->post(route('admin.blog-posts.store'), [
+        'author_id' => $admin->id,
+        'category_id' => $category->id,
+        'title' => 'Artikel Berita Terbaru',
+        'slug' => 'artikel-berita-terbaru',
+        'excerpt' => 'Ringkasan berita',
+        'body' => 'Konten berita',
+        'is_published' => true,
+        'published_at' => now()->toDateTimeString(),
+    ]);
+
+    $response->assertRedirect(route('admin.blog-posts.index'));
+    $this->assertDatabaseHas('blog_posts', [
+        'title' => 'Artikel Berita Terbaru',
+        'category_id' => $category->id,
+    ]);
 });
 
 it('can update a blog post', function () {

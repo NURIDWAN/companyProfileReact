@@ -22,11 +22,6 @@ const mainNavGroups: NavGroup[] = [
         title: 'Konten Publik',
         items: [
             {
-                title: 'Landing Page',
-                href: '/admin/landing',
-                icon: LayoutGrid,
-            },
-            {
                 title: 'Menu Website',
                 href: '/admin/menus',
                 icon: Folder,

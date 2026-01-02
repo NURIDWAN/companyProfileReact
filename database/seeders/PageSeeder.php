@@ -14,58 +14,80 @@ class PageSeeder extends Seeder
      */
     public function run(): void
     {
+        // Clear all existing pages to start fresh
+        Page::query()->forceDelete();
+
         $pages = [
-            // Halaman utama yang ada di menu
-            [
+            'home' => [
                 'title' => 'Beranda',
-                'slug' => 'home',
-                'meta_description' => 'Selamat datang di website kami. Kami siap melayani Anda dengan sepenuh hati.',
+                'meta_title' => 'Harmony Strategic Group | Mitra Bisnis Lintas Industri',
+                'meta_description' => 'Kemitraan strategis yang membantu perusahaan di berbagai sektor meningkatkan kinerja dan mewujudkan transformasi bisnis.',
+                'status' => 'published',
+                'published_at' => now(),
             ],
-            [
+            'about' => [
                 'title' => 'Tentang Kami',
-                'slug' => 'about',
-                'meta_description' => 'Kami adalah organisasi yang berkomitmen untuk memberikan layanan terbaik.',
+                'meta_title' => 'Tentang Harmony Strategic Group',
+                'meta_description' => 'Pelajari profil perusahaan, pengalaman lintas industri, dan nilai kolaborasi yang kami pegang.',
+                'status' => 'published',
+                'published_at' => now(),
             ],
-            [
+            'service' => [
                 'title' => 'Layanan',
-                'slug' => 'service',
-                'meta_description' => 'Temukan berbagai layanan unggulan yang kami tawarkan untuk memenuhi kebutuhan Anda.',
+                'meta_title' => 'Layanan Konsultasi & Implementasi Bisnis',
+                'meta_description' => 'Jelajahi layanan strategi, optimalisasi proses, pengembangan talenta, dan inisiatif transformasi yang kami tawarkan.',
+                'status' => 'published',
+                'published_at' => now(),
             ],
-            [
+            'product' => [
                 'title' => 'Produk',
-                'slug' => 'product',
-                'meta_description' => 'Jelajahi produk-produk unggulan yang kami tawarkan.',
+                'meta_title' => 'Program & Solusi Harmony Strategic Group',
+                'meta_description' => 'Kumpulan program siap pakai untuk meningkatkan efisiensi, kualitas layanan, dan pengalaman pelanggan.',
+                'status' => 'published',
+                'published_at' => now(),
             ],
-            [
+            'project' => [
                 'title' => 'Proyek',
-                'slug' => 'project',
-                'meta_description' => 'Lihat berbagai proyek yang telah kami kerjakan dengan sukses.',
+                'meta_title' => 'Portofolio Proyek Harmony Strategic Group',
+                'meta_description' => 'Kisah keberhasilan dan hasil terukur yang kami capai bersama mitra di berbagai sektor.',
+                'status' => 'published',
+                'published_at' => now(),
             ],
-            [
+            'career' => [
                 'title' => 'Karier',
-                'slug' => 'career',
-                'meta_description' => 'Temukan peluang karier dan berkembang bersama tim kami.',
+                'meta_title' => 'Karier di Harmony Strategic Group',
+                'meta_description' => 'Temukan kesempatan berkarier dan berkembang bersama tim konsultan lintas industri.',
+                'status' => 'published',
+                'published_at' => now(),
             ],
-            [
+            'blog' => [
                 'title' => 'Blog',
-                'slug' => 'blog',
-                'meta_description' => 'Baca artikel, berita, dan pengumuman terbaru dari kami.',
+                'meta_title' => 'Insight Bisnis & Industri',
+                'meta_description' => 'Artikel seputar tren industri, strategi operasional, dan pembaruan seputar transformasi bisnis.',
+                'status' => 'published',
+                'published_at' => now(),
             ],
-            [
+            'contact' => [
                 'title' => 'Kontak',
-                'slug' => 'contact',
-                'meta_description' => 'Jangan ragu untuk menghubungi kami. Tim kami siap membantu Anda.',
+                'meta_title' => 'Hubungi Harmony Strategic Group',
+                'meta_description' => 'Diskusikan tantangan bisnis Anda dan temukan solusi yang relevan bersama tim kami.',
+                'status' => 'published',
+                'published_at' => now(),
             ],
         ];
 
-        foreach ($pages as $index => $data) {
-            Page::firstOrCreate(
-                ['slug' => $data['slug'], 'parent_id' => null],
-                array_merge($data, [
-                    'display_order' => $index,
-                    'meta_title' => $data['title'],
-                ])
-            );
+        $rootOrder = 0;
+        foreach ($pages as $slug => $data) {
+            Page::create([
+                'slug' => $slug,
+                'parent_id' => null,
+                'title' => $data['title'],
+                'meta_title' => $data['meta_title'],
+                'meta_description' => $data['meta_description'],
+                'display_order' => $rootOrder++,
+                'status' => $data['status'],
+                'published_at' => $data['published_at'],
+            ]);
         }
     }
 }

@@ -15,16 +15,14 @@ type ServicesProps = {
     services?: ServiceCard[];
     heading?: string | null;
     description?: string | null;
-    highlights?: string[];
 };
 
-export function Services({ services = [], heading, description, highlights }: ServicesProps) {
+export function Services({ services = [], heading, description }: ServicesProps) {
     const hasData = services.length > 0;
     const title = heading ?? "Layanan Unggulan";
     const desc =
         description ??
         "Temukan layanan yang kami siapkan untuk mendukung pertumbuhan perusahaan, meningkatkan efisiensi, dan menghadirkan pengalaman pelanggan yang unggul.";
-    const highlightList = highlights ?? [];
 
     return (
         <motion.section
@@ -50,23 +48,6 @@ export function Services({ services = [], heading, description, highlights }: Se
                 >
                     {desc}
                 </motion.p>
-
-                {highlightList.length > 0 && (
-                    <motion.div
-                        variants={containerVariants}
-                        className="mx-auto mb-8 grid max-w-4xl grid-cols-1 gap-3 sm:grid-cols-2"
-                    >
-                        {highlightList.map((item, idx) => (
-                            <motion.div
-                                key={`${idx}-${item}`}
-                                variants={itemVariants}
-                                className="rounded-xl border border-indigo-100 bg-indigo-50/50 px-4 py-3 text-left text-sm text-gray-700 shadow-sm dark:border-indigo-900/30 dark:bg-indigo-900/30 dark:text-indigo-50"
-                            >
-                                {item}
-                            </motion.div>
-                        ))}
-                    </motion.div>
-                )}
 
                 {hasData ? (
                     <motion.div

@@ -10,26 +10,42 @@ use Inertia\Response;
 
 class PageController extends Controller
 {
-    public function show(string $slug): Response
+    /**
+     * Show a page by its path (supports nested paths like "tentang-kami/profil").
+     */
+    public function show(string $path): Response
     {
-        $page = Page::query()
-            ->published()
-            ->whereNull('parent_id')
-            ->where('slug', $slug)
-            ->with(['sections' => function ($q) {
-                $q->where('is_active', true)->orderBy('display_order');
-            }])
-            ->first();
+        $slugs = explode('/', $path);
+        $page = null;
+        $parentId = null;
 
-        if (!$page) {
-            throw new ModelNotFoundException();
+        // Traverse the path segments to find the target page
+        foreach ($slugs as $slug) {
+            $page = Page::query()
+                ->published()
+                ->where('parent_id', $parentId)
+                ->where('slug', $slug)
+                ->first();
+
+            if (!$page) {
+                throw new ModelNotFoundException();
+            }
+
+            $parentId = $page->id;
         }
+
+        // Load sections for the final page
+        $page->load([
+            'sections' => function ($q) {
+                $q->where('is_active', true)->orderBy('display_order');
+            }
+        ]);
 
         return Inertia::render('landingPage/StaticPage', [
             'page' => [
                 'id' => $page->id,
                 'title' => $page->title,
-                'body' => $page->body,
+                'full_path' => $page->full_path,
                 'meta_keywords' => $page->meta_keywords,
                 'sections' => $page->sections->map(function ($section) {
                     return [

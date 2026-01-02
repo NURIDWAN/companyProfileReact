@@ -51,7 +51,7 @@ class ProductController extends Controller
 
         $data['features'] = $this->cleanList(collect($data['features'] ?? []));
 
-        $model = config('services.gemini.model', 'gemini-2.0-flash');
+        $model = config('services.gemini.model', 'gemini-2.5-flash');
 
         $geminiRequest = GeminiRequest::create([
             'user_id' => $request->user()?->id,

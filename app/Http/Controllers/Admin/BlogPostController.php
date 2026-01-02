@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Jobs\ProcessGeminiRequest;
 use App\Models\BlogPost;
+use App\Models\Category;
 use App\Models\GeminiRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -35,7 +36,7 @@ class BlogPostController extends Controller
             'preset' => ['nullable', 'string', 'max:120'],
         ]);
 
-        $model = config('services.gemini.model', 'gemini-2.0-flash');
+        $model = config('services.gemini.model', 'gemini-2.5-flash');
 
         $geminiRequest = GeminiRequest::create([
             'user_id' => $request->user()?->id,
@@ -78,6 +79,7 @@ class BlogPostController extends Controller
     {
         return Inertia::render('admin/blog-posts/Form', [
             'users' => $this->authorOptions(),
+            'categories' => $this->categoryOptions(),
         ]);
     }
 
@@ -104,8 +106,9 @@ class BlogPostController extends Controller
     public function edit(BlogPost $blogPost): Response
     {
         return Inertia::render('admin/blog-posts/Form', [
-            'post' => $blogPost,
+            'post' => $blogPost->load('category:id,name,slug'),
             'users' => $this->authorOptions(),
+            'categories' => $this->categoryOptions(),
         ]);
     }
 
@@ -143,6 +146,7 @@ class BlogPostController extends Controller
 
         $data = $request->validate([
             'author_id' => ['nullable', 'exists:users,id'],
+            'category_id' => ['nullable', 'exists:categories,id'],
             'title' => ['required', 'string', 'max:255'],
             'slug' => [
                 'required',
@@ -205,6 +209,14 @@ class BlogPostController extends Controller
             ->get();
     }
 
+    private function categoryOptions()
+    {
+        return Category::query()
+            ->select('id', 'name', 'slug')
+            ->orderBy('name')
+            ->get();
+    }
+
     private function normalizeLines(?string $value): array
     {
         if (!$value) {
@@ -212,7 +224,7 @@ class BlogPostController extends Controller
         }
 
         return collect(preg_split('/\r?\n/', $value))
-            ->map(fn ($line) => trim($line))
+            ->map(fn($line) => trim($line))
             ->filter()
             ->values()
             ->all();

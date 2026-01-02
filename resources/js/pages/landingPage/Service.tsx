@@ -26,6 +26,7 @@ import {
     Trophy,
     Users,
     Workflow,
+    Zap,
     type LucideIcon,
 } from 'lucide-react';
 import { serviceIconRegistry } from '@/lib/service-icons';
@@ -52,13 +53,14 @@ type ServiceHero = SectionCopy & {
     secondary_link?: string | null;
     background_image?: string | null;
     subheading?: string | null;
+    stats?: { value: string; label: string; desc: string }[];
 };
 
 type HighlightCard = {
     title?: string | null;
     description?: string | null;
     iconName?: string | null;
-    icon?: string | null;
+    icon?: string | LucideIcon | null;
 };
 
 type OfferingsSection = SectionCopy & {
@@ -68,6 +70,7 @@ type OfferingsSection = SectionCopy & {
 type TechStackItem = {
     name?: string | null;
     logo?: string | null;
+    icon?: string | null;
 };
 
 type TechStackSection = SectionCopy & {
@@ -251,13 +254,7 @@ const heroStats = [
     { label: 'Client NPS', value: '4.8/5', desc: 'Rata-rata kepuasan partner' },
     { label: 'Transformation Consultants', value: '70+', desc: 'Team strategist & delivery' },
 ];
-const trustedBrands = [
-    { name: 'Nusa Energi', industry: 'Energi' },
-    { name: 'Prima Bank', industry: 'Keuangan' },
-    { name: 'Cakra Logistics', industry: 'Manufaktur' },
-    { name: 'TelcoPlus', industry: 'Telekomunikasi' },
-    { name: 'Satwa Health', industry: 'Kesehatan' },
-];
+
 const serviceHighlights = [
     {
         title: 'Blueprint ↠ Launch',
@@ -276,14 +273,20 @@ const serviceHighlights = [
     },
 ];
 
-function resolveIcon(name: string | null | undefined, fallback: LucideIcon): LucideIcon {
-    return (name && iconRegistry[name]) || fallback;
+
+function resolveIcon(icon: string | LucideIcon | null | undefined, fallback: LucideIcon): LucideIcon {
+    if (typeof icon === 'string') {
+        return iconRegistry[icon] ?? fallback;
+    }
+    return icon ?? fallback;
 }
 
 function ServicesHeroSection({ hero }: { hero: ServiceHero }) {
     const backgroundImage = hero.background_image ?? FALLBACK_HERO.background_image;
     const primaryReady = hero.primary_label && hero.primary_link;
     const secondaryReady = hero.secondary_label && hero.secondary_link;
+    // Use dynamic stats if available (even if empty array), otherwise ONLY fallback if undefined
+    const stats = hero.stats !== undefined ? hero.stats : heroStats;
 
     return (
         <section className="relative overflow-hidden">
@@ -319,7 +322,7 @@ function ServicesHeroSection({ hero }: { hero: ServiceHero }) {
                     )}
                     <div className="grid w-full max-w-4xl gap-4 rounded-[32px] border border-white/20 bg-white/10 p-6 text-left backdrop-blur">
                         <div className="grid gap-4 sm:grid-cols-3">
-                            {heroStats.map((stat) => (
+                            {stats.map((stat) => (
                                 <div key={stat.label} className="rounded-2xl bg-white/5 p-4 text-center">
                                     <p className="text-3xl font-semibold text-white">{stat.value}</p>
                                     <p className="text-sm tracking-wide text-indigo-100">{stat.label}</p>
@@ -335,29 +338,7 @@ function ServicesHeroSection({ hero }: { hero: ServiceHero }) {
     );
 }
 
-function TrustedBySection() {
-    return (
-        <section className="bg-gradient-to-b from-white to-slate-50 py-10 dark:from-slate-950 dark:to-slate-900">
-            <div className="container mx-auto flex flex-col items-center gap-6 px-6 text-center">
-                <p className="text-xs uppercase tracking-[0.5em] text-slate-400">Trusted by transformation teams</p>
-                <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
-                    {trustedBrands.map((brand) => (
-                        <div
-                            key={brand.name}
-                            className="flex items-center gap-2 rounded-full border border-slate-200/60 bg-white/80 px-4 py-2 text-sm text-slate-600 shadow-sm dark:border-white/10 dark:bg-slate-900/40 dark:text-white/70"
-                        >
-                            <Sparkles className="h-4 w-4 text-indigo-500" />
-                            <div className="text-left leading-tight">
-                                <p className="font-semibold text-slate-900 dark:text-white">{brand.name}</p>
-                                <span className="text-xs uppercase tracking-wide text-slate-400">{brand.industry}</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </section>
-    );
-}
+
 
 function ServiceHighlightsSection() {
     return (
@@ -507,54 +488,73 @@ function OurServicesSection({ copy, items }: { copy: SectionCopy; items: Highlig
 }
 
 function TechStackSection({ data }: { data: TechStackSection }) {
-    const items = data.items?.filter((item) => item.name) ?? [];
+    const categories = data.items?.filter((item) => item.name) ?? [];
 
     return (
-        <section className="bg-white py-20 dark:bg-gray-900">
+        <section className="bg-white py-20 text-center dark:bg-slate-900">
             <div className="container mx-auto px-6">
-                <div className="mb-12 text-center">
+                <div className="mb-16">
                     {data.badge ? (
                         <Badge variant="outline" className="mb-4 text-sm">
                             {data.badge}
                         </Badge>
                     ) : null}
-                    <h2 className="text-3xl font-bold text-gray-800 dark:text-white">{data.heading ?? FALLBACK_TECH_STACK.heading}</h2>
+                    <h2 className="text-3xl font-bold text-gray-800 dark:text-white md:text-4xl">
+                        {data.heading ?? FALLBACK_TECH_STACK.heading}
+                    </h2>
                     {data.description ? (
-                        <p className="mx-auto mt-3 max-w-3xl text-lg text-gray-600 dark:text-gray-400">{data.description}</p>
+                        <p className="mx-auto mt-3 max-w-3xl text-lg text-gray-600 dark:text-gray-400">
+                            {data.description}
+                        </p>
                     ) : null}
+                    <div className="mx-auto mt-4 h-1 w-24 rounded-full bg-indigo-500" />
                 </div>
-                {items.length ? (
-                    <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
-                        {items.map((tech, index) => {
-                            const fallbackIcon = techStackIconCycle[index % techStackIconCycle.length];
-                            const Icon = resolveIcon(tech.icon, fallbackIcon);
 
-                            return (
-                                <div
-                                    key={tech.name}
-                                    className="group flex flex-col items-center gap-3 rounded-2xl border border-slate-200/80 px-6 py-4 shadow-sm transition hover:-translate-y-1 hover:border-indigo-300 dark:border-white/10 dark:hover:border-indigo-300/60"
-                                >
-                                    {tech.logo ? (
-                                        <img
-                                            src={tech.logo}
-                                            alt={tech.name ?? ''}
-                                            className="h-12 w-12 object-contain grayscale opacity-60 transition-all duration-300 group-hover:grayscale-0 group-hover:opacity-100 dark:invert dark:group-hover:invert-0"
-                                        />
-                                    ) : (
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500/10 to-cyan-400/10 text-indigo-600 transition group-hover:from-indigo-500/20 group-hover:to-cyan-400/20 dark:text-indigo-200">
-                                            <Icon className="h-5 w-5" />
-                                        </div>
-                                    )}
-                                    <span className="text-sm font-medium text-gray-600 transition-colors group-hover:text-indigo-600 dark:text-gray-300 dark:group-hover:text-white">
-                                        {tech.name}
-                                    </span>
-                                </div>
-                            );
-                        })}
+                {categories.length ? (
+                    <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2 lg:grid-cols-3">
+                        {categories.map((category, index) => (
+                            <Card
+                                key={`cat-${index}`}
+                                className="group relative overflow-hidden border-slate-200 bg-white hover:border-indigo-200 hover:shadow-lg dark:border-gray-800 dark:bg-slate-800 dark:hover:border-indigo-900"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100 dark:from-indigo-900/10" />
+                                <CardHeader className="relative pb-2">
+                                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+                                        <Layers className="h-6 w-6" />
+                                    </div>
+                                    <CardTitle className="text-xl font-bold text-slate-800 dark:text-white">
+                                        {category.name}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="relative">
+                                    <div className="flex flex-wrap justify-center gap-2">
+                                        {(category.items ?? []).map((tech, idx) => (
+                                            <span
+                                                key={`${tech}-${idx}`}
+                                                className="inline-flex items-center rounded-md bg-slate-100 px-3 py-1 text-sm font-medium text-slate-600 transition-colors group-hover:bg-white group-hover:text-indigo-600 group-hover:shadow-sm dark:bg-slate-700 dark:text-slate-300 dark:group-hover:bg-slate-800 dark:group-hover:text-indigo-300"
+                                            >
+                                                {tech}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
                     </div>
                 ) : (
-                    <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-                        Daftar teknologi belum dikonfigurasi.
+                    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                        {/* Fallback to original flat list if no categories present (backward compatibility) */}
+                        {(FALLBACK_TECH_STACK.items ?? []).map((item, index) => (
+                            <div
+                                key={`fallback-${index}`}
+                                className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:shadow-lg dark:border-gray-800 dark:bg-slate-800"
+                            >
+                                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-900/30">
+                                    <Zap className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                                </div>
+                                <h3 className="font-semibold text-gray-800 dark:text-white">{item.name}</h3>
+                            </div>
+                        ))}
                     </div>
                 )}
             </div>
@@ -693,35 +693,32 @@ function FaqSection({ data }: { data: FaqSection }) {
                     <div className="mx-auto mt-4 h-1 w-24 rounded-full bg-indigo-500" />
                 </div>
                 {items.length ? (
-                    <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[2fr,1fr]">
-                        <Accordion type="single" collapsible className="w-full rounded-3xl border border-slate-200 bg-white/80 p-2 shadow-lg dark:border-white/10 dark:bg-slate-900/60">
-                            {items.map((faq, index) => (
-                                <AccordionItem key={index} value={`item-${index + 1}`} className="border-b border-slate-100 last:border-b-0 dark:border-white/5">
-                                    <AccordionTrigger className="text-left text-lg text-slate-900 dark:text-white">
-                                        {faq.question}
-                                    </AccordionTrigger>
-                                    <AccordionContent className="text-base text-gray-600 dark:text-gray-300">
-                                        {faq.answer}
-                                    </AccordionContent>
-                                </AccordionItem>
-                            ))}
-                        </Accordion>
-                        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-indigo-600 to-cyan-500 text-white shadow-2xl">
-                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.15),_transparent_55%)]" />
-                            <CardHeader className="relative space-y-3">
-                                <Badge className="w-fit bg-white/20 text-white">Diskusi Strategis</Badge>
-                                <CardTitle className="text-2xl">Belum menemukan jawaban?</CardTitle>
-                                <p className="text-indigo-100">Tim konsultan kami siap membantu memetakan kebutuhan serta menyusun proposal solusi.</p>
-                            </CardHeader>
-                            <CardContent className="relative flex flex-col gap-3 pt-0">
-                                <Button className="rounded-full bg-white text-indigo-700 hover:bg-indigo-50" asChild>
-                                    <a href="/contact">Jadwalkan Konsultasi</a>
-                                </Button>
-                                <Button variant="ghost" className="rounded-full border border-white/40 text-white hover:bg-white/10" asChild>
-                                    <a href="mailto:hello@harmonygroup.id">Email tim kami</a>
-                                </Button>
-                            </CardContent>
-                        </Card>
+                    <div className="mx-auto max-w-4xl">
+                        <div className="space-y-4">
+                            <Accordion type="single" collapsible className="w-full">
+                                {items.map((faq, index) => (
+                                    <AccordionItem
+                                        key={index}
+                                        value={`item-${index + 1}`}
+                                        className="mb-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md dark:border-gray-800 dark:bg-slate-800"
+                                    >
+                                        <AccordionTrigger className="px-6 py-4 text-left text-lg font-medium text-slate-800 hover:text-indigo-600 hover:no-underline dark:text-slate-100 dark:hover:text-indigo-400">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+                                                    <span className="text-sm font-bold">{String(index + 1).padStart(2, '0')}</span>
+                                                </div>
+                                                {faq.question}
+                                            </div>
+                                        </AccordionTrigger>
+                                        <AccordionContent className="bg-slate-50/50 px-6 pb-4 pt-0 text-base leading-relaxed text-gray-600 dark:bg-slate-900/50 dark:text-gray-300">
+                                            <div className="ml-11 border-t border-slate-100 pt-3 dark:border-white/5">
+                                                {faq.answer}
+                                            </div>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                ))}
+                            </Accordion>
+                        </div>
                     </div>
                 ) : (
                     <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
@@ -773,13 +770,16 @@ export default function ServicesPage() {
         offeringsSection?.items?.filter((item) => item?.title)?.map((item) => ({
             title: item.title,
             description: item.description,
-            iconName: item.iconName ?? item.icon,
+            iconName: item.iconName,
+            icon: item.icon,
         })) ?? [];
 
-    const fallbackHighlightItems = services.map((service, index) => ({
-        title: service.title,
-        description: service.excerpt ?? service.description ?? 'Detail layanan akan segera tersedia.',
-        iconName: highlightIconNames[index % highlightIconNames.length],
+
+
+    const fallbackHighlightItems = serviceHighlights.map((item) => ({
+        title: item.title,
+        description: item.description,
+        icon: item.icon as any,
     }));
 
     const highlightItems = configuredHighlightItems.length ? configuredHighlightItems : fallbackHighlightItems;
@@ -787,16 +787,11 @@ export default function ServicesPage() {
     return (
         <LandingPageLayout>
             <ServicesHeroSection hero={heroContent} />
-            <TrustedBySection />
-            <div id="pendampingan-akreditasi">
-                <DynamicServicesSummary services={services} copy={summaryCopy} />
-            </div>
-            <div id="permohonan-data">
-                <ServiceHighlightsSection />
-            </div>
+
             <div id="konsultasi-mutu">
                 <OurServicesSection copy={offeringsCopy} items={highlightItems} />
             </div>
+
             <div id="pengaduan">
                 <TechStackSection data={techStackData} />
             </div>

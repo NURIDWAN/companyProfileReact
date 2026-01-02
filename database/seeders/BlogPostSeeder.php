@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\BlogPost;
+use App\Models\Category;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -17,6 +18,11 @@ class BlogPostSeeder extends Seeder
             'email' => 'admin@example.com',
         ]);
 
+        // Get categories from database (seeded by CategorySeeder)
+        $beritaCategory = Category::where('slug', 'berita')->first();
+        $artikelCategory = Category::where('slug', 'artikel')->first();
+        $tipsCategory = Category::where('slug', 'tips-tutorial')->first();
+
         BlogPost::query()->truncate();
 
         $posts = [
@@ -28,6 +34,7 @@ class BlogPostSeeder extends Seeder
                 'cover_image' => 'https://images.unsplash.com/photo-1460925895917-afdab827c52f',
                 'is_published' => true,
                 'published_at' => Carbon::now()->subDays(5),
+                'category_id' => $beritaCategory?->id,
             ],
             [
                 'title' => 'Studi Kasus: Modernisasi Infrastruktur Data untuk Korporasi',
@@ -37,6 +44,7 @@ class BlogPostSeeder extends Seeder
                 'cover_image' => 'https://images.unsplash.com/photo-1517430816045-df4b7de11d1d',
                 'is_published' => true,
                 'published_at' => Carbon::now()->subDays(12),
+                'category_id' => $artikelCategory?->id,
             ],
             [
                 'title' => 'Checklist Kesiapan Transformasi Digital untuk UMKM',
@@ -46,6 +54,7 @@ class BlogPostSeeder extends Seeder
                 'cover_image' => 'https://images.unsplash.com/photo-1450101215322-bf5cd27642fc',
                 'is_published' => true,
                 'published_at' => Carbon::now()->subDays(20),
+                'category_id' => $tipsCategory?->id,
             ],
         ];
 

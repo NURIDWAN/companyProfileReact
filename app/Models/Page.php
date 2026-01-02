@@ -42,6 +42,23 @@ class Page extends Model
         return $this->hasMany(self::class, 'parent_id')->orderBy('display_order');
     }
 
+    /**
+     * Get the full hierarchical path for this page.
+     * Example: "tentang-kami/profil" for a child page under "Tentang Kami"
+     */
+    public function getFullPathAttribute(): string
+    {
+        $segments = collect([$this->slug]);
+        $parent = $this->parent;
+
+        while ($parent) {
+            $segments->prepend($parent->slug);
+            $parent = $parent->parent;
+        }
+
+        return $segments->implode('/');
+    }
+
     public function sections()
     {
         return $this->hasMany(PageSection::class)->orderBy('display_order');

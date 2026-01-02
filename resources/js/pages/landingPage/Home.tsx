@@ -108,7 +108,6 @@ export default function HomePage() {
                             services={services}
                             heading={servicesContent?.heading}
                             description={servicesContent?.description}
-                            highlights={servicesContent?.highlights}
                         />
                     </div>
                 )}

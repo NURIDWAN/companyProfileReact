@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\BlogPost;
+use App\Models\Category;
 use App\Models\CompanySetting;
 use App\Models\JobPosition;
 use App\Models\Product;
@@ -60,13 +61,16 @@ it('renders home page with dynamic data', function () {
 
     $this->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('landingPage/Home')
-            ->has('services', fn (Assert $services) => $services
-                ->where('0.title', 'Konsultasi Digital')
-            )
-            ->where('hero.heading', 'Hero heading')
-            ->where('about.title', 'Tentang')
+        ->assertInertia(
+            fn(Assert $page) => $page
+                ->component('landingPage/Home')
+                ->has(
+                    'services',
+                    fn(Assert $services) => $services
+                        ->where('0.title', 'Konsultasi Digital')
+                )
+                ->where('hero.heading', 'Hero heading')
+                ->where('about.title', 'Tentang')
         );
 });
 
@@ -75,14 +79,17 @@ it('renders product listing with categories', function () {
 
     $this->get(route('product'))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('landingPage/Product')
-            ->has('products', 1)
-            ->has('categories', fn (Assert $categories) => $categories
-                ->where('0', 'Software')
-            )
-            ->has('productCta')
-            ->has('productStats')
+        ->assertInertia(
+            fn(Assert $page) => $page
+                ->component('landingPage/Product')
+                ->has('products', 1)
+                ->has(
+                    'categories',
+                    fn(Assert $categories) => $categories
+                        ->where('0', 'Software')
+                )
+                ->has('productCta')
+                ->has('productStats')
         );
 });
 
@@ -95,9 +102,10 @@ it('renders career page with active positions', function () {
 
     $this->get(route('career'))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('landingPage/Career')
-            ->has('positions', 1)
+        ->assertInertia(
+            fn(Assert $page) => $page
+                ->component('landingPage/Career')
+                ->has('positions', 1)
         );
 });
 
@@ -202,17 +210,18 @@ it('renders service page with configured content settings', function () {
 
     $this->get(route('service'))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('landingPage/Service')
-            ->where('hero.heading', 'Solusi Test')
-            ->where('hero.highlight', 'Unggul')
-            ->where('offeringsSection.badge', 'Uji Coba')
-            ->where('offeringsSection.items.0.title', 'Custom Highlight')
-            ->where('summarySection.badge', 'Ringkasan')
-            ->where('techStackSection.items.0.name', 'Laravel')
-            ->where('processSection.items.0.title', 'Analisis')
-            ->where('advantagesSection.items.0.title', 'Tim Berpengalaman')
-            ->where('faqSection.items.0.question', 'Apa itu layanan?')
+        ->assertInertia(
+            fn(Assert $page) => $page
+                ->component('landingPage/Service')
+                ->where('hero.heading', 'Solusi Test')
+                ->where('hero.highlight', 'Unggul')
+                ->where('offeringsSection.badge', 'Uji Coba')
+                ->where('offeringsSection.items.0.title', 'Custom Highlight')
+                ->where('summarySection.badge', 'Ringkasan')
+                ->where('techStackSection.items.0.name', 'Laravel')
+                ->where('processSection.items.0.title', 'Analisis')
+                ->where('advantagesSection.items.0.title', 'Tim Berpengalaman')
+                ->where('faqSection.items.0.question', 'Apa itu layanan?')
         );
 });
 
@@ -243,10 +252,11 @@ it('renders contact page with company profile data', function () {
 
     $this->get(route('contact'))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('landingPage/Contact')
-            ->where('branding.name', 'Harmony Strategic Group')
-            ->where('companyContacts.phone', '+62 811 1234 567')
+        ->assertInertia(
+            fn(Assert $page) => $page
+                ->component('landingPage/Contact')
+                ->where('branding.name', 'Harmony Strategic Group')
+                ->where('companyContacts.phone', '+62 811 1234 567')
         );
 });
 
@@ -312,14 +322,15 @@ it('renders about page with dynamic sections', function () {
 
     $this->get(route('about'))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('landingPage/About')
-            ->where('overview.paragraphs.0', 'Paragraf 1')
-            ->where('vision.vision_text', 'Visi uji coba.')
-            ->has('values', 1)
-            ->where('statistics.primary.0.value', '100+')
-            ->where('team.members.0.name', 'Test')
-            ->where('cta.primary_label', 'Hubungi')
+        ->assertInertia(
+            fn(Assert $page) => $page
+                ->component('landingPage/About')
+                ->where('overview.paragraphs.0', 'Paragraf 1')
+                ->where('vision.vision_text', 'Visi uji coba.')
+                ->has('values', 1)
+                ->where('statistics.primary.0.value', '100+')
+                ->where('team.members.0.name', 'Test')
+                ->where('cta.primary_label', 'Hubungi')
         );
 });
 
@@ -336,10 +347,11 @@ it('only exposes activated navigation links', function () {
 
     $this->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->has('navigation.primary', 2)
-            ->where('navigation.primary.0.key', 'home')
-            ->where('navigation.primary.1.key', 'contact')
+        ->assertInertia(
+            fn(Assert $page) => $page
+                ->has('navigation.primary', 2)
+                ->where('navigation.primary.0.key', 'home')
+                ->where('navigation.primary.1.key', 'contact')
         );
 });
 
@@ -355,4 +367,37 @@ it('returns 404 when a landing page is disabled', function () {
 
     $this->get(route('home'))->assertNotFound();
     $this->get(route('contact'))->assertOk();
+});
+
+it('renders blog category page with filtered articles', function () {
+    $category = Category::factory()->create(['name' => 'Berita', 'slug' => 'berita']);
+    $otherCategory = Category::factory()->create(['name' => 'Tutorial', 'slug' => 'tutorial']);
+
+    BlogPost::factory()->create([
+        'title' => 'Artikel Berita',
+        'slug' => 'artikel-berita',
+        'category_id' => $category->id,
+        'is_published' => true,
+        'published_at' => Carbon::now()->subDay(),
+    ]);
+
+    BlogPost::factory()->create([
+        'title' => 'Artikel Tutorial',
+        'slug' => 'artikel-tutorial',
+        'category_id' => $otherCategory->id,
+        'is_published' => true,
+        'published_at' => Carbon::now()->subDays(2),
+    ]);
+
+    $this->get(route('blog.category', $category))
+        ->assertOk()
+        ->assertInertia(
+            fn(Assert $page) => $page
+                ->component('landingPage/Blog')
+                ->has('articles', 1)
+                ->where('articles.0.title', 'Artikel Berita')
+                ->where('currentCategory.name', 'Berita')
+                ->where('currentCategory.slug', 'berita')
+                ->has('categories')
+        );
 });

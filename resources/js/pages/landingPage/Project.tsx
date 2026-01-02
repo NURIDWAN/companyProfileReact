@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { usePage, Link } from '@inertiajs/react';
 import type { PageProps } from '@inertiajs/core';
-import { Calendar, Building2, ArrowUpRight, Layers } from 'lucide-react';
+import { Calendar, Building2, ArrowUpRight } from 'lucide-react';
 
 import LandingPageLayout from '@/layouts/landingPage-layouts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -139,25 +139,7 @@ export default function ProjectPage() {
                     </div>
                 </section>
 
-                <div className="grid gap-6 md:grid-cols-3">
-                    <Card className="p-6 text-center">
-                        <Layers className="mx-auto mb-3 h-8 w-8 text-blue-600" />
-                        <p className="text-3xl font-bold text-gray-900">{projects.length}</p>
-                        <p className="text-sm text-gray-500">Total Proyek</p>
-                    </Card>
-                    <Card className="p-6 text-center">
-                        <Building2 className="mx-auto mb-3 h-8 w-8 text-green-600" />
-                        <p className="text-3xl font-bold text-gray-900">
-                            {projects.filter((project) => (project.status ?? '').toLowerCase() === 'completed').length}
-                        </p>
-                        <p className="text-sm text-gray-500">Proyek Selesai</p>
-                    </Card>
-                    <Card className="p-6 text-center">
-                        <Calendar className="mx-auto mb-3 h-8 w-8 text-purple-600" />
-                        <p className="text-3xl font-bold text-gray-900">{new Date().getFullYear()}</p>
-                        <p className="text-sm text-gray-500">Tahun Operasi</p>
-                    </Card>
-                </div>
+
 
                 <div className="flex flex-wrap gap-2">
                     {statuses.map((status) => (

@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Page;
 use App\Models\PageSection;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class PageSectionSeeder extends Seeder
 {
@@ -16,358 +15,449 @@ class PageSectionSeeder extends Seeder
                 [
                     'title' => 'Hero',
                     'slug' => 'hero',
-                    'content' => '<div class="hero-section">
-                        <h1>Kemitraan Strategis untuk Pertumbuhan Bisnis Anda</h1>
-                        <p>Kami membantu organisasi di berbagai industri mengoptimalkan operasional, meningkatkan nilai layanan, dan mewujudkan inisiatif transformasi bisnis yang berdampak.</p>
-                        <div class="hero-buttons">
-                            <a href="/contact" class="btn btn-primary">Diskusikan Kebutuhan</a>
-                            <a href="/service" class="btn btn-secondary">Lihat Solusi</a>
-                        </div>
-                    </div>',
+                    'content' => json_encode([
+                        '__type' => 'hero_home',
+                        'heading' => 'Kemitraan Strategis untuk Pertumbuhan Bisnis Anda',
+                        'description' => 'Kami membantu organisasi di berbagai industri mengoptimalkan operasional, meningkatkan nilai layanan, dan mewujudkan inisiatif transformasi bisnis yang berdampak.',
+                        'primary_label' => 'Diskusikan Kebutuhan',
+                        'primary_link' => '/contact',
+                        'secondary_label' => 'Lihat Solusi',
+                        'secondary_link' => '/service',
+                        'hero_image' => null,
+                    ]),
                 ],
                 [
                     'title' => 'Tentang Ringkas',
                     'slug' => 'about-summary',
-                    'content' => '<div class="about-intro">
-                        <h2>Tentang Kami</h2>
-                        <p>Sejak 2010 kami bermitra dengan perusahaan publik dan swasta di sektor manufaktur, jasa, kesehatan, energi, dan retail untuk menghadirkan solusi bisnis terintegrasi.</p>
-                        <ul>
-                            <li>Jejak proyek di lebih dari 15 sektor industri</li>
-                            <li>Pendekatan berbasis data dan kebutuhan lapangan</li>
-                            <li>Program implementasi dan pendampingan end-to-end</li>
-                            <li>Fokus pada hasil bisnis dan keberlanjutan</li>
-                        </ul>
-                    </div>',
+                    'content' => json_encode([
+                        '__type' => 'about_intro',
+                        'heading' => 'Tentang Kami',
+                        'description' => 'Sejak 2010 kami bermitra dengan perusahaan publik dan swasta di sektor manufaktur, jasa, kesehatan, energi, dan retail untuk menghadirkan solusi bisnis terintegrasi.',
+                        'highlights' => [
+                            'Jejak proyek di lebih dari 15 sektor industri',
+                            'Pendekatan berbasis data dan kebutuhan lapangan',
+                            'Program implementasi dan pendampingan end-to-end',
+                            'Fokus pada hasil bisnis dan keberlanjutan'
+                        ],
+                        'image' => null,
+                    ]),
                 ],
                 [
                     'title' => 'Layanan Highlight',
                     'slug' => 'service-highlight',
-                    'content' => '<div class="service-overview">
-                        <h2>Layanan Unggulan</h2>
-                        <p>Temukan layanan yang kami siapkan untuk mendukung pertumbuhan perusahaan, meningkatkan efisiensi, dan menghadirkan pengalaman pelanggan yang unggul.</p>
-                        <ul>
-                            <li>Konsultasi Transformasi Digital</li>
-                            <li>Pengembangan Aplikasi Kustom</li>
-                            <li>Implementasi Data & AI</li>
-                            <li>Operasional dan Managed Services</li>
-                        </ul>
-                    </div>',
+                    'content' => json_encode([
+                        '__type' => 'service_overview',
+                        'heading' => 'Layanan Unggulan',
+                        'description' => 'Temukan layanan yang kami siapkan untuk mendukung pertumbuhan perusahaan, meningkatkan efisiensi, dan menghadirkan pengalaman pelanggan yang unggul.',
+                        'highlights' => [
+                            'Konsultasi Transformasi Digital',
+                            'Pengembangan Aplikasi Kustom',
+                            'Implementasi Data & AI',
+                            'Operasional dan Managed Services'
+                        ],
+                    ]),
+                ],
+                [
+                    'title' => 'Mengapa Kami',
+                    'slug' => 'why-us',
+                    'content' => json_encode([
+                        '__type' => 'why_us',
+                        'heading' => 'Mengapa Perusahaan Kami',
+                        'description' => 'Kami hadir dengan komitmen memberikan nilai terbaik untuk setiap klien.',
+                        'items' => [
+                            [
+                                'icon' => 'shield-check',
+                                'title' => 'Konsultasi Bisnis',
+                                'description' => 'Strategi bisnis yang tepat untuk pertumbuhan berkelanjutan.'
+                            ],
+                            [
+                                'icon' => 'refresh-cw',
+                                'title' => 'Transformasi Digital',
+                                'description' => 'Implementasi teknologi untuk efisiensi operasional maksimal.'
+                            ],
+                            [
+                                'icon' => 'trending-up',
+                                'title' => 'Peningkatan Produktivitas',
+                                'description' => 'Solusi untuk meningkatkan produktivitas tim dan proses bisnis.'
+                            ]
+                        ]
+                    ]),
+                ],
+                [
+                    'title' => 'Testimoni',
+                    'slug' => 'testimonials',
+                    'content' => json_encode([
+                        '__type' => 'testimonials_home',
+                        'heading' => 'Kata Mereka',
+                        'description' => 'Apa kata klien kami tentang layanan yang kami berikan.',
+                        'items' => [
+                            [
+                                'name' => 'Ahmad Hidayat',
+                                'position' => 'CEO PT Maju Jaya',
+                                'company' => 'PT Maju Jaya',
+                                'avatar' => 'https://ui-avatars.com/api/?name=Ahmad+Hidayat&background=0D8ABC&color=fff',
+                                'rating' => 5,
+                                'testimonial' => 'Pelayanan yang sangat profesional dan hasil yang memuaskan. Tim sangat responsif dan memahami kebutuhan bisnis kami.'
+                            ],
+                            [
+                                'name' => 'Siti Nurhaliza',
+                                'position' => 'Director',
+                                'company' => 'CV Berkah Sejahtera',
+                                'avatar' => 'https://ui-avatars.com/api/?name=Siti+Nurhaliza&background=10b981&color=fff',
+                                'rating' => 5,
+                                'testimonial' => 'Implementasi sistem berjalan lancar dan tepat waktu. Sangat puas dengan dedikasi tim dalam memberikan solusi terbaik.'
+                            ],
+                            [
+                                'name' => 'Budi Santoso',
+                                'position' => 'Manager IT',
+                                'company' => 'PT Teknologi Nusantara',
+                                'avatar' => 'https://ui-avatars.com/api/?name=Budi+Santoso&background=f59e0b&color=fff',
+                                'rating' => 5,
+                                'testimonial' => 'Kualitas code dan arsitektur sistem yang dibangun sangat baik. Support after sales juga luar biasa responsif.'
+                            ]
+                        ]
+                    ]),
+                ],
+                [
+                    'title' => 'Statistik',
+                    'slug' => 'metrics',
+                    'content' => json_encode([
+                        '__type' => 'metrics_home',
+                        'items' => [
+                            ['value' => '100+', 'label' => 'Klien Puas'],
+                            ['value' => '90', 'label' => 'Proyek Selesai'],
+                            ['value' => '65%', 'label' => 'Efisiensi Meningkat']
+                        ]
+                    ]),
+                ],
+                [
+                    'title' => 'Artikel Terbaru',
+                    'slug' => 'blog-preview',
+                    'content' => json_encode([
+                        '__type' => 'blog_preview',
+                        'heading' => 'Artikel Terbaru',
+                        'description' => 'Baca artikel dan insight terbaru dari tim kami.',
+                        'link_text' => 'Lihat Semua Artikel',
+                        'link_url' => '/blog'
+                    ]),
+                ],
+                [
+                    'title' => 'CTA - Home',
+                    'slug' => 'cta-home',
+                    'content' => json_encode([
+                        '__type' => 'cta_home',
+                        'heading' => 'Siap untuk Memulai?',
+                        'description' => 'Hubungi tim kami untuk mendiskusikan kebutuhan bisnis Anda dan temukan solusi terbaik bersama kami.',
+                        'button_label' => 'Hubungi Kami',
+                        'button_link' => '/contact',
+                    ]),
                 ],
             ],
             'about' => [
                 [
-                    'title' => 'Profil',
-                    'slug' => 'profil',
-                    'content' => '<div class="profil-section">
-                        <h2>Profil Organisasi</h2>
-                        <p>Kami adalah lembaga yang berkomitmen untuk memberikan layanan terbaik dalam bidang penjaminan mutu pendidikan. Dengan pengalaman lebih dari 10 tahun, kami telah membantu ratusan institusi mencapai standar mutu terbaik.</p>
-                        <p>Tim kami terdiri dari profesional berpengalaman yang siap memberikan pendampingan dan konsultasi untuk meningkatkan kualitas institusi Anda.</p>
-                    </div>',
-                ],
-                [
-                    'title' => 'Sambutan',
-                    'slug' => 'sambutan',
-                    'content' => '<div class="sambutan-section">
-                        <h2>Sambutan Ketua</h2>
-                        <p><strong>Assalamu\'alaikum Warahmatullahi Wabarakatuh,</strong></p>
-                        <p>Selamat datang di website Lembaga Penjaminan Mutu. Kami berkomitmen untuk terus meningkatkan kualitas pendidikan melalui sistem penjaminan mutu yang terstandar dan berkelanjutan.</p>
-                        <p>Mari kita bersama-sama membangun pendidikan yang berkualitas untuk masa depan yang lebih baik.</p>
-                        <p><strong>Wassalamu\'alaikum Warahmatullahi Wabarakatuh</strong></p>
-                        <p><em>- Ketua Lembaga Penjaminan Mutu</em></p>
-                    </div>',
-                ],
-                [
-                    'title' => 'Struktur Organisasi',
-                    'slug' => 'struktur-organisasi',
-                    'content' => '<div class="struktur-section">
-                        <h2>Struktur Organisasi</h2>
-                        <p>Lembaga kami memiliki struktur organisasi yang solid dan profesional untuk memastikan pelaksanaan tugas yang optimal.</p>
-                        <ul>
-                            <li><strong>Ketua:</strong> [Nama Ketua]</li>
-                            <li><strong>Wakil Ketua:</strong> [Nama Wakil]</li>
-                            <li><strong>Sekretaris:</strong> [Nama Sekretaris]</li>
-                            <li><strong>Bendahara:</strong> [Nama Bendahara]</li>
-                            <li><strong>Divisi PPEPP:</strong> [Nama Koordinator]</li>
-                            <li><strong>Divisi MONEV:</strong> [Nama Koordinator]</li>
-                            <li><strong>Divisi AMI:</strong> [Nama Koordinator]</li>
-                        </ul>
-                    </div>',
+                    'title' => 'Overview',
+                    'slug' => 'overview',
+                    'content' => json_encode([
+                        '__type' => 'about_overview',
+                        'badge' => 'Tentang Perusahaan',
+                        'heading' => 'Mitra Terpercaya untuk Transformasi Bisnis',
+                        'title' => 'Tentang Kami',
+                        'paragraphs' => [
+                            'Kami adalah perusahaan konsultan teknologi dan manajemen yang berdedikasi untuk membantu organisasi mencapai potensi penuh mereka.',
+                            'Dengan pengalaman lebih dari satu dekade, kami telah bekerjasama dengan berbagai klien dari startup hingga perusahaan multinasional.'
+                        ],
+                        'stats' => [
+                            ['value' => '10+', 'label' => 'Tahun Pengalaman'],
+                            ['value' => '50+', 'label' => 'Klien Semuanya'],
+                            ['value' => '100+', 'label' => 'Proyek Selesai']
+                        ],
+                        'highlights' => [
+                            ['icon' => 'zap', 'title' => 'Inovasi', 'description' => 'Selalu mencari cara baru yang lebih baik.'],
+                            ['icon' => 'shield', 'title' => 'Kepercayaan', 'description' => 'Menjaga integritas dalam setiap kerjasama.']
+                        ]
+                    ]),
                 ],
                 [
                     'title' => 'Visi & Misi',
                     'slug' => 'visi-misi',
-                    'content' => '<div class="visi-misi-section">
-                        <h2>Visi dan Misi</h2>
-                        <h3>Visi</h3>
-                        <p>Menjadi lembaga penjaminan mutu yang terdepan dalam mendukung peningkatan kualitas pendidikan tinggi yang berkelanjutan.</p>
-                        <h3>Misi</h3>
-                        <ul>
-                            <li>Mengembangkan sistem penjaminan mutu internal yang efektif dan berkelanjutan</li>
-                            <li>Melaksanakan monitoring dan evaluasi secara berkala untuk peningkatan mutu</li>
-                            <li>Memfasilitasi proses akreditasi institusi dan program studi</li>
-                            <li>Memberikan pendampingan dan konsultasi dalam peningkatan mutu pendidikan</li>
-                            <li>Membangun budaya mutu di seluruh civitas akademika</li>
-                        </ul>
-                    </div>',
+                    'content' => json_encode([
+                        '__type' => 'about_vision',
+                        'badge' => 'Arah Kami',
+                        'title' => 'Visi & Misi',
+                        'vision_title' => 'Visi Kami',
+                        'vision_text' => 'Menjadi mitra transformasi digital terdepan di Asia Tenggara, memberdayakan bisnis untuk tumbuh berkelanjutan melalui teknologi.',
+                        'mission_title' => 'Misi Kami',
+                        'mission_text' => 'Menyediakan solusi teknologi inovatif yang praktis, membangun talenta digital terbaik, dan menciptakan dampak positif bagi ekosistem bisnis.'
+                    ]),
                 ],
                 [
-                    'title' => 'Akreditasi Institusi',
-                    'slug' => 'akreditasi-institusi',
-                    'content' => '<div class="akreditasi-section">
-                        <h2>Akreditasi Institusi</h2>
-                        <p>Institusi kami telah terakreditasi dengan peringkat yang baik, menunjukkan komitmen kami terhadap kualitas pendidikan.</p>
-                        <p><strong>Status Akreditasi:</strong> [Status dan Peringkat]</p>
-                        <p><strong>Masa Berlaku:</strong> [Tanggal - Tanggal]</p>
-                        <p>Kami terus berupaya meningkatkan kualitas untuk mencapai standar akreditasi yang lebih tinggi.</p>
-                    </div>',
+                    'title' => 'Nilai Perusahaan',
+                    'slug' => 'values',
+                    'content' => json_encode([
+                        '__type' => 'about_values',
+                        'items' => [
+                            ['icon' => 'users', 'title' => 'Kolaborasi', 'description' => 'Bekerja bersama untuk hasil terbaik.'],
+                            ['icon' => 'star', 'title' => 'Keunggulan', 'description' => 'Selalu memberikan kualitas terbaik.'],
+                            ['icon' => 'heart', 'title' => 'Kepedulian', 'description' => 'Peduli pada klien, tim, dan masyarakat.']
+                        ]
+                    ]),
+                ],
+                [
+                    'title' => 'Statistik',
+                    'slug' => 'statistics',
+                    'content' => json_encode([
+                        '__type' => 'about_statistics',
+                        'badge' => 'Pencapaian',
+                        'title' => 'Dampak Kami',
+                        'description' => 'Angka yang mencerminkan dedikasi dan hasil kerja keras kami.',
+                        'primary' => [
+                            ['value' => '98%', 'label' => 'Kepuasan Klien'],
+                            ['value' => '200%', 'label' => 'Rata-rata ROI Klien']
+                        ],
+                        'secondary' => [
+                            ['value' => '24/7', 'label' => 'Dukungan Teknis'],
+                            ['value' => '15', 'label' => 'Penghargaan Industri']
+                        ]
+                    ]),
+                ],
+                [
+                    'title' => 'Tim',
+                    'slug' => 'team',
+                    'content' => json_encode([
+                        '__type' => 'about_team',
+                        'badge' => 'Tim Kami',
+                        'title' => 'Bertemu Para Ahli',
+                        'description' => 'Dipimpin oleh individu yang bersemangat dan berpengalaman di bidangnya.',
+                        'members' => [
+                            [
+                                'name' => 'Budi Santoso',
+                                'role' => 'CEO',
+                                'image' => 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop',
+                                'description' => 'Visioner teknologi dengan 15 tahun pengalaman.'
+                            ],
+                            [
+                                'name' => 'Siti Aminah',
+                                'role' => 'CTO',
+                                'image' => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop',
+                                'description' => 'Arsitek sistem yang ahli dalam skalabilitas.'
+                            ]
+                        ]
+                    ]),
+                ],
+                [
+                    'title' => 'CTA About',
+                    'slug' => 'cta',
+                    'content' => json_encode([
+                        '__type' => 'about_cta',
+                        'badge' => 'Karir',
+                        'heading' => 'Bergabung Bersama Kami',
+                        'description' => 'Jadilah bagian dari tim yang dinamis dan inovatif.',
+                        'primary_label' => 'Lihat Lowongan',
+                        'primary_link' => '/career',
+                        'contacts' => [
+                            ['icon' => 'mail', 'title' => 'Email', 'detail' => 'career@example.com']
+                        ]
+                    ]),
                 ],
             ],
             'service' => [
                 [
-                    'title' => 'Pendampingan Akreditasi',
-                    'slug' => 'pendampingan-akreditasi',
-                    'content' => '<div class="service-detail">
-                        <h2>Layanan Pendampingan Akreditasi</h2>
-                        <p>Kami menyediakan layanan pendampingan komprehensif untuk proses akreditasi institusi dan program studi Anda.</p>
-                        <h3>Layanan Meliputi:</h3>
-                        <ul>
-                            <li>Konsultasi persiapan dokumen akreditasi</li>
-                            <li>Pendampingan penyusunan borang dan dokumen pendukung</li>
-                            <li>Simulasi visitasi akreditasi</li>
-                            <li>Pelatihan tim akreditasi</li>
-                            <li>Monitoring dan evaluasi berkelanjutan</li>
-                        </ul>
-                    </div>',
+                    'title' => 'Hero Service',
+                    'slug' => 'hero-service',
+                    'content' => json_encode([
+                        '__type' => 'service_hero',
+                        'heading' => 'Solusi Digital Komprehensif',
+                        'highlight' => 'Keahlian Kami',
+                        'description' => 'Dari pengembangan web hingga AI, kami menyediakan layanan end-to-end untuk kebutuhan digital Anda.',
+                        'primary_label' => 'Minta Penawaran',
+                        'primary_link' => '/contact',
+                        'secondary_label' => 'Portofolio',
+                        'secondary_link' => '/project',
+                        'hero_image' => 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1600&auto=format&fit=crop',
+                    ]),
                 ],
                 [
-                    'title' => 'Permohonan Data',
-                    'slug' => 'permohonan-data',
-                    'content' => '<div class="service-detail">
-                        <h2>Permohonan Data</h2>
-                        <p>Untuk mendukung transparansi dan akuntabilitas, kami menyediakan layanan permohonan data akademik dan institusional.</p>
-                        <h3>Prosedur:</h3>
-                        <ol>
-                            <li>Ajukan permohonan melalui formulir yang tersedia</li>
-                            <li>Sertakan identitas dan tujuan penggunaan data</li>
-                            <li>Tim kami akan memverifikasi permohonan Anda</li>
-                            <li>Data akan dikirimkan maksimal 7 hari kerja</li>
-                        </ol>
-                    </div>',
+                    'title' => 'Ringkasan Layanan',
+                    'slug' => 'summary',
+                    'content' => json_encode([
+                        '__type' => 'service_summary',
+                        'badge' => 'Layanan Kami',
+                        'heading' => 'Apa yang Kami Tawarkan',
+                        'description' => 'Kami menawarkan berbagai layanan teknologi untuk mempercepat pertumbuhan bisnis Anda.'
+                    ]),
                 ],
                 [
-                    'title' => 'Konsultasi Mutu',
-                    'slug' => 'konsultasi-mutu',
-                    'content' => '<div class="service-detail">
-                        <h2>Konsultasi Mutu</h2>
-                        <p>Dapatkan konsultasi profesional untuk meningkatkan sistem penjaminan mutu di institusi Anda.</p>
-                        <h3>Topik Konsultasi:</h3>
-                        <ul>
-                            <li>Pengembangan dokumen SPMI</li>
-                            <li>Implementasi siklus PPEPP</li>
-                            <li>Strategi peningkatan mutu berkelanjutan</li>
-                            <li>Audit mutu internal</li>
-                            <li>Best practices dalam penjaminan mutu</li>
-                        </ul>
-                    </div>',
+                    'title' => 'Penawaran',
+                    'slug' => 'offerings',
+                    'content' => json_encode([
+                        '__type' => 'service_offerings',
+                        'badge' => 'Keahlian',
+                        'heading' => 'Bidang Fokus',
+                        'description' => 'Spesialisasi kami mencakup berbagai domain teknologi.',
+                        'items' => [
+                            ['title' => 'Web Development', 'description' => 'Membangun website responsif dan modern.', 'icon' => 'layout'],
+                            ['title' => 'Mobile Apps', 'description' => 'Aplikasi native untuk iOS dan Android.', 'icon' => 'smartphone'],
+                            ['title' => 'Cloud Infrastructure', 'description' => 'Skalabilitas dan keamanan di cloud.', 'icon' => 'cloud']
+                        ]
+                    ]),
                 ],
                 [
-                    'title' => 'Pengaduan',
-                    'slug' => 'pengaduan',
-                    'content' => '<div class="service-detail">
-                        <h2>Layanan Pengaduan</h2>
-                        <p>Kami menyediakan saluran pengaduan untuk menampung masukan, keluhan, dan saran dari civitas akademika.</p>
-                        <p>Pengaduan Anda akan ditangani dengan:</p>
-                        <ul>
-                            <li>Konfidensialitas terjamin</li>
-                            <li>Respon maksimal 3 hari kerja</li>
-                            <li>Penanganan yang profesional</li>
-                            <li>Tindak lanjut yang terukur</li>
-                        </ul>
-                    </div>',
+                    'title' => 'Tech Stack',
+                    'slug' => 'tech-stack',
+                    'content' => json_encode([
+                        '__type' => 'service_tech_stack',
+                        'badge' => 'Teknologi',
+                        'heading' => 'Stack Modern',
+                        'description' => 'Kami menggunakan alat terbaik untuk hasil terbaik.',
+                        'categories' => [
+                            ['name' => 'Frontend', 'items' => ['React', 'Vue', 'Tailwind']],
+                            ['name' => 'Backend', 'items' => ['Laravel', 'Node.js', 'Go']],
+                        ]
+                    ]),
                 ],
                 [
-                    'title' => 'Kritik & Saran',
-                    'slug' => 'kritik-saran',
-                    'content' => '<div class="service-detail">
-                        <h2>Kritik & Saran</h2>
-                        <p>Masukan Anda sangat berharga bagi peningkatan layanan kami. Silakan sampaikan kritik dan saran konstruktif untuk membantu kami berkembang lebih baik.</p>
-                        <p>Setiap masukan akan kami evaluasi dan ditindaklanjuti untuk perbaikan berkelanjutan.</p>
-                    </div>',
+                    'title' => 'Proses Kerja',
+                    'slug' => 'process',
+                    'content' => json_encode([
+                        '__type' => 'service_process',
+                        'badge' => 'Alur Kerja',
+                        'heading' => 'Bagaimana Kami Bekerja',
+                        'description' => 'Metodologi agile untuk pengiriman cepat dan berkualitas.',
+                        'steps' => [
+                            ['title' => 'Discovery', 'description' => 'Memahami kebutuhan bisnis.'],
+                            ['title' => 'Design', 'description' => 'Merancang solusi visual dan arsitektur.'],
+                            ['title' => 'Development', 'description' => 'Menulis kode berkualitas tinggi.'],
+                            ['title' => 'Launch', 'description' => 'Deployment dan monitoring.']
+                        ]
+                    ]),
+                ],
+                [
+                    'title' => 'Keunggulan',
+                    'slug' => 'advantages',
+                    'content' => json_encode([
+                        '__type' => 'service_advantages',
+                        'badge' => 'Mengapa Kami',
+                        'heading' => 'Nilai Tambah',
+                        'description' => 'Apa yang membedakan kami dari kompetitor.',
+                        'items' => [
+                            ['title' => 'Tim Berpengalaman', 'description' => 'Ahli di bidangnya masing-masing.'],
+                            ['title' => 'Komitmen pada Kualitas', 'description' => 'Standar tinggi tanpa kompromi.']
+                        ]
+                    ]),
+                ],
+                [
+                    'title' => 'FAQ',
+                    'slug' => 'faq',
+                    'content' => json_encode([
+                        '__type' => 'service_faqs',
+                        'heading' => 'Pertanyaan Umum',
+                        'description' => 'Jawaban untuk pertanyaan yang sering diajukan.',
+                        'items' => [
+                            ['question' => 'Berapa lama waktu pengerjaan?', 'answer' => 'Tergantung kompleksitas proyek, biasanya 1-3 bulan.'],
+                            ['question' => 'Apakah ada garansi?', 'answer' => 'Ya, kami memberikan garansi maintenance selama 3 bulan.']
+                        ]
+                    ]),
                 ],
             ],
             'product' => [
                 [
-                    'title' => 'Produk Unggulan',
-                    'slug' => 'unggulan',
-                    'content' => '<div class="product-section">
-                        <h2>Produk Unggulan</h2>
-                        <p>Temukan berbagai produk dan layanan unggulan yang kami tawarkan untuk mendukung kebutuhan Anda.</p>
-                        <p>Produk kami dirancang dengan standar kualitas terbaik dan telah dipercaya oleh banyak institusi.</p>
-                    </div>',
+                    'title' => 'Hero Product',
+                    'slug' => 'hero-product',
+                    'content' => json_encode([
+                        '__type' => 'product_hero',
+                        'badge' => 'Produk',
+                        'heading' => 'Produk Digital Unggulan',
+                        'description' => 'Solusi siap pakai untuk mempercepat operasional bisnis Anda.'
+                    ]),
                 ],
                 [
-                    'title' => 'Kategori Produk',
-                    'slug' => 'kategori',
-                    'content' => '<div class="product-section">
-                        <h2>Kategori Produk</h2>
-                        <p>Produk kami tersedia dalam berbagai kategori untuk memenuhi kebutuhan yang beragam:</p>
-                        <ul>
-                            <li>Dokumen SPMI</li>
-                            <li>Panduan dan Manual</li>
-                            <li>Template dan Form</li>
-                            <li>Software dan Aplikasi</li>
-                        </ul>
-                    </div>',
+                    'title' => 'Stats Product',
+                    'slug' => 'stats-product',
+                    'content' => json_encode([
+                        '__type' => 'product_stats',
+                        'labels' => [
+                            'products' => 'Produk Aktif',
+                            'clients' => 'Pengguna Puas',
+                            'rating' => 'Rating Rata-rata',
+                            'awards' => 'Penghargaan'
+                        ],
+                        'awards' => 5
+                    ]),
                 ],
                 [
-                    'title' => 'Demo / Trial',
-                    'slug' => 'demo',
-                    'content' => '<div class="product-section">
-                        <h2>Demo & Trial</h2>
-                        <p>Kami menyediakan layanan demo dan trial untuk produk tertentu. Hubungi kami untuk informasi lebih lanjut dan jadwalkan demo produk yang Anda minati.</p>
-                    </div>',
+                    'title' => 'CTA Product',
+                    'slug' => 'cta-product',
+                    'content' => json_encode([
+                        '__type' => 'product_cta',
+                        'badge' => 'Tertarik?',
+                        'heading' => 'Mulai Gunakan Produk Kami',
+                        'description' => 'Hubungi sales kami untuk demo dan informasi harga.',
+                        'primary_label' => 'Hubungi Sales',
+                        'primary_link' => '/contact',
+                        'contacts' => [
+                            ['icon' => 'phone', 'title' => 'Telepon', 'detail' => '+62 21 555 1234']
+                        ]
+                    ]),
                 ],
             ],
             'project' => [
                 [
-                    'title' => 'Proyek Berjalan',
-                    'slug' => 'berjalan',
-                    'content' => '<div class="project-section">
-                        <h2>Proyek Berjalan</h2>
-                        <p>Saat ini kami sedang menjalankan berbagai proyek peningkatan mutu di berbagai institusi. Proyek-proyek ini mencakup pendampingan akreditasi, implementasi SPMI, dan audit mutu internal.</p>
-                    </div>',
-                ],
-                [
-                    'title' => 'Proyek Selesai',
-                    'slug' => 'selesai',
-                    'content' => '<div class="project-section">
-                        <h2>Proyek yang Telah Selesai</h2>
-                        <p>Kami telah menyelesaikan berbagai proyek dengan hasil yang memuaskan. Berikut adalah beberapa pencapaian kami:</p>
-                        <ul>
-                            <li>Pendampingan akreditasi 50+ program studi</li>
-                            <li>Implementasi SPMI di 20+ institusi</li>
-                            <li>Audit mutu internal untuk 100+ unit</li>
-                        </ul>
-                    </div>',
-                ],
-                [
-                    'title' => 'Klien & Mitra',
-                    'slug' => 'klien',
-                    'content' => '<div class="project-section">
-                        <h2>Klien & Mitra</h2>
-                        <p>Kami bangga telah bermitra dengan berbagai institusi pendidikan terkemuka. Kepercayaan mereka adalah motivasi kami untuk terus memberikan layanan terbaik.</p>
-                    </div>',
+                    'title' => 'Hero Project',
+                    'slug' => 'hero-project',
+                    'content' => json_encode([
+                        '__type' => 'project_hero',
+                        'badge' => 'Portofolio',
+                        'heading' => 'Karya Terbaik Kami',
+                        'description' => 'Lihat bagaimana kami membantu klien mencapai tujuan mereka melalui teknologi.'
+                    ]),
                 ],
             ],
             'career' => [
                 [
-                    'title' => 'Lowongan Aktif',
-                    'slug' => 'lowongan',
-                    'content' => '<div class="career-section">
-                        <h2>Lowongan Pekerjaan</h2>
-                        <p>Bergabunglah dengan tim kami! Saat ini kami membuka lowongan untuk berbagai posisi. Kunjungi halaman karier kami secara berkala untuk informasi lowongan terbaru.</p>
-                    </div>',
-                ],
-                [
-                    'title' => 'Budaya & Nilai',
-                    'slug' => 'budaya',
-                    'content' => '<div class="career-section">
-                        <h2>Budaya & Nilai Organisasi</h2>
-                        <p>Kami membangun budaya kerja yang positif, kolaboratif, dan inovatif. Nilai-nilai kami:</p>
-                        <ul>
-                            <li><strong>Integritas:</strong> Menjunjung tinggi kejujuran dan etika</li>
-                            <li><strong>Profesionalisme:</strong> Komitmen pada kualitas terbaik</li>
-                            <li><strong>Kolaborasi:</strong> Bekerja sama untuk hasil optimal</li>
-                            <li><strong>Inovasi:</strong> Terus berinovasi dan berkembang</li>
-                        </ul>
-                    </div>',
-                ],
-                [
-                    'title' => 'Proses Rekrutmen',
-                    'slug' => 'proses',
-                    'content' => '<div class="career-section">
-                        <h2>Proses Rekrutmen</h2>
-                        <p>Proses rekrutmen kami dirancang untuk menemukan kandidat terbaik:</p>
-                        <ol>
-                            <li>Pengajuan lamaran dan CV</li>
-                            <li>Seleksi administrasi</li>
-                            <li>Tes tertulis/online</li>
-                            <li>Wawancara HR</li>
-                            <li>Wawancara user/manajemen</li>
-                            <li>Offering dan onboarding</li>
-                        </ol>
-                    </div>',
-                ],
-                [
-                    'title' => 'FAQ Karier',
-                    'slug' => 'faq-karier',
-                    'content' => '<div class="career-section">
-                        <h2>FAQ Karier</h2>
-                        <p><strong>Q: Berapa lama proses rekrutmen?</strong><br>
-                        A: Proses rekrutmen biasanya memakan waktu 2-4 minggu.</p>
-                        <p><strong>Q: Apakah ada program magang?</strong><br>
-                        A: Ya, kami membuka program magang untuk mahasiswa dan fresh graduate.</p>
-                        <p><strong>Q: Bagaimana cara melamar?</strong><br>
-                        A: Kirimkan CV dan surat lamaran ke email recruitment@example.com</p>
-                    </div>',
+                    'title' => 'Hero Career',
+                    'slug' => 'hero-career',
+                    'content' => json_encode([
+                        '__type' => 'career_hero',
+                        'badge' => 'Karir',
+                        'heading' => 'Berkembang Bersama Kami',
+                        'description' => 'Temukan peluang karir yang menantang dan lingkungan kerja yang mendukung.'
+                    ]),
                 ],
             ],
             'blog' => [
                 [
-                    'title' => 'Artikel Terbaru',
-                    'slug' => 'terbaru',
-                    'content' => '<div class="blog-section">
-                        <h2>Artikel Terbaru</h2>
-                        <p>Baca artikel dan insight terbaru dari kami seputar penjaminan mutu, akreditasi, dan pengembangan pendidikan tinggi.</p>
-                    </div>',
-                ],
-                [
-                    'title' => 'Kategori Berita',
-                    'slug' => 'berita',
-                    'content' => '<div class="blog-section">
-                        <h2>Berita & Informasi</h2>
-                        <p>Dapatkan informasi terkini seputar kegiatan, event, dan pencapaian lembaga kami.</p>
-                    </div>',
-                ],
-                [
-                    'title' => 'Pengumuman',
-                    'slug' => 'pengumuman',
-                    'content' => '<div class="blog-section">
-                        <h2>Pengumuman</h2>
-                        <p>Pengumuman resmi dan informasi penting dari lembaga kami.</p>
-                    </div>',
+                    'title' => 'Hero Blog',
+                    'slug' => 'hero-blog',
+                    'content' => json_encode([
+                        '__type' => 'blog_hero',
+                        'badge' => 'Wawasan',
+                        'heading' => 'Artikel & Berita Terbaru',
+                        'description' => 'Ikuti perkembangan teknologi dan tren bisnis terkini bersama kami.'
+                    ]),
                 ],
             ],
             'contact' => [
                 [
-                    'title' => 'Formulir Kontak',
-                    'slug' => 'form',
-                    'content' => '<div class="contact-section">
-                        <h2>Hubungi Kami</h2>
-                        <p>Silakan isi formulir di bawah ini untuk menghubungi kami. Tim kami akan merespons pesan Anda sesegera mungkin.</p>
-                    </div>',
+                    'title' => 'Hero Contact',
+                    'slug' => 'hero-contact',
+                    'content' => json_encode([
+                        '__type' => 'contact_hero',
+                        'heading' => 'Kontak Kami',
+                        'description' => 'Mitra strategis untuk pertumbuhan bisnis lintas industri.',
+                        'background_image' => null,
+                    ]),
                 ],
                 [
-                    'title' => 'Lokasi & Peta',
-                    'slug' => 'lokasi',
-                    'content' => '<div class="contact-section">
-                        <h2>Lokasi Kantor</h2>
-                        <p><strong>Alamat:</strong><br>
-                        Jl. Contoh No. 123<br>
-                        Kota, Provinsi 12345</p>
-                        <p><strong>Email:</strong> info@example.com<br>
-                        <strong>Telepon:</strong> (021) 1234-5678<br>
-                        <strong>Fax:</strong> (021) 1234-5679</p>
-                    </div>',
-                ],
-                [
-                    'title' => 'Kontak Darurat',
-                    'slug' => 'darurat',
-                    'content' => '<div class="contact-section">
-                        <h2>Kontak Darurat</h2>
-                        <p>Untuk keperluan mendesak di luar jam kerja, hubungi:</p>
-                        <p><strong>Hotline 24/7:</strong> 0800-123-4567</p>
-                    </div>',
+                    'title' => 'Contact Info',
+                    'slug' => 'contact-info',
+                    'content' => json_encode([
+                        '__type' => 'contact_info',
+                        'address' => 'Jl. Merdeka No. 123, Jakarta Pusat, DKI Jakarta, 10110',
+                        'phone' => '+62 21 555 8890',
+                        'email' => 'hello@harmonygroup.id',
+                        'operating_hours' => 'Senin - Jumat: 08:00 - 17:00',
+                        'map_embed' => null,
+                    ]),
                 ],
             ],
         ];
@@ -379,6 +469,12 @@ class PageSectionSeeder extends Seeder
             }
 
             foreach ($sectionList as $order => $section) {
+                // Ensure content is properly JSON encoded if it's an array, 
+                // but we already json_encoded it in the array definition for clarity. 
+                // However, the previous code might expect it to strictly be a string or array.
+                // In my definition above, 'content' is ALREADY a string (result of json_encode).
+                // So we just use it directly.
+
                 PageSection::updateOrCreate(
                     [
                         'page_id' => $page->id,

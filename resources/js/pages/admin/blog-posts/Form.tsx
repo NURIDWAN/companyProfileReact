@@ -23,6 +23,8 @@ type BlogPost = {
     is_published: boolean;
     published_at?: string | null;
     author_id?: number | null;
+    category_id?: number | null;
+    category?: { id: number; name: string; slug: string } | null;
     meta_title?: string | null;
     meta_description?: string | null;
     og_title?: string | null;
@@ -65,41 +67,43 @@ const blogPresets: Array<{
     call_to_action: string;
     description: string;
 }> = [
-    {
-        id: "friendly-startup",
-        label: "Friendly Startup",
-        tone: "hangat, optimistis, penuh energi",
-        audience: "founder startup dan pemilik bisnis digital",
-        call_to_action: "Diskusikan ide Anda dengan tim kami",
-        description: "Cocok untuk artikel ringan dan menginspirasi dengan sentuhan storytelling.",
-    },
-    {
-        id: "enterprise",
-        label: "Enterprise & Korporasi",
-        tone: "formal, strategis, fokus ROI",
-        audience: "C-level dan direktur perusahaan enterprise",
-        call_to_action: "Jadwalkan sesi konsultasi strategis",
-        description: "Tekankan mitigasi risiko dan dampak bisnis terukur.",
-    },
-    {
-        id: "public-sector",
-        label: "Sektor Publik",
-        tone: "profesional, mengedepankan kepatuhan",
-        audience: "pejabat pemda/BUMN",
-        call_to_action: "Pelajari cara kami mendampingi instansi Anda",
-        description: "Soroti transparansi, keberlanjutan, dan manfaat sosial.",
-    },
-];
+        {
+            id: "friendly-startup",
+            label: "Friendly Startup",
+            tone: "hangat, optimistis, penuh energi",
+            audience: "founder startup dan pemilik bisnis digital",
+            call_to_action: "Diskusikan ide Anda dengan tim kami",
+            description: "Cocok untuk artikel ringan dan menginspirasi dengan sentuhan storytelling.",
+        },
+        {
+            id: "enterprise",
+            label: "Enterprise & Korporasi",
+            tone: "formal, strategis, fokus ROI",
+            audience: "C-level dan direktur perusahaan enterprise",
+            call_to_action: "Jadwalkan sesi konsultasi strategis",
+            description: "Tekankan mitigasi risiko dan dampak bisnis terukur.",
+        },
+        {
+            id: "public-sector",
+            label: "Sektor Publik",
+            tone: "profesional, mengedepankan kepatuhan",
+            audience: "pejabat pemda/BUMN",
+            call_to_action: "Pelajari cara kami mendampingi instansi Anda",
+            description: "Soroti transparansi, keberlanjutan, dan manfaat sosial.",
+        },
+    ];
 
 interface Props {
     post?: BlogPost;
     users?: { id: number; name: string }[];
+    categories?: { id: number; name: string; slug: string }[];
 }
 
-export default function BlogPostForm({ post, users = [] }: Props) {
+export default function BlogPostForm({ post, users = [], categories = [] }: Props) {
     const title = post ? "Edit Artikel" : "Tulis Artikel";
     const form = useForm({
         author_id: post?.author_id ?? "",
+        category_id: post?.category_id ?? "",
         title: post?.title ?? "",
         slug: post?.slug ?? "",
         excerpt: post?.excerpt ?? "",
@@ -541,6 +545,23 @@ export default function BlogPostForm({ post, users = [] }: Props) {
                                     ))}
                                 </select>
                                 {errors.author_id && <p className="text-xs text-rose-500">{errors.author_id}</p>}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="category_id">Kategori</Label>
+                                <select
+                                    id="category_id"
+                                    className="h-10 rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                    value={data.category_id ?? ""}
+                                    onChange={(event) => setData("category_id", event.target.value)}
+                                >
+                                    <option value="">Pilih kategori</option>
+                                    {categories.map((cat) => (
+                                        <option key={cat.id} value={cat.id}>
+                                            {cat.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                {errors.category_id && <p className="text-xs text-rose-500">{errors.category_id}</p>}
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="excerpt">Ringkasan</Label>

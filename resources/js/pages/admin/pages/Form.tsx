@@ -6,7 +6,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ImageUpload } from "@/components/ui/ImageUpload";
 import { RichTextEditor } from "@/components/RichTextEditor";
+import { IconPicker } from "@/components/ui/IconPicker";
 import InputError from "@/components/input-error";
 import { FormEventHandler, useMemo, useState } from "react";
 import { PlusCircle, Trash2 } from "lucide-react";
@@ -61,13 +63,36 @@ export default function PageForm({ page, parents = [] }: Props) {
     const inferType = (section: SectionPayload): string => {
         const slug = (section.slug ?? "").toLowerCase();
         const name = (section.title ?? "").toLowerCase();
-        if ((slug.includes("service") || name.includes("layanan")) && slug.includes("hero")) return "service_hero";
-        if (slug.includes("hero") || name.includes("hero")) return "hero_home";
-        if (slug.includes("about") || name.includes("tentang")) return "about_intro";
-        if (slug.includes("highlight") && (slug.includes("about") || name.includes("tentang"))) return "about_highlight";
-        if (slug.includes("service") || slug.includes("layanan")) return "service_overview";
-        if (slug.includes("faq")) return "service_faq";
-        if (slug.includes("cta")) return "cta_home";
+
+        // Home
+        if (slug === 'hero' || slug === 'hero_home') return 'hero_home';
+        if (slug.includes('about') && slug.includes('summary')) return 'about_intro';
+        if (slug.includes('service') && slug.includes('highlight')) return 'service_overview';
+        if (slug.includes('why') && slug.includes('us')) return 'why_us';
+        if (slug.includes('testimonial')) return 'testimonials_home';
+        if (slug.includes('metric')) return 'metrics_home';
+        if (slug.includes('blog') && slug.includes('preview')) return 'blog_preview';
+        if (slug.includes('cta') && slug.includes('home')) return 'cta_home';
+
+        // About
+        if (slug === 'overview' || slug === 'about_overview') return 'about_overview';
+        if (slug.includes('visi') || slug.includes('misi')) return 'about_vision';
+        if (slug.includes('value') || slug.includes('nilai')) return 'about_values';
+        if (slug.includes('stat')) return 'about_statistics';
+        if (slug.includes('team') || slug.includes('tim')) return 'about_team';
+        if (slug.includes('cta') && slug.includes('about')) return 'about_cta';
+
+        // Service
+        if (slug.includes('hero') && slug.includes('service')) return 'service_hero';
+        if (slug === 'summary' || slug === 'service_summary') return 'service_summary';
+        if (slug === 'offerings' || slug === 'service_offerings') return 'service_offerings';
+        if (slug === 'tech-stack' || slug === 'service_tech_stack') return 'service_tech_stack';
+        if (slug === 'process' || slug === 'service_process') return 'service_process';
+        if (slug === 'advantages' || slug === 'service_advantages') return 'service_advantages';
+        if (slug === 'faq' || slug === 'service_faqs') return 'service_faqs';
+
+
+
         return "plain";
     };
     const parseContent = (content?: string | null) => {
@@ -94,14 +119,36 @@ export default function PageForm({ page, parents = [] }: Props) {
     };
 
     const sectionTypes = [
-        { value: "plain", label: "Konten Biasa" },
-        { value: "hero_home", label: "Hero - Home" },
-        { value: "about_intro", label: "Tentang Kami - Intro" },
-        { value: "about_highlight", label: "Tentang Kami - Highlight" },
-        { value: "service_hero", label: "Hero - Service" },
-        { value: "service_overview", label: "Service Overview" },
-        { value: "service_faq", label: "FAQ - Service" },
-        { value: "cta_home", label: "CTA - Home" },
+        { value: "plain", label: "Konten Biasa (HTML)" },
+
+        // Home
+        { value: "hero_home", label: "Home - Hero" },
+        { value: "about_intro", label: "Home - About Summary" },
+        { value: "service_overview", label: "Home - Service Highlight" },
+        { value: "why_us", label: "Home - Why Choose Us" },
+        { value: "testimonials_home", label: "Home - Testimonials" },
+        { value: "metrics_home", label: "Home - Metrics/Stats" },
+        { value: "blog_preview", label: "Home - Blog Preview" },
+        { value: "cta_home", label: "Home - CTA" },
+
+        // About
+        { value: "about_overview", label: "About - Overview" },
+        { value: "about_vision", label: "About - Visi & Misi" },
+        { value: "about_values", label: "About - Values" },
+        { value: "about_statistics", label: "About - Stats" },
+        { value: "about_team", label: "About - Team" },
+        { value: "about_cta", label: "About - CTA" },
+
+        // Service
+        { value: "service_hero", label: "Service - Hero" },
+        { value: "service_summary", label: "Service - Summary" },
+        { value: "service_offerings", label: "Service - Offerings" },
+        { value: "service_tech_stack", label: "Service - Tech Stack" },
+        { value: "service_process", label: "Service - Process" },
+        { value: "service_advantages", label: "Service - Advantages" },
+        { value: "service_faqs", label: "Service - FAQ" },
+
+
     ];
 
     const form = useForm({
@@ -448,6 +495,7 @@ export default function PageForm({ page, parents = [] }: Props) {
                                                     setData("sections", updated);
                                                 };
 
+                                                // --- HOME SECTIONS ---
                                                 if (type === "hero_home") {
                                                     return (
                                                         <div className="mt-2 space-y-3">
@@ -479,15 +527,16 @@ export default function PageForm({ page, parents = [] }: Props) {
                                                                     <Input value={dataSection.secondary_link ?? ""} onChange={(e) => updateData({ secondary_link: e.target.value })} />
                                                                 </div>
                                                             </div>
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Gambar Hero (URL)</Label>
-                                                                <Input value={dataSection.hero_image ?? ""} onChange={(e) => updateData({ hero_image: e.target.value })} placeholder="https://..." />
-                                                            </div>
+                                                            <ImageUpload
+                                                                value={dataSection.hero_image ?? null}
+                                                                onChange={(url) => updateData({ hero_image: url })}
+                                                                label="Gambar Hero"
+                                                            />
                                                         </div>
                                                     );
                                                 }
 
-                                                if (type === "about_intro") {
+                                                if (type === "about_intro" || type === "service_overview") {
                                                     return (
                                                         <div className="mt-2 space-y-3">
                                                             <div className="space-y-1">
@@ -498,157 +547,49 @@ export default function PageForm({ page, parents = [] }: Props) {
                                                                 <Label className="text-xs">Deskripsi</Label>
                                                                 <Textarea value={dataSection.description ?? ""} onChange={(e) => updateData({ description: e.target.value })} />
                                                             </div>
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Highlight (satu per baris)</Label>
-                                                                <Textarea
-                                                                    value={(dataSection.highlights ?? []).join("\n")}
-                                                                    onChange={(e) => updateData({ highlights: e.target.value.split("\n").filter((v: string) => v.trim() !== "") })}
+                                                            <div className="space-y-2">
+                                                                <Label className="text-xs">Highlights</Label>
+                                                                {(dataSection.highlights ?? []).map((highlight: string, idx: number) => (
+                                                                    <div key={idx} className="flex gap-2">
+                                                                        <Input
+                                                                            value={highlight}
+                                                                            onChange={(e) => {
+                                                                                const updated = [...(dataSection.highlights ?? [])];
+                                                                                updated[idx] = e.target.value;
+                                                                                updateData({ highlights: updated });
+                                                                            }}
+                                                                            placeholder={`Highlight ${idx + 1}`}
+                                                                        />
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="ghost"
+                                                                            size="icon"
+                                                                            onClick={() => {
+                                                                                const updated = [...(dataSection.highlights ?? [])];
+                                                                                updated.splice(idx, 1);
+                                                                                updateData({ highlights: updated });
+                                                                            }}
+                                                                        >
+                                                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                                                        </Button>
+                                                                    </div>
+                                                                ))}
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => updateData({ highlights: [...(dataSection.highlights ?? []), ""] })}
+                                                                >
+                                                                    <PlusCircle className="mr-2 h-3 w-3" /> Tambah Highlight
+                                                                </Button>
+                                                            </div>
+                                                            {type === 'about_intro' && (
+                                                                <ImageUpload
+                                                                    value={dataSection.image ?? null}
+                                                                    onChange={(url) => updateData({ image: url })}
+                                                                    label="Gambar"
                                                                 />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Gambar (URL)</Label>
-                                                                <Input value={dataSection.image ?? ""} onChange={(e) => updateData({ image: e.target.value })} placeholder="https://..." />
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                }
-
-                                                if (type === "about_highlight") {
-                                                    return (
-                                                        <div className="mt-2 space-y-3">
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Judul</Label>
-                                                                <Input value={dataSection.heading ?? ""} onChange={(e) => updateData({ heading: e.target.value })} />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Deskripsi</Label>
-                                                                <Textarea value={dataSection.description ?? ""} onChange={(e) => updateData({ description: e.target.value })} />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Highlight (satu per baris)</Label>
-                                                                <Textarea
-                                                                    value={(dataSection.highlights ?? []).join("\n")}
-                                                                    onChange={(e) =>
-                                                                        updateData({
-                                                                            highlights: e.target.value
-                                                                                .split("\n")
-                                                                                .map((v: string) => v.trim())
-                                                                                .filter((v: string) => v !== ""),
-                                                                        })
-                                                                    }
-                                                                />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Gambar (URL)</Label>
-                                                                <Input value={dataSection.image ?? ""} onChange={(e) => updateData({ image: e.target.value })} placeholder="https://..." />
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                }
-
-                                                if (type === "service_overview") {
-                                                    return (
-                                                        <div className="mt-2 space-y-3">
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Judul</Label>
-                                                                <Input value={dataSection.heading ?? ""} onChange={(e) => updateData({ heading: e.target.value })} />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Deskripsi</Label>
-                                                                <Textarea value={dataSection.description ?? ""} onChange={(e) => updateData({ description: e.target.value })} />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Highlight (satu per baris)</Label>
-                                                                <Textarea
-                                                                    value={(dataSection.highlights ?? []).join("\n")}
-                                                                    onChange={(e) =>
-                                                                        updateData({
-                                                                            highlights: e.target.value
-                                                                                .split("\n")
-                                                                                .map((v: string) => v.trim())
-                                                                                .filter((v: string) => v !== ""),
-                                                                        })
-                                                                    }
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                }
-
-                                                if (type === "service_hero") {
-                                                    return (
-                                                        <div className="mt-2 space-y-3">
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Judul</Label>
-                                                                <Input value={dataSection.heading ?? ""} onChange={(e) => updateData({ heading: e.target.value })} />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Highlight</Label>
-                                                                <Input value={dataSection.highlight ?? ""} onChange={(e) => updateData({ highlight: e.target.value })} />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Deskripsi</Label>
-                                                                <Textarea value={dataSection.description ?? ""} onChange={(e) => updateData({ description: e.target.value })} />
-                                                            </div>
-                                                            <div className="grid gap-2 md:grid-cols-2">
-                                                                <div className="space-y-1">
-                                                                    <Label className="text-xs">Label Tombol Utama</Label>
-                                                                    <Input value={dataSection.primary_label ?? ""} onChange={(e) => updateData({ primary_label: e.target.value })} />
-                                                                </div>
-                                                                <div className="space-y-1">
-                                                                    <Label className="text-xs">Link Tombol Utama</Label>
-                                                                    <Input value={dataSection.primary_link ?? ""} onChange={(e) => updateData({ primary_link: e.target.value })} />
-                                                                </div>
-                                                            </div>
-                                                            <div className="grid gap-2 md:grid-cols-2">
-                                                                <div className="space-y-1">
-                                                                    <Label className="text-xs">Label Tombol Sekunder</Label>
-                                                                    <Input value={dataSection.secondary_label ?? ""} onChange={(e) => updateData({ secondary_label: e.target.value })} />
-                                                                </div>
-                                                                <div className="space-y-1">
-                                                                    <Label className="text-xs">Link Tombol Sekunder</Label>
-                                                                    <Input value={dataSection.secondary_link ?? ""} onChange={(e) => updateData({ secondary_link: e.target.value })} />
-                                                                </div>
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Gambar Hero (URL)</Label>
-                                                                <Input value={dataSection.hero_image ?? ""} onChange={(e) => updateData({ hero_image: e.target.value })} placeholder="https://..." />
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                }
-
-                                                if (type === "service_faq") {
-                                                    return (
-                                                        <div className="mt-2 space-y-3">
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Judul</Label>
-                                                                <Input value={dataSection.heading ?? ""} onChange={(e) => updateData({ heading: e.target.value })} />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Deskripsi</Label>
-                                                                <Textarea value={dataSection.description ?? ""} onChange={(e) => updateData({ description: e.target.value })} />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">FAQ (format: pertanyaan|jawaban, satu per baris)</Label>
-                                                                <Textarea
-                                                                    value={(dataSection.items ?? [])
-                                                                        .map((item: any) => `${item.question ?? ""}|${item.answer ?? ""}`.trim())
-                                                                        .join("\n")}
-                                                                    onChange={(e) => {
-                                                                        const items = e.target.value
-                                                                            .split("\n")
-                                                                            .map((line) => line.trim())
-                                                                            .filter((line) => line !== "")
-                                                                            .map((line) => {
-                                                                                const [question, answer] = line.split("|");
-                                                                                return { question: question?.trim() ?? "", answer: answer?.trim() ?? "" };
-                                                                            })
-                                                                            .filter((item) => item.question || item.answer);
-                                                                        updateData({ items });
-                                                                    }}
-                                                                />
-                                                            </div>
+                                                            )}
                                                         </div>
                                                     );
                                                 }
@@ -678,9 +619,1257 @@ export default function PageForm({ page, parents = [] }: Props) {
                                                     );
                                                 }
 
+                                                if (type === "why_us") {
+                                                    return (
+                                                        <div className="mt-2 space-y-3">
+                                                            <div className="grid gap-2 md:grid-cols-2">
+                                                                <div className="space-y-1"><Label className="text-xs">Heading</Label><Input value={dataSection.heading ?? ""} onChange={(e) => updateData({ heading: e.target.value })} /></div>
+                                                                <div className="space-y-1"><Label className="text-xs">Description</Label><Input value={dataSection.description ?? ""} onChange={(e) => updateData({ description: e.target.value })} /></div>
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <Label className="text-xs">Items</Label>
+                                                                {(dataSection.items ?? []).map((item: any, idx: number) => (
+                                                                    <div key={idx} className="flex flex-col gap-2 rounded-lg border p-3 bg-muted/20">
+                                                                        <div className="flex gap-2 items-start">
+                                                                            <div className="w-[200px] flex-shrink-0">
+                                                                                <Label className="text-[10px] text-muted-foreground mb-1 block">Icon</Label>
+                                                                                <IconPicker
+                                                                                    value={item.icon ?? ""}
+                                                                                    onChange={(val) => {
+                                                                                        const updated = [...(dataSection.items ?? [])];
+                                                                                        updated[idx] = { ...item, icon: val };
+                                                                                        updateData({ items: updated });
+                                                                                    }}
+                                                                                />
+                                                                            </div>
+                                                                            <div className="flex-1 space-y-2">
+                                                                                <div>
+                                                                                    <Label className="text-[10px] text-muted-foreground mb-1 block">Judul</Label>
+                                                                                    <Input
+                                                                                        value={item.title ?? ""}
+                                                                                        onChange={(e) => {
+                                                                                            const updated = [...(dataSection.items ?? [])];
+                                                                                            updated[idx] = { ...item, title: e.target.value };
+                                                                                            updateData({ items: updated });
+                                                                                        }}
+                                                                                        placeholder="Judul Feature"
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="mt-6"
+                                                                                onClick={() => {
+                                                                                    const updated = [...(dataSection.items ?? [])];
+                                                                                    updated.splice(idx, 1);
+                                                                                    updateData({ items: updated });
+                                                                                }}
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4 text-destructive" />
+                                                                            </Button>
+                                                                        </div>
+                                                                        <div>
+                                                                            <Label className="text-[10px] text-muted-foreground mb-1 block">Deskripsi</Label>
+                                                                            <Input
+                                                                                value={item.description ?? ""}
+                                                                                onChange={(e) => {
+                                                                                    const updated = [...(dataSection.items ?? [])];
+                                                                                    updated[idx] = { ...item, description: e.target.value };
+                                                                                    updateData({ items: updated });
+                                                                                }}
+                                                                                placeholder="Deskripsi singkat"
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => updateData({ items: [...(dataSection.items ?? []), { icon: "", title: "", description: "" }] })}
+                                                                >
+                                                                    <PlusCircle className="mr-2 h-3 w-3" /> Tambah Item
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+
+                                                if (type === "testimonials_home") {
+                                                    return (
+                                                        <div className="mt-2 space-y-3">
+                                                            <div className="grid gap-2 md:grid-cols-2">
+                                                                <div className="space-y-1"><Label className="text-xs">Heading</Label><Input value={dataSection.heading ?? ""} onChange={(e) => updateData({ heading: e.target.value })} /></div>
+                                                                <div className="space-y-1"><Label className="text-xs">Description</Label><Input value={dataSection.description ?? ""} onChange={(e) => updateData({ description: e.target.value })} /></div>
+                                                            </div>
+                                                            <div className="space-y-3 border p-3 rounded-lg bg-muted/10">
+                                                                <div className="flex justify-between items-center mb-2">
+                                                                    <Label className="text-sm font-semibold">Testimonial Items</Label>
+                                                                    <p className="text-xs text-muted-foreground">Kelola daftar testimonial dari klien.</p>
+                                                                </div>
+
+                                                                {(dataSection.items ?? []).map((item: any, idx: number) => (
+                                                                    <div key={idx} className="relative space-y-3 rounded-lg border border-input bg-background p-4 shadow-sm">
+                                                                        <div className="absolute right-3 top-3">
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                                                                onClick={() => {
+                                                                                    const updated = [...(dataSection.items ?? [])];
+                                                                                    updated.splice(idx, 1);
+                                                                                    updateData({ items: updated });
+                                                                                }}
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </div>
+
+                                                                        <div className="grid gap-4 md:grid-cols-2 pr-8">
+                                                                            <div className="space-y-1">
+                                                                                <Label className="text-xs text-muted-foreground">Nama Klien</Label>
+                                                                                <Input
+                                                                                    value={item.name ?? ""}
+                                                                                    onChange={(e) => {
+                                                                                        const updated = [...(dataSection.items ?? [])];
+                                                                                        updated[idx] = { ...item, name: e.target.value };
+                                                                                        updateData({ items: updated });
+                                                                                    }}
+                                                                                    placeholder="Nama Lengkap"
+                                                                                />
+                                                                            </div>
+                                                                            <div className="space-y-1">
+                                                                                <Label className="text-xs text-muted-foreground">Posisi / Perusahaan</Label>
+                                                                                <Input
+                                                                                    value={item.position ?? ""}
+                                                                                    onChange={(e) => {
+                                                                                        const updated = [...(dataSection.items ?? [])];
+                                                                                        updated[idx] = { ...item, position: e.target.value };
+                                                                                        updateData({ items: updated });
+                                                                                    }}
+                                                                                    placeholder="CEO PT Maju Jaya"
+                                                                                />
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div className="space-y-1">
+                                                                            <Label className="text-xs text-muted-foreground">Isi Testimonial</Label>
+                                                                            <Textarea
+                                                                                value={item.testimonial ?? ""}
+                                                                                onChange={(e) => {
+                                                                                    const updated = [...(dataSection.items ?? [])];
+                                                                                    updated[idx] = { ...item, testimonial: e.target.value };
+                                                                                    updateData({ items: updated });
+                                                                                }}
+                                                                                className="min-h-[80px]"
+                                                                                placeholder="Tulis pendapat klien di sini..."
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => updateData({ items: [...(dataSection.items ?? []), { name: "", position: "", testimonial: "" }] })}
+                                                                >
+                                                                    <PlusCircle className="mr-2 h-4 w-4" />
+                                                                    Tambah Testimonial
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+
+                                                if (type === "metrics_home") {
+                                                    return (
+                                                        <div className="mt-2 space-y-3">
+                                                            <div className="space-y-1">
+                                                                <Label className="text-xs">Metrics (Format: value|label per baris)</Label>
+                                                                <Textarea
+                                                                    value={(dataSection.items ?? []).map((s: any) => `${s.value}|${s.label}`).join("\n")}
+                                                                    onChange={(e) => updateData({ items: e.target.value.split("\n").map((l: string) => { const [v, lb] = l.split("|"); return { value: v, label: lb }; }).filter((i: any) => i.value) })}
+                                                                    placeholder="100+|Klien Puas"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+
+                                                if (type === "blog_preview") {
+                                                    return (
+                                                        <div className="mt-2 space-y-3">
+                                                            <div className="grid gap-2 md:grid-cols-2">
+                                                                <div className="space-y-1"><Label className="text-xs">Heading</Label><Input value={dataSection.heading ?? ""} onChange={(e) => updateData({ heading: e.target.value })} /></div>
+                                                                <div className="space-y-1"><Label className="text-xs">Description</Label><Input value={dataSection.description ?? ""} onChange={(e) => updateData({ description: e.target.value })} /></div>
+                                                            </div>
+                                                            <div className="grid gap-2 md:grid-cols-2">
+                                                                <div className="space-y-1"><Label className="text-xs">Link Text</Label><Input value={dataSection.link_text ?? ""} onChange={(e) => updateData({ link_text: e.target.value })} placeholder="Lihat Semua" /></div>
+                                                                <div className="space-y-1"><Label className="text-xs">Link URL</Label><Input value={dataSection.link_url ?? ""} onChange={(e) => updateData({ link_url: e.target.value })} placeholder="/blog" /></div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+
+                                                // --- ABOUT SECTIONS ---
+                                                if (type === "about_overview") {
+                                                    return (
+                                                        <div className="mt-2 space-y-3">
+                                                            <div className="grid gap-2 md:grid-cols-2">
+                                                                <div className="space-y-1"><Label className="text-xs">Badge</Label><Input value={dataSection.badge ?? ""} onChange={(e) => updateData({ badge: e.target.value })} /></div>
+                                                                <div className="space-y-1"><Label className="text-xs">Title (Kecil)</Label><Input value={dataSection.title ?? ""} onChange={(e) => updateData({ title: e.target.value })} /></div>
+                                                            </div>
+                                                            <div className="space-y-1"><Label className="text-xs">Heading (Besar)</Label><Input value={dataSection.heading ?? ""} onChange={(e) => updateData({ heading: e.target.value })} /></div>
+                                                            <div className="space-y-1">
+                                                                <Label className="text-xs">Paragraf (satu per baris)</Label>
+                                                                <Textarea value={(dataSection.paragraphs ?? []).join("\n")} onChange={(e) => updateData({ paragraphs: e.target.value.split("\n") })} />
+                                                            </div>
+                                                            <div className="space-y-3 border p-3 rounded-lg bg-muted/10">
+                                                                <div className="flex justify-between items-center mb-2">
+                                                                    <Label className="text-sm font-semibold">Stats</Label>
+                                                                    <p className="text-xs text-muted-foreground">Statistik utama perusahaan.</p>
+                                                                </div>
+
+                                                                {(dataSection.stats ?? []).map((stat: any, idx: number) => (
+                                                                    <div key={idx} className="flex gap-2 items-end">
+                                                                        <div className="flex-1 space-y-1">
+                                                                            <Label className="text-xs text-muted-foreground">Value</Label>
+                                                                            <Input
+                                                                                value={stat.value ?? ""}
+                                                                                onChange={(e) => {
+                                                                                    const updated = [...(dataSection.stats ?? [])];
+                                                                                    updated[idx] = { ...stat, value: e.target.value };
+                                                                                    updateData({ stats: updated });
+                                                                                }}
+                                                                                placeholder="ex: 100+"
+                                                                            />
+                                                                        </div>
+                                                                        <div className="flex-[2] space-y-1">
+                                                                            <Label className="text-xs text-muted-foreground">Label</Label>
+                                                                            <Input
+                                                                                value={stat.label ?? ""}
+                                                                                onChange={(e) => {
+                                                                                    const updated = [...(dataSection.stats ?? [])];
+                                                                                    updated[idx] = { ...stat, label: e.target.value };
+                                                                                    updateData({ stats: updated });
+                                                                                }}
+                                                                                placeholder="ex: Proyek Selesai"
+                                                                            />
+                                                                        </div>
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="ghost"
+                                                                            size="icon"
+                                                                            className="h-9 w-9 text-muted-foreground hover:text-destructive mb-0.5"
+                                                                            onClick={() => {
+                                                                                const updated = [...(dataSection.stats ?? [])];
+                                                                                updated.splice(idx, 1);
+                                                                                updateData({ stats: updated });
+                                                                            }}
+                                                                        >
+                                                                            <Trash2 className="h-4 w-4" />
+                                                                        </Button>
+                                                                    </div>
+                                                                ))}
+
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => updateData({ stats: [...(dataSection.stats ?? []), { value: "", label: "" }] })}
+                                                                >
+                                                                    <PlusCircle className="mr-2 h-4 w-4" />
+                                                                    Tambah Stat
+                                                                </Button>
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <Label className="text-xs">Highlights</Label>
+                                                                {(dataSection.highlights ?? []).map((item: any, idx: number) => (
+                                                                    <div key={idx} className="flex flex-col gap-2 rounded-lg border p-3 bg-muted/20">
+                                                                        <div className="flex gap-2 items-start">
+                                                                            <div className="w-[200px] flex-shrink-0">
+                                                                                <Label className="text-[10px] text-muted-foreground mb-1 block">Icon</Label>
+                                                                                <IconPicker
+                                                                                    value={item.icon ?? ""}
+                                                                                    onChange={(val) => {
+                                                                                        const updated = [...(dataSection.highlights ?? [])];
+                                                                                        updated[idx] = { ...item, icon: val };
+                                                                                        updateData({ highlights: updated });
+                                                                                    }}
+                                                                                />
+                                                                            </div>
+                                                                            <div className="flex-1 space-y-2">
+                                                                                <div>
+                                                                                    <Label className="text-[10px] text-muted-foreground mb-1 block">Judul</Label>
+                                                                                    <Input
+                                                                                        value={item.title ?? ""}
+                                                                                        onChange={(e) => {
+                                                                                            const updated = [...(dataSection.highlights ?? [])];
+                                                                                            updated[idx] = { ...item, title: e.target.value };
+                                                                                            updateData({ highlights: updated });
+                                                                                        }}
+                                                                                        placeholder="Judul Highlight"
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="mt-6"
+                                                                                onClick={() => {
+                                                                                    const updated = [...(dataSection.highlights ?? [])];
+                                                                                    updated.splice(idx, 1);
+                                                                                    updateData({ highlights: updated });
+                                                                                }}
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4 text-destructive" />
+                                                                            </Button>
+                                                                        </div>
+                                                                        <div>
+                                                                            <Label className="text-[10px] text-muted-foreground mb-1 block">Deskripsi</Label>
+                                                                            <Input
+                                                                                value={item.description ?? ""}
+                                                                                onChange={(e) => {
+                                                                                    const updated = [...(dataSection.highlights ?? [])];
+                                                                                    updated[idx] = { ...item, description: e.target.value };
+                                                                                    updateData({ highlights: updated });
+                                                                                }}
+                                                                                placeholder="Deskripsi singkat"
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => updateData({ highlights: [...(dataSection.highlights ?? []), { icon: "", title: "", description: "" }] })}
+                                                                >
+                                                                    <PlusCircle className="mr-2 h-3 w-3" /> Tambah Highlight
+                                                                </Button>
+                                                            </div>
+                                                            <ImageUpload
+                                                                value={dataSection.image ?? null}
+                                                                onChange={(url) => updateData({ image: url })}
+                                                                label="Gambar Overview"
+                                                            />
+                                                        </div>
+                                                    );
+                                                }
+
+                                                if (type === "about_vision") {
+                                                    return (
+                                                        <div className="mt-2 space-y-3">
+                                                            <div className="grid gap-2 md:grid-cols-2">
+                                                                <div className="space-y-1"><Label className="text-xs">Badge</Label><Input value={dataSection.badge ?? ""} onChange={(e) => updateData({ badge: e.target.value })} /></div>
+                                                                <div className="space-y-1"><Label className="text-xs">Title</Label><Input value={dataSection.title ?? ""} onChange={(e) => updateData({ title: e.target.value })} /></div>
+                                                            </div>
+                                                            <hr />
+                                                            <div className="space-y-1"><Label className="text-xs">Judul Visi</Label><Input value={dataSection.vision_title ?? ""} onChange={(e) => updateData({ vision_title: e.target.value })} /></div>
+                                                            <div className="space-y-1"><Label className="text-xs">Teks Visi</Label><Textarea value={dataSection.vision_text ?? ""} onChange={(e) => updateData({ vision_text: e.target.value })} /></div>
+                                                            <hr />
+                                                            <div className="space-y-1"><Label className="text-xs">Judul Misi</Label><Input value={dataSection.mission_title ?? ""} onChange={(e) => updateData({ mission_title: e.target.value })} /></div>
+                                                            <div className="space-y-1"><Label className="text-xs">Teks Misi</Label><Textarea value={dataSection.mission_text ?? ""} onChange={(e) => updateData({ mission_text: e.target.value })} /></div>
+                                                            <ImageUpload
+                                                                value={dataSection.image ?? null}
+                                                                onChange={(url) => updateData({ image: url })}
+                                                                label="Gambar Vision/Mission"
+                                                            />
+                                                        </div>
+                                                    );
+                                                }
+
+                                                if (type === "about_values") {
+                                                    return (
+                                                        <div className="mt-2 space-y-3">
+                                                            <div className="space-y-2">
+                                                                <Label className="text-xs">Values</Label>
+                                                                {(dataSection.items ?? []).map((item: any, idx: number) => (
+                                                                    <div key={idx} className="flex flex-col gap-2 rounded-lg border p-3 bg-muted/20">
+                                                                        <div className="flex gap-2 items-start">
+                                                                            <div className="w-[200px] flex-shrink-0">
+                                                                                <Label className="text-[10px] text-muted-foreground mb-1 block">Icon</Label>
+                                                                                <IconPicker
+                                                                                    value={item.icon ?? ""}
+                                                                                    onChange={(val) => {
+                                                                                        const updated = [...(dataSection.items ?? [])];
+                                                                                        updated[idx] = { ...item, icon: val };
+                                                                                        updateData({ items: updated });
+                                                                                    }}
+                                                                                />
+                                                                            </div>
+                                                                            <div className="flex-1 space-y-2">
+                                                                                <div>
+                                                                                    <Label className="text-[10px] text-muted-foreground mb-1 block">Judul</Label>
+                                                                                    <Input
+                                                                                        value={item.title ?? ""}
+                                                                                        onChange={(e) => {
+                                                                                            const updated = [...(dataSection.items ?? [])];
+                                                                                            updated[idx] = { ...item, title: e.target.value };
+                                                                                            updateData({ items: updated });
+                                                                                        }}
+                                                                                        placeholder="Nilai Inti"
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="mt-6"
+                                                                                onClick={() => {
+                                                                                    const updated = [...(dataSection.items ?? [])];
+                                                                                    updated.splice(idx, 1);
+                                                                                    updateData({ items: updated });
+                                                                                }}
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4 text-destructive" />
+                                                                            </Button>
+                                                                        </div>
+                                                                        <div>
+                                                                            <Label className="text-[10px] text-muted-foreground mb-1 block">Deskripsi</Label>
+                                                                            <Input
+                                                                                value={item.description ?? ""}
+                                                                                onChange={(e) => {
+                                                                                    const updated = [...(dataSection.items ?? [])];
+                                                                                    updated[idx] = { ...item, description: e.target.value };
+                                                                                    updateData({ items: updated });
+                                                                                }}
+                                                                                placeholder="Deskripsi singkat"
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => updateData({ items: [...(dataSection.items ?? []), { icon: "", title: "", description: "" }] })}
+                                                                >
+                                                                    <PlusCircle className="mr-2 h-3 w-3" /> Tambah Value
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+
+                                                if (type === "about_statistics") {
+                                                    return (
+                                                        <div className="mt-2 space-y-3">
+                                                            <div className="grid gap-2 md:grid-cols-2">
+                                                                <div className="space-y-1"><Label className="text-xs">Badge</Label><Input value={dataSection.badge ?? ""} onChange={(e) => updateData({ badge: e.target.value })} /></div>
+                                                                <div className="space-y-1"><Label className="text-xs">Title</Label><Input value={dataSection.title ?? ""} onChange={(e) => updateData({ title: e.target.value })} /></div>
+                                                            </div>
+                                                            <div className="space-y-1"><Label className="text-xs">Description</Label><Textarea value={dataSection.description ?? ""} onChange={(e) => updateData({ description: e.target.value })} /></div>
+                                                            <div className="space-y-3 border p-3 rounded-lg bg-muted/10">
+                                                                <div className="flex justify-between items-center mb-2">
+                                                                    <Label className="text-sm font-semibold">Primary Stats</Label>
+                                                                    <p className="text-xs text-muted-foreground">Statistik utama (Highlight).</p>
+                                                                </div>
+
+                                                                {(dataSection.primary ?? []).map((stat: any, idx: number) => (
+                                                                    <div key={idx} className="flex gap-2 items-end">
+                                                                        <div className="flex-1 space-y-1">
+                                                                            <Label className="text-xs text-muted-foreground">Value</Label>
+                                                                            <Input
+                                                                                value={stat.value ?? ""}
+                                                                                onChange={(e) => {
+                                                                                    const updated = [...(dataSection.primary ?? [])];
+                                                                                    updated[idx] = { ...stat, value: e.target.value };
+                                                                                    updateData({ primary: updated });
+                                                                                }}
+                                                                                placeholder="98%"
+                                                                            />
+                                                                        </div>
+                                                                        <div className="flex-[2] space-y-1">
+                                                                            <Label className="text-xs text-muted-foreground">Label</Label>
+                                                                            <Input
+                                                                                value={stat.label ?? ""}
+                                                                                onChange={(e) => {
+                                                                                    const updated = [...(dataSection.primary ?? [])];
+                                                                                    updated[idx] = { ...stat, label: e.target.value };
+                                                                                    updateData({ primary: updated });
+                                                                                }}
+                                                                                placeholder="Kepuasan Klien"
+                                                                            />
+                                                                        </div>
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="ghost"
+                                                                            size="icon"
+                                                                            className="h-9 w-9 text-muted-foreground hover:text-destructive mb-0.5"
+                                                                            onClick={() => {
+                                                                                const updated = [...(dataSection.primary ?? [])];
+                                                                                updated.splice(idx, 1);
+                                                                                updateData({ primary: updated });
+                                                                            }}
+                                                                        >
+                                                                            <Trash2 className="h-4 w-4" />
+                                                                        </Button>
+                                                                    </div>
+                                                                ))}
+
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => updateData({ primary: [...(dataSection.primary ?? []), { value: "", label: "" }] })}
+                                                                >
+                                                                    <PlusCircle className="mr-2 h-4 w-4" />
+                                                                    Tambah Primary Stat
+                                                                </Button>
+                                                            </div>
+
+                                                            <div className="space-y-3 border p-3 rounded-lg bg-muted/10">
+                                                                <div className="flex justify-between items-center mb-2">
+                                                                    <Label className="text-sm font-semibold">Secondary Stats</Label>
+                                                                    <p className="text-xs text-muted-foreground">Statistik tambahan (List).</p>
+                                                                </div>
+
+                                                                {(dataSection.secondary ?? []).map((stat: any, idx: number) => (
+                                                                    <div key={idx} className="flex gap-2 items-end">
+                                                                        <div className="flex-1 space-y-1">
+                                                                            <Label className="text-xs text-muted-foreground">Value</Label>
+                                                                            <Input
+                                                                                value={stat.value ?? ""}
+                                                                                onChange={(e) => {
+                                                                                    const updated = [...(dataSection.secondary ?? [])];
+                                                                                    updated[idx] = { ...stat, value: e.target.value };
+                                                                                    updateData({ secondary: updated });
+                                                                                }}
+                                                                                placeholder="24/7"
+                                                                            />
+                                                                        </div>
+                                                                        <div className="flex-[2] space-y-1">
+                                                                            <Label className="text-xs text-muted-foreground">Label</Label>
+                                                                            <Input
+                                                                                value={stat.label ?? ""}
+                                                                                onChange={(e) => {
+                                                                                    const updated = [...(dataSection.secondary ?? [])];
+                                                                                    updated[idx] = { ...stat, label: e.target.value };
+                                                                                    updateData({ secondary: updated });
+                                                                                }}
+                                                                                placeholder="Dukungan Teknis"
+                                                                            />
+                                                                        </div>
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="ghost"
+                                                                            size="icon"
+                                                                            className="h-9 w-9 text-muted-foreground hover:text-destructive mb-0.5"
+                                                                            onClick={() => {
+                                                                                const updated = [...(dataSection.secondary ?? [])];
+                                                                                updated.splice(idx, 1);
+                                                                                updateData({ secondary: updated });
+                                                                            }}
+                                                                        >
+                                                                            <Trash2 className="h-4 w-4" />
+                                                                        </Button>
+                                                                    </div>
+                                                                ))}
+
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => updateData({ secondary: [...(dataSection.secondary ?? []), { value: "", label: "" }] })}
+                                                                >
+                                                                    <PlusCircle className="mr-2 h-4 w-4" />
+                                                                    Tambah Secondary Stat
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+
+                                                if (type === "about_team") {
+                                                    return (
+                                                        <div className="mt-2 space-y-3">
+                                                            <div className="grid gap-2 md:grid-cols-2">
+                                                                <div className="space-y-1"><Label className="text-xs">Badge</Label><Input value={dataSection.badge ?? ""} onChange={(e) => updateData({ badge: e.target.value })} /></div>
+                                                                <div className="space-y-1"><Label className="text-xs">Title</Label><Input value={dataSection.title ?? ""} onChange={(e) => updateData({ title: e.target.value })} /></div>
+                                                            </div>
+                                                            <div className="space-y-1"><Label className="text-xs">Description</Label><Textarea value={dataSection.description ?? ""} onChange={(e) => updateData({ description: e.target.value })} /></div>
+                                                            <div className="space-y-3 border p-3 rounded-lg bg-muted/10">
+                                                                <div className="flex justify-between items-center mb-2">
+                                                                    <Label className="text-sm font-semibold">Team Members</Label>
+                                                                    <p className="text-xs text-muted-foreground">Kelola anggota tim.</p>
+                                                                </div>
+
+                                                                {(dataSection.members ?? []).map((member: any, idx: number) => (
+                                                                    <div key={idx} className="relative space-y-4 rounded-lg border border-input bg-background p-4 shadow-sm">
+                                                                        <div className="absolute right-3 top-3">
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                                                                onClick={() => {
+                                                                                    const updated = [...(dataSection.members ?? [])];
+                                                                                    updated.splice(idx, 1);
+                                                                                    updateData({ members: updated });
+                                                                                }}
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </div>
+
+                                                                        <div className="flex flex-col md:flex-row gap-4">
+                                                                            <div className="w-full md:w-1/3">
+                                                                                <Label className="text-xs text-muted-foreground mb-1 block">Foto</Label>
+                                                                                <ImageUpload
+                                                                                    value={member.image ?? null}
+                                                                                    onChange={(url) => {
+                                                                                        const updated = [...(dataSection.members ?? [])];
+                                                                                        updated[idx] = { ...member, image: url };
+                                                                                        updateData({ members: updated });
+                                                                                    }}
+                                                                                    label="Foto Anggota"
+                                                                                />
+                                                                            </div>
+                                                                            <div className="w-full md:w-2/3 space-y-3">
+                                                                                <div className="grid gap-3 md:grid-cols-2">
+                                                                                    <div className="space-y-1">
+                                                                                        <Label className="text-xs text-muted-foreground">Nama</Label>
+                                                                                        <Input
+                                                                                            value={member.name ?? ""}
+                                                                                            onChange={(e) => {
+                                                                                                const updated = [...(dataSection.members ?? [])];
+                                                                                                updated[idx] = { ...member, name: e.target.value };
+                                                                                                updateData({ members: updated });
+                                                                                            }}
+                                                                                            placeholder="Nama Lengkap"
+                                                                                        />
+                                                                                    </div>
+                                                                                    <div className="space-y-1">
+                                                                                        <Label className="text-xs text-muted-foreground">Jabatan (Role)</Label>
+                                                                                        <Input
+                                                                                            value={member.role ?? ""}
+                                                                                            onChange={(e) => {
+                                                                                                const updated = [...(dataSection.members ?? [])];
+                                                                                                updated[idx] = { ...member, role: e.target.value };
+                                                                                                updateData({ members: updated });
+                                                                                            }}
+                                                                                            placeholder="ex: CEO"
+                                                                                        />
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className="space-y-1">
+                                                                                    <Label className="text-xs text-muted-foreground">Deskripsi Singkat</Label>
+                                                                                    <Textarea
+                                                                                        value={member.description ?? ""}
+                                                                                        onChange={(e) => {
+                                                                                            const updated = [...(dataSection.members ?? [])];
+                                                                                            updated[idx] = { ...member, description: e.target.value };
+                                                                                            updateData({ members: updated });
+                                                                                        }}
+                                                                                        className="min-h-[80px]"
+                                                                                        placeholder="Deskripsi singkat tentang anggota tim..."
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => updateData({ members: [...(dataSection.members ?? []), { name: "", role: "", image: "", description: "" }] })}
+                                                                >
+                                                                    <PlusCircle className="mr-2 h-4 w-4" />
+                                                                    Tambah Anggota
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+
+                                                if (type === "about_cta") {
+                                                    return (
+                                                        <div className="mt-2 space-y-3">
+                                                            <div className="grid gap-2 md:grid-cols-2">
+                                                                <div className="space-y-1"><Label className="text-xs">Badge</Label><Input value={dataSection.badge ?? ""} onChange={(e) => updateData({ badge: e.target.value })} /></div>
+                                                                <div className="space-y-1"><Label className="text-xs">Heading</Label><Input value={dataSection.heading ?? ""} onChange={(e) => updateData({ heading: e.target.value })} /></div>
+                                                            </div>
+                                                            <div className="space-y-1"><Label className="text-xs">Description</Label><Textarea value={dataSection.description ?? ""} onChange={(e) => updateData({ description: e.target.value })} /></div>
+                                                            <div className="grid gap-2 md:grid-cols-2">
+                                                                <div className="space-y-1"><Label className="text-xs">Primary Label</Label><Input value={dataSection.primary_label ?? ""} onChange={(e) => updateData({ primary_label: e.target.value })} /></div>
+                                                                <div className="space-y-1"><Label className="text-xs">Primary Link</Label><Input value={dataSection.primary_link ?? ""} onChange={(e) => updateData({ primary_link: e.target.value })} /></div>
+                                                            </div>
+                                                            <div className="space-y-3 border p-3 rounded-lg bg-muted/10">
+                                                                <div className="flex justify-between items-center mb-2">
+                                                                    <Label className="text-sm font-semibold">Contacts</Label>
+                                                                    <p className="text-xs text-muted-foreground">Kontak (Email, Phone, etc).</p>
+                                                                </div>
+
+                                                                {(dataSection.contacts ?? []).map((contact: any, idx: number) => (
+                                                                    <div key={idx} className="flex flex-col gap-2 rounded-lg border p-3 bg-muted/20">
+                                                                        <div className="flex gap-2 items-start">
+                                                                            <div className="w-[200px] flex-shrink-0">
+                                                                                <Label className="text-[10px] text-muted-foreground mb-1 block">Icon</Label>
+                                                                                <IconPicker
+                                                                                    value={contact.icon ?? ""}
+                                                                                    onChange={(val) => {
+                                                                                        const updated = [...(dataSection.contacts ?? [])];
+                                                                                        updated[idx] = { ...contact, icon: val };
+                                                                                        updateData({ contacts: updated });
+                                                                                    }}
+                                                                                />
+                                                                            </div>
+                                                                            <div className="flex-1 space-y-2">
+                                                                                <div>
+                                                                                    <Label className="text-[10px] text-muted-foreground mb-1 block">Title (Label)</Label>
+                                                                                    <Input
+                                                                                        value={contact.title ?? ""}
+                                                                                        onChange={(e) => {
+                                                                                            const updated = [...(dataSection.contacts ?? [])];
+                                                                                            updated[idx] = { ...contact, title: e.target.value };
+                                                                                            updateData({ contacts: updated });
+                                                                                        }}
+                                                                                        placeholder="Email"
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="mt-6"
+                                                                                onClick={() => {
+                                                                                    const updated = [...(dataSection.contacts ?? [])];
+                                                                                    updated.splice(idx, 1);
+                                                                                    updateData({ contacts: updated });
+                                                                                }}
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4 text-destructive" />
+                                                                            </Button>
+                                                                        </div>
+                                                                        <div>
+                                                                            <Label className="text-[10px] text-muted-foreground mb-1 block">Detail (Value)</Label>
+                                                                            <Input
+                                                                                value={contact.detail ?? ""}
+                                                                                onChange={(e) => {
+                                                                                    const updated = [...(dataSection.contacts ?? [])];
+                                                                                    updated[idx] = { ...contact, detail: e.target.value };
+                                                                                    updateData({ contacts: updated });
+                                                                                }}
+                                                                                placeholder="contact@company.com"
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => updateData({ contacts: [...(dataSection.contacts ?? []), { icon: "", title: "", detail: "" }] })}
+                                                                >
+                                                                    <PlusCircle className="mr-2 h-3 w-3" /> Tambah Kontak
+                                                                </Button>
+                                                            </div>
+                                                            {/* Background Image Upload removed - Using Gradient Design */}
+                                                        </div>
+                                                    );
+                                                }
+
+                                                // --- SERVICE SECTIONS ---
+                                                if (type === "service_hero" || type === "project_hero" || type === "career_hero" || type === "blog_hero" || type === "product_hero") {
+                                                    return (
+                                                        <div className="mt-2 space-y-3">
+                                                            {type === 'product_hero' && <div className="space-y-1"><Label className="text-xs">Badge</Label><Input value={dataSection.badge ?? ""} onChange={(e) => updateData({ badge: e.target.value })} /></div>}
+                                                            <div className="space-y-1"><Label className="text-xs">Judul</Label><Input value={dataSection.heading ?? ""} onChange={(e) => updateData({ heading: e.target.value })} /></div>
+                                                            {type === 'service_hero' && <div className="space-y-1"><Label className="text-xs">Highlight</Label><Input value={dataSection.highlight ?? ""} onChange={(e) => updateData({ highlight: e.target.value })} /></div>}
+                                                            <div className="space-y-1"><Label className="text-xs">Deskripsi</Label><Textarea value={dataSection.description ?? ""} onChange={(e) => updateData({ description: e.target.value })} /></div>
+
+                                                            {type === 'service_hero' && (
+                                                                <div className="space-y-1 mt-4 border-t pt-4">
+                                                                    <Label className="text-xs font-semibold">Statistics (Hero Bottom)</Label>
+                                                                    <div className="space-y-2">
+                                                                        {(dataSection.stats ?? []).map((stat: any, index: number) => (
+                                                                            <div key={index} className="flex gap-2 items-start border p-2 rounded-md bg-gray-50 dark:bg-gray-800">
+                                                                                <div className="grid gap-2 flex-1 md:grid-cols-3">
+                                                                                    <Input
+                                                                                        placeholder="Value (e.g. 120+)"
+                                                                                        value={stat.value ?? ""}
+                                                                                        onChange={(e) => {
+                                                                                            const newStats = [...(dataSection.stats ?? [])];
+                                                                                            newStats[index] = { ...newStats[index], value: e.target.value };
+                                                                                            updateData({ stats: newStats });
+                                                                                        }}
+                                                                                    />
+                                                                                    <Input
+                                                                                        placeholder="Label (e.g. Projects)"
+                                                                                        value={stat.label ?? ""}
+                                                                                        onChange={(e) => {
+                                                                                            const newStats = [...(dataSection.stats ?? [])];
+                                                                                            newStats[index] = { ...newStats[index], label: e.target.value };
+                                                                                            updateData({ stats: newStats });
+                                                                                        }}
+                                                                                    />
+                                                                                    <Input
+                                                                                        placeholder="Desc (e.g. Implementasi...)"
+                                                                                        value={stat.desc ?? ""}
+                                                                                        onChange={(e) => {
+                                                                                            const newStats = [...(dataSection.stats ?? [])];
+                                                                                            newStats[index] = { ...newStats[index], desc: e.target.value };
+                                                                                            updateData({ stats: newStats });
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                                <Button
+                                                                                    variant="ghost"
+                                                                                    size="icon"
+                                                                                    className="h-8 w-8 text-red-500 hover:text-red-600"
+                                                                                    onClick={() => {
+                                                                                        const newStats = [...(dataSection.stats ?? [])];
+                                                                                        newStats.splice(index, 1);
+                                                                                        updateData({ stats: newStats });
+                                                                                    }}
+                                                                                >
+                                                                                    <Trash2 className="h-4 w-4" />
+                                                                                </Button>
+                                                                            </div>
+                                                                        ))}
+                                                                        <Button
+                                                                            variant="outline"
+                                                                            size="sm"
+                                                                            onClick={() => updateData({ stats: [...(dataSection.stats ?? []), { value: "", label: "", desc: "" }] })}
+                                                                        >
+                                                                            <PlusCircle className="mr-2 h-3 w-3" /> Add Stat
+                                                                        </Button>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                            <div className="grid gap-2 md:grid-cols-2">
+                                                                <div className="space-y-1"><Label className="text-xs">Label Tombol Utama</Label><Input value={dataSection.primary_label ?? ""} onChange={(e) => updateData({ primary_label: e.target.value })} /></div>
+                                                                <div className="space-y-1"><Label className="text-xs">Link Tombol Utama</Label><Input value={dataSection.primary_link ?? ""} onChange={(e) => updateData({ primary_link: e.target.value })} /></div>
+                                                            </div>
+
+
+                                                            {(type === 'service_hero' || type === 'product_hero' || type === 'project_hero' || type === 'career_hero' || type === 'blog_hero') && (
+                                                                <>
+                                                                    <div className="grid gap-2 md:grid-cols-2">
+                                                                        <div className="space-y-1"><Label className="text-xs">Label Tombol Sekunder</Label><Input value={dataSection.secondary_label ?? ""} onChange={(e) => updateData({ secondary_label: e.target.value })} /></div>
+                                                                        <div className="space-y-1"><Label className="text-xs">Link Tombol Sekunder</Label><Input value={dataSection.secondary_link ?? ""} onChange={(e) => updateData({ secondary_link: e.target.value })} /></div>
+                                                                    </div>
+                                                                    <ImageUpload
+                                                                        value={dataSection.hero_image ?? dataSection.background_image ?? null}
+                                                                        onChange={(url) => updateData({ hero_image: url, background_image: url })}
+                                                                        label="Background Image / Hero Image"
+                                                                    />
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                }
+
+                                                if (type === "service_summary") {
+                                                    return (
+                                                        <div className="mt-2 space-y-3">
+                                                            <div className="grid gap-2 md:grid-cols-2">
+                                                                <div className="space-y-1"><Label className="text-xs">Badge</Label><Input value={dataSection.badge ?? ""} onChange={(e) => updateData({ badge: e.target.value })} /></div>
+                                                                <div className="space-y-1"><Label className="text-xs">Heading</Label><Input value={dataSection.heading ?? ""} onChange={(e) => updateData({ heading: e.target.value })} /></div>
+                                                            </div>
+                                                            <div className="space-y-1"><Label className="text-xs">Deskripsi</Label><Textarea value={dataSection.description ?? ""} onChange={(e) => updateData({ description: e.target.value })} /></div>
+                                                        </div>
+                                                    );
+                                                }
+
+                                                if (type === "service_advantages") {
+                                                    return (
+                                                        <div className="mt-2 space-y-3">
+                                                            <div className="grid gap-2 md:grid-cols-2">
+                                                                <div className="space-y-1"><Label className="text-xs">Badge</Label><Input value={dataSection.badge ?? ""} onChange={(e) => updateData({ badge: e.target.value })} /></div>
+                                                                <div className="space-y-1"><Label className="text-xs">Heading</Label><Input value={dataSection.heading ?? ""} onChange={(e) => updateData({ heading: e.target.value })} /></div>
+                                                            </div>
+                                                            <div className="space-y-1"><Label className="text-xs">Deskripsi</Label><Textarea value={dataSection.description ?? ""} onChange={(e) => updateData({ description: e.target.value })} /></div>
+                                                            <div className="space-y-1 mt-4 border-t pt-4">
+                                                                <Label className="text-xs font-semibold">Advantage Items</Label>
+                                                                <div className="space-y-2">
+                                                                    {(dataSection.items ?? []).map((item: any, index: number) => (
+                                                                        <div key={index} className="flex gap-2 items-start border p-2 rounded-md bg-gray-50 dark:bg-gray-800">
+                                                                            <div className="grid gap-2 flex-1 md:grid-cols-[1fr,2fr,auto]">
+                                                                                <div className="space-y-1">
+                                                                                    <Label className="text-[10px] text-muted-foreground">Title</Label>
+                                                                                    <Input
+                                                                                        placeholder="Title"
+                                                                                        value={item.title ?? ""}
+                                                                                        onChange={(e) => {
+                                                                                            const newItems = [...(dataSection.items ?? [])];
+                                                                                            newItems[index] = { ...newItems[index], title: e.target.value };
+                                                                                            updateData({ items: newItems });
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                                <div className="space-y-1">
+                                                                                    <Label className="text-[10px] text-muted-foreground">Description</Label>
+                                                                                    <Textarea
+                                                                                        placeholder="Description"
+                                                                                        className="h-10 min-h-[40px]"
+                                                                                        value={item.description ?? ""}
+                                                                                        onChange={(e) => {
+                                                                                            const newItems = [...(dataSection.items ?? [])];
+                                                                                            newItems[index] = { ...newItems[index], description: e.target.value };
+                                                                                            updateData({ items: newItems });
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                                <div className="space-y-1">
+                                                                                    <Label className="text-[10px] text-muted-foreground">Icon</Label>
+                                                                                    <IconPicker
+                                                                                        value={item.icon ?? item.iconName ?? ""}
+                                                                                        onChange={(icon) => {
+                                                                                            const newItems = [...(dataSection.items ?? [])];
+                                                                                            newItems[index] = { ...newItems[index], icon: icon, iconName: icon };
+                                                                                            updateData({ items: newItems });
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="h-8 w-8 text-red-500 hover:text-red-600 mt-6"
+                                                                                onClick={() => {
+                                                                                    const newItems = [...(dataSection.items ?? [])];
+                                                                                    newItems.splice(index, 1);
+                                                                                    updateData({ items: newItems });
+                                                                                }}
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </div>
+                                                                    ))}
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={() => updateData({ items: [...(dataSection.items ?? []), { title: "", description: "", icon: "" }] })}
+                                                                    >
+                                                                        <PlusCircle className="mr-2 h-3 w-3" /> Add Item
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+
+                                                if (type === "service_offerings") {
+                                                    return (
+                                                        <div className="mt-2 space-y-3">
+                                                            <div className="grid gap-2 md:grid-cols-2">
+                                                                <div className="space-y-1"><Label className="text-xs">Badge</Label><Input value={dataSection.badge ?? ""} onChange={(e) => updateData({ badge: e.target.value })} /></div>
+                                                                <div className="space-y-1"><Label className="text-xs">Heading</Label><Input value={dataSection.heading ?? ""} onChange={(e) => updateData({ heading: e.target.value })} /></div>
+                                                            </div>
+                                                            <div className="space-y-1"><Label className="text-xs">Deskripsi</Label><Textarea value={dataSection.description ?? ""} onChange={(e) => updateData({ description: e.target.value })} /></div>
+
+                                                            <div className="space-y-1 mt-4 border-t pt-4">
+                                                                <Label className="text-xs font-semibold">Offerings Items</Label>
+                                                                <div className="space-y-2">
+                                                                    {(dataSection.items ?? []).map((item: any, index: number) => (
+                                                                        <div key={index} className="flex gap-2 items-start border p-2 rounded-md bg-gray-50 dark:bg-gray-800">
+                                                                            <div className="grid gap-2 flex-1 md:grid-cols-[1fr,2fr,auto]">
+                                                                                <div className="space-y-1">
+                                                                                    <Label className="text-[10px] text-muted-foreground">Title</Label>
+                                                                                    <Input
+                                                                                        placeholder="Title"
+                                                                                        value={item.title ?? ""}
+                                                                                        onChange={(e) => {
+                                                                                            const newItems = [...(dataSection.items ?? [])];
+                                                                                            newItems[index] = { ...newItems[index], title: e.target.value };
+                                                                                            updateData({ items: newItems });
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                                <div className="space-y-1">
+                                                                                    <Label className="text-[10px] text-muted-foreground">Description</Label>
+                                                                                    <Textarea
+                                                                                        placeholder="Description"
+                                                                                        className="h-10 min-h-[40px]"
+                                                                                        value={item.description ?? ""}
+                                                                                        onChange={(e) => {
+                                                                                            const newItems = [...(dataSection.items ?? [])];
+                                                                                            newItems[index] = { ...newItems[index], description: e.target.value };
+                                                                                            updateData({ items: newItems });
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                                <div className="space-y-1">
+                                                                                    <Label className="text-[10px] text-muted-foreground">Icon</Label>
+                                                                                    <IconPicker
+                                                                                        value={item.icon ?? item.iconName ?? ""}
+                                                                                        onChange={(icon) => {
+                                                                                            const newItems = [...(dataSection.items ?? [])];
+                                                                                            newItems[index] = { ...newItems[index], icon: icon, iconName: icon };
+                                                                                            updateData({ items: newItems });
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="h-8 w-8 text-red-500 hover:text-red-600 mt-6"
+                                                                                onClick={() => {
+                                                                                    const newItems = [...(dataSection.items ?? [])];
+                                                                                    newItems.splice(index, 1);
+                                                                                    updateData({ items: newItems });
+                                                                                }}
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </div>
+                                                                    ))}
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={() => updateData({ items: [...(dataSection.items ?? []), { title: "", description: "", icon: "" }] })}
+                                                                    >
+                                                                        <PlusCircle className="mr-2 h-3 w-3" /> Add Item
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+
+                                                if (type === "service_process") {
+                                                    return (
+                                                        <div className="mt-2 space-y-3">
+                                                            <div className="grid gap-2 md:grid-cols-2">
+                                                                <div className="space-y-1"><Label className="text-xs">Badge</Label><Input value={dataSection.badge ?? ""} onChange={(e) => updateData({ badge: e.target.value })} /></div>
+                                                                <div className="space-y-1"><Label className="text-xs">Heading</Label><Input value={dataSection.heading ?? ""} onChange={(e) => updateData({ heading: e.target.value })} /></div>
+                                                            </div>
+                                                            <div className="space-y-1"><Label className="text-xs">Deskripsi</Label><Textarea value={dataSection.description ?? ""} onChange={(e) => updateData({ description: e.target.value })} /></div>
+                                                            <div className="space-y-1 mt-4 border-t pt-4">
+                                                                <Label className="text-xs font-semibold">Process Steps</Label>
+                                                                <div className="space-y-2">
+                                                                    {(dataSection.items ?? dataSection.steps ?? []).map((item: any, index: number) => (
+                                                                        <div key={index} className="flex gap-2 items-start border p-2 rounded-md bg-gray-50 dark:bg-gray-800">
+                                                                            <div className="grid gap-2 flex-1 md:grid-cols-[auto,1fr,2fr,auto]">
+                                                                                <div className="space-y-1 w-16">
+                                                                                    <Label className="text-[10px] text-muted-foreground">Step</Label>
+                                                                                    <Input
+                                                                                        placeholder="01"
+                                                                                        value={item.step ?? String(index + 1).padStart(2, '0')}
+                                                                                        onChange={(e) => {
+                                                                                            const newItems = [...(dataSection.items ?? dataSection.steps ?? [])];
+                                                                                            newItems[index] = { ...newItems[index], step: e.target.value };
+                                                                                            updateData({ items: newItems });
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                                <div className="space-y-1">
+                                                                                    <Label className="text-[10px] text-muted-foreground">Title</Label>
+                                                                                    <Input
+                                                                                        placeholder="Title"
+                                                                                        value={item.title ?? ""}
+                                                                                        onChange={(e) => {
+                                                                                            const newItems = [...(dataSection.items ?? dataSection.steps ?? [])];
+                                                                                            newItems[index] = { ...newItems[index], title: e.target.value };
+                                                                                            updateData({ items: newItems });
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                                <div className="space-y-1">
+                                                                                    <Label className="text-[10px] text-muted-foreground">Description</Label>
+                                                                                    <Textarea
+                                                                                        placeholder="Description"
+                                                                                        className="h-10 min-h-[40px]"
+                                                                                        value={item.description ?? ""}
+                                                                                        onChange={(e) => {
+                                                                                            const newItems = [...(dataSection.items ?? dataSection.steps ?? [])];
+                                                                                            newItems[index] = { ...newItems[index], description: e.target.value };
+                                                                                            updateData({ items: newItems });
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                                <div className="space-y-1">
+                                                                                    <Label className="text-[10px] text-muted-foreground">Icon</Label>
+                                                                                    <IconPicker
+                                                                                        value={item.icon ?? item.iconName ?? ""}
+                                                                                        onChange={(icon) => {
+                                                                                            const newItems = [...(dataSection.items ?? dataSection.steps ?? [])];
+                                                                                            newItems[index] = { ...newItems[index], icon: icon, iconName: icon };
+                                                                                            updateData({ items: newItems });
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="h-8 w-8 text-red-500 hover:text-red-600 mt-6"
+                                                                                onClick={() => {
+                                                                                    const newItems = [...(dataSection.items ?? dataSection.steps ?? [])];
+                                                                                    newItems.splice(index, 1);
+                                                                                    updateData({ items: newItems });
+                                                                                }}
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </div>
+                                                                    ))}
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={() => updateData({ items: [...(dataSection.items ?? dataSection.steps ?? []), { title: "", description: "", icon: "", step: "" }] })}
+                                                                    >
+                                                                        <PlusCircle className="mr-2 h-3 w-3" /> Add Step
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+
+                                                if (type === "service_tech_stack") {
+                                                    return (
+                                                        <div className="mt-2 space-y-3">
+                                                            <div className="grid gap-2 md:grid-cols-2">
+                                                                <div className="space-y-1"><Label className="text-xs">Badge</Label><Input value={dataSection.badge ?? ""} onChange={(e) => updateData({ badge: e.target.value })} /></div>
+                                                                <div className="space-y-1"><Label className="text-xs">Heading</Label><Input value={dataSection.heading ?? ""} onChange={(e) => updateData({ heading: e.target.value })} /></div>
+                                                            </div>
+                                                            <div className="space-y-1"><Label className="text-xs">Deskripsi</Label><Textarea value={dataSection.description ?? ""} onChange={(e) => updateData({ description: e.target.value })} /></div>
+                                                            <div className="space-y-1 mt-4 border-t pt-4">
+                                                                <Label className="text-xs font-semibold">Tech Categories</Label>
+                                                                <div className="space-y-2">
+                                                                    {(dataSection.categories ?? []).map((category: any, index: number) => (
+                                                                        <div key={index} className="flex gap-2 items-start border p-2 rounded-md bg-gray-50 dark:bg-gray-800">
+                                                                            <div className="grid gap-2 flex-1 md:grid-cols-2">
+                                                                                <div className="space-y-1">
+                                                                                    <Label className="text-[10px] text-muted-foreground">Category Name</Label>
+                                                                                    <Input
+                                                                                        placeholder="ex: Frontend"
+                                                                                        value={category.name ?? ""}
+                                                                                        onChange={(e) => {
+                                                                                            const newCategories = [...(dataSection.categories ?? [])];
+                                                                                            newCategories[index] = { ...newCategories[index], name: e.target.value };
+                                                                                            updateData({ categories: newCategories });
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                                <div className="space-y-1">
+                                                                                    <Label className="text-[10px] text-muted-foreground">Items (Comma separated)</Label>
+                                                                                    <Textarea
+                                                                                        placeholder="ex: React, Vue, Tailwind"
+                                                                                        className="h-10 min-h-[40px]"
+                                                                                        value={(category.items ?? []).join(", ")}
+                                                                                        onChange={(e) => {
+                                                                                            const newCategories = [...(dataSection.categories ?? [])];
+                                                                                            newCategories[index] = {
+                                                                                                ...newCategories[index],
+                                                                                                items: e.target.value.split(',').map(s => s.trim())
+                                                                                            };
+                                                                                            updateData({ categories: newCategories });
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="h-8 w-8 text-red-500 hover:text-red-600 mt-6"
+                                                                                onClick={() => {
+                                                                                    const newCategories = [...(dataSection.categories ?? [])];
+                                                                                    newCategories.splice(index, 1);
+                                                                                    updateData({ categories: newCategories });
+                                                                                }}
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </div>
+                                                                    ))}
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={() => updateData({ categories: [...(dataSection.categories ?? []), { name: "", items: [] }] })}
+                                                                    >
+                                                                        <PlusCircle className="mr-2 h-3 w-3" /> Add Category
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+
+                                                if (type === "service_faqs") {
+                                                    return (
+                                                        <div className="mt-2 space-y-3">
+                                                            <div className="space-y-1"><Label className="text-xs">Heading</Label><Input value={dataSection.heading ?? ""} onChange={(e) => updateData({ heading: e.target.value })} /></div>
+                                                            <div className="space-y-1"><Label className="text-xs">Deskripsi</Label><Textarea value={dataSection.description ?? ""} onChange={(e) => updateData({ description: e.target.value })} /></div>
+                                                            <div className="space-y-1 mt-4 border-t pt-4">
+                                                                <Label className="text-xs font-semibold">Questions & Answers</Label>
+                                                                <div className="space-y-2">
+                                                                    {(dataSection.items ?? []).map((item: any, index: number) => (
+                                                                        <div key={index} className="flex gap-2 items-start border p-2 rounded-md bg-gray-50 dark:bg-gray-800">
+                                                                            <div className="grid gap-2 flex-1 md:grid-cols-1 lg:grid-cols-2">
+                                                                                <div className="space-y-1">
+                                                                                    <Label className="text-[10px] text-muted-foreground">Question</Label>
+                                                                                    <Input
+                                                                                        placeholder="ex: What is the estimated timeline?"
+                                                                                        value={item.question ?? ""}
+                                                                                        onChange={(e) => {
+                                                                                            const newItems = [...(dataSection.items ?? [])];
+                                                                                            newItems[index] = { ...newItems[index], question: e.target.value };
+                                                                                            updateData({ items: newItems });
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                                <div className="space-y-1">
+                                                                                    <Label className="text-[10px] text-muted-foreground">Answer</Label>
+                                                                                    <Textarea
+                                                                                        placeholder="Answer here..."
+                                                                                        className="h-10 min-h-[40px]"
+                                                                                        value={item.answer ?? ""}
+                                                                                        onChange={(e) => {
+                                                                                            const newItems = [...(dataSection.items ?? [])];
+                                                                                            newItems[index] = { ...newItems[index], answer: e.target.value };
+                                                                                            updateData({ items: newItems });
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="h-8 w-8 text-red-500 hover:text-red-600 mt-6"
+                                                                                onClick={() => {
+                                                                                    const newItems = [...(dataSection.items ?? [])];
+                                                                                    newItems.splice(index, 1);
+                                                                                    updateData({ items: newItems });
+                                                                                }}
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </div>
+                                                                    ))}
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={() => updateData({ items: [...(dataSection.items ?? []), { question: "", answer: "" }] })}
+                                                                    >
+                                                                        <PlusCircle className="mr-2 h-3 w-3" /> Add Question
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+
+
+
                                                 return (
                                                     <div className="mt-2 space-y-1">
-                                                        <Label className="text-xs">Konten</Label>
+                                                        <Label className="text-xs">Konten (HTML)</Label>
                                                         <RichTextEditor
                                                             value={section.content ?? ""}
                                                             onChange={(value) => {
@@ -692,6 +1881,7 @@ export default function PageForm({ page, parents = [] }: Props) {
                                                         />
                                                     </div>
                                                 );
+
                                             })()}
                                         </div>
                                     ))}
