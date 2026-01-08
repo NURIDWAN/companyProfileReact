@@ -48,6 +48,30 @@ interface Props {
     parents?: ParentOption[];
 }
 
+type SectionFormData = {
+    id?: number;
+    title: string;
+    slug?: string;
+    content: string;
+    display_order: number;
+    is_active: boolean;
+    type: string;
+    data: Record<string, any>;
+};
+
+type PageFormData = {
+    parent_id: number | null;
+    title: string;
+    slug: string;
+    meta_title: string;
+    meta_description: string;
+    meta_keywords: string;
+    is_published: boolean;
+    published_at: string;
+    display_order: number;
+    sections: SectionFormData[];
+};
+
 function slugify(text: string) {
     return text
         .toLowerCase()
@@ -151,7 +175,7 @@ export default function PageForm({ page, parents = [] }: Props) {
 
     ];
 
-    const form = useForm({
+    const form = useForm<PageFormData>({
         parent_id: page?.parent_id ?? null,
         title: page?.title ?? "",
         slug: page?.slug ?? "",
@@ -174,7 +198,9 @@ export default function PageForm({ page, parents = [] }: Props) {
     });
 
     const [slugEdited, setSlugEdited] = useState(!!page?.slug);
-    const { data, setData, processing, errors } = form;
+    const { data, processing, errors } = form;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const setData = form.setData as (key: keyof PageFormData, value: any) => void;
 
     const action = useMemo(() => {
         return page ? route("admin.pages.update", page.id) : route("admin.pages.store");
@@ -253,7 +279,7 @@ export default function PageForm({ page, parents = [] }: Props) {
                                     id="parent"
                                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
                                     value={data.parent_id ?? ""}
-                                    onChange={(e) => setData("parent_id", e.target.value === "" ? "" : Number(e.target.value))}
+                                    onChange={(e) => setData("parent_id", e.target.value === "" ? null : Number(e.target.value))}
                                 >
                                     <option value="">(Tidak ada)</option>
                                     {parents.map((parent) => (
@@ -277,7 +303,7 @@ export default function PageForm({ page, parents = [] }: Props) {
                                         Terbitkan halaman
                                     </label>
                                 </div>
-                                <InputError message={errors.status} />
+                                <InputError message={errors.is_published} />
                             </div>
 
                             <div className="grid gap-3">
@@ -351,6 +377,7 @@ export default function PageForm({ page, parents = [] }: Props) {
                                             setData("sections", [
                                                 ...(data.sections ?? []),
                                                 {
+                                                    id: undefined,
                                                     title: "",
                                                     slug: "",
                                                     content: "",

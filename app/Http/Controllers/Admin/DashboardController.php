@@ -13,6 +13,7 @@ use App\Models\Testimonial;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\Activitylog\Models\Activity;
 
 class DashboardController extends Controller
 {
@@ -30,6 +31,24 @@ class DashboardController extends Controller
         $latestProducts = Product::query()->latest()->limit(5)->get(['id', 'name', 'created_at']);
         $latestProjects = Project::query()->latest('started_at')->limit(5)->get(['id', 'name', 'status']);
         $latestPosts = BlogPost::query()->latest('published_at')->limit(5)->get(['id', 'title', 'published_at']);
+
+        // Fetch recent activities for activity feed
+        $recentActivities = Activity::with('causer:id,name')
+            ->latest()
+            ->take(15)
+            ->get()
+            ->map(function ($activity) {
+                return [
+                    'id' => $activity->id,
+                    'description' => $activity->description,
+                    'causer_name' => $activity->causer?->name ?? 'System',
+                    'subject_type' => class_basename($activity->subject_type ?? 'N/A'),
+                    'subject_id' => $activity->subject_id,
+                    'properties' => $activity->properties,
+                    'created_at' => $activity->created_at->diffForHumans(),
+                    'created_at_full' => $activity->created_at->format('d M Y, H:i'),
+                ];
+            });
 
         $activity = collect(range(0, 5))->map(function ($weeksAgo) {
             $start = Carbon::now()->subWeeks($weeksAgo + 1);
@@ -79,11 +98,12 @@ class DashboardController extends Controller
             'metrics' => $metrics,
             'latestProducts' => $latestProducts,
             'latestProjects' => $latestProjects,
-             'latestPosts' => $latestPosts,
+            'latestPosts' => $latestPosts,
             'activity' => $activity,
             'monthlyProducts' => $monthlyProducts,
             'monthlyServices' => $monthlyServices,
             'monthlyProjects' => $monthlyProjects,
+            'recentActivities' => $recentActivities,
         ]);
     }
 }

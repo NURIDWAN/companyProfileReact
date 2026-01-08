@@ -5,6 +5,7 @@ import { Head, usePage } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import ActivityFeed, { type ActivityItem } from '@/components/dashboard/ActivityFeed';
 import {
     Area,
     AreaChart,
@@ -49,6 +50,7 @@ type DashboardProps = {
     monthlyProducts: Array<{ label: string; value: number }>;
     monthlyServices: Array<{ label: string; value: number }>;
     monthlyProjects: Array<{ label: string; value: number }>;
+    recentActivities: ActivityItem[];
 };
 
 type TrendInfo = {
@@ -79,7 +81,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard() {
-    const { metrics, latestProducts, latestProjects, latestPosts, activity, monthlyProducts, monthlyServices, monthlyProjects } =
+    const { metrics, latestProducts, latestProjects, latestPosts, activity, monthlyProducts, monthlyServices, monthlyProjects, recentActivities } =
         usePage<DashboardProps>().props;
 
     const todayLabel = new Intl.DateTimeFormat('id-ID', {
@@ -285,8 +287,11 @@ export default function Dashboard() {
                     ))}
                 </section>
 
-                <section className="grid gap-4 lg:grid-cols-3">
-                    <Card className="overflow-hidden">
+                <section className="grid gap-4 lg:grid-cols-4">
+                    <div className="lg:col-span-1">
+                        <ActivityFeed activities={recentActivities} />
+                    </div>
+                    <Card className="overflow-hidden lg:col-span-1">
                         <CardHeader className="flex flex-row items-center gap-3 pb-2">
                             <div className="rounded-lg bg-indigo-500/10 p-2 text-indigo-500">
                                 <PackageSearch className="h-4 w-4" />

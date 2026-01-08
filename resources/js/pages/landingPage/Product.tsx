@@ -285,7 +285,16 @@ export default function ProductPage() {
 
 
 
-                {productCta && <CTASection data={productCta} />}
+                {productCta && (
+                    <CTASection
+                        badge={productCta.badge}
+                        heading={productCta.heading}
+                        description={productCta.description}
+                        primaryButton={productCta.primary}
+                        secondaryButton={productCta.secondary}
+                        contacts={productCta.contacts}
+                    />
+                )}
             </div>
         </LandingPageLayout>
     );

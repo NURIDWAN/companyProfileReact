@@ -512,34 +512,33 @@ function TechStackSection({ data }: { data: TechStackSection }) {
 
                 {categories.length ? (
                     <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2 lg:grid-cols-3">
-                        {categories.map((category, index) => (
-                            <Card
-                                key={`cat-${index}`}
-                                className="group relative overflow-hidden border-slate-200 bg-white hover:border-indigo-200 hover:shadow-lg dark:border-gray-800 dark:bg-slate-800 dark:hover:border-indigo-900"
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100 dark:from-indigo-900/10" />
-                                <CardHeader className="relative pb-2">
-                                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
-                                        <Layers className="h-6 w-6" />
-                                    </div>
-                                    <CardTitle className="text-xl font-bold text-slate-800 dark:text-white">
-                                        {category.name}
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="relative">
-                                    <div className="flex flex-wrap justify-center gap-2">
-                                        {(category.items ?? []).map((tech, idx) => (
-                                            <span
-                                                key={`${tech}-${idx}`}
-                                                className="inline-flex items-center rounded-md bg-slate-100 px-3 py-1 text-sm font-medium text-slate-600 transition-colors group-hover:bg-white group-hover:text-indigo-600 group-hover:shadow-sm dark:bg-slate-700 dark:text-slate-300 dark:group-hover:bg-slate-800 dark:group-hover:text-indigo-300"
-                                            >
-                                                {tech}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
+                        {categories.map((category, index) => {
+                            const Icon = techStackIconCycle[index % techStackIconCycle.length];
+                            return (
+                                <Card
+                                    key={`cat-${index}`}
+                                    className="group relative overflow-hidden border-slate-200 bg-white hover:border-indigo-200 hover:shadow-lg dark:border-gray-800 dark:bg-slate-800 dark:hover:border-indigo-900"
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100 dark:from-indigo-900/10" />
+                                    <CardHeader className="relative pb-2">
+                                        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+                                            {category.icon ? (
+                                                iconRegistry[category.icon] ? (
+                                                    (() => { const IconComp = iconRegistry[category.icon]; return <IconComp className="h-6 w-6" />; })()
+                                                ) : (
+                                                    <Layers className="h-6 w-6" />
+                                                )
+                                            ) : (
+                                                <Icon className="h-6 w-6" />
+                                            )}
+                                        </div>
+                                        <CardTitle className="text-xl font-bold text-slate-800 dark:text-white">
+                                            {category.name}
+                                        </CardTitle>
+                                    </CardHeader>
+                                </Card>
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
