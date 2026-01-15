@@ -1,4 +1,4 @@
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { containerVariants, itemVariants, slideIn } from "@/utils/animations";
 
@@ -18,7 +18,7 @@ export function About({ content }: AboutProps) {
   const description = content?.description ?? 'Tambahkan narasi perusahaan melalui dashboard.';
   const highlights = content?.highlights ?? [];
   const imageUrl = content?.image_url;
-  
+
   return (
     <motion.section
       initial="hidden"
@@ -34,12 +34,18 @@ export function About({ content }: AboutProps) {
           className="space-y-6"
           variants={slideIn}
         >
-          <motion.h1
+          <motion.span
+            variants={itemVariants}
+            className="inline-block rounded-full bg-indigo-100 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300"
+          >
+            Sekilas
+          </motion.span>
+          <motion.h2
             variants={itemVariants}
             className="text-4xl font-bold tracking-tight lg:text-5xl"
           >
             {title}
-          </motion.h1>
+          </motion.h2>
           <motion.p
             variants={itemVariants}
             className="text-lg leading-relaxed text-gray-600 dark:text-gray-400"
@@ -52,7 +58,7 @@ export function About({ content }: AboutProps) {
               className="grid grid-cols-1 gap-4 sm:grid-cols-2"
               variants={containerVariants}
             >
-              {highlights.map((highlight) => (
+              {highlights.slice(0, 4).map((highlight) => (
                 <motion.div
                   key={highlight}
                   variants={itemVariants}
@@ -64,6 +70,16 @@ export function About({ content }: AboutProps) {
               ))}
             </motion.div>
           ) : null}
+
+          <motion.div variants={itemVariants}>
+            <a
+              href="/about"
+              className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-6 py-3 text-sm font-medium text-white transition hover:bg-indigo-700"
+            >
+              Selengkapnya
+              <ArrowRight className="h-4 w-4" />
+            </a>
+          </motion.div>
         </motion.div>
 
         {imageUrl && (

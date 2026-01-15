@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PageRequest;
+use App\Models\MenuItem;
 use App\Models\Page;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Carbon;
@@ -36,19 +37,26 @@ class PageController extends Controller
     {
         return Inertia::render('admin/pages/Form', [
             'parents' => $this->parentOptions(),
+            'menuItems' => $this->menuItemOptions(),
         ]);
     }
 
     public function store(PageRequest $request): RedirectResponse
     {
         try {
-            DB::transaction(function () use ($request) {
+            $page = null;
+            DB::transaction(function () use ($request, &$page) {
                 $data = $this->payload($request);
                 $data['created_by'] = $request->user()?->id;
                 $data['updated_by'] = $request->user()?->id;
 
                 $page = Page::create($data);
                 $this->syncSections($page, $request->input('sections', []));
+
+                // Auto-create menu item if requested
+                if ($request->boolean('add_to_menu') && $request->filled('menu_position')) {
+                    $this->createMenuItem($page, $request->input('menu_position'), $request->input('menu_parent_id'));
+                }
             });
 
             return redirect()->route('admin.pages.index')->with('success', 'Halaman berhasil dibuat.');
@@ -187,5 +195,44 @@ class PageController extends Controller
             ->when($excludeId, fn ($query) => $query->where('id', '!=', $excludeId))
             ->orderBy('title')
             ->get();
+    }
+
+    /**
+     * Get menu items grouped by position for parent selection.
+     */
+    private function menuItemOptions(): array
+    {
+        $positions = ['main', 'header', 'footer'];
+
+        return collect($positions)->mapWithKeys(function ($position) {
+            $items = MenuItem::where('position', $position)
+                ->whereNull('parent_id')
+                ->orderBy('display_order')
+                ->get(['id', 'title']);
+
+            return [$position => $items];
+        })->toArray();
+    }
+
+    /**
+     * Create a menu item for the given page.
+     */
+    private function createMenuItem(Page $page, string $position, ?int $parentId = null): void
+    {
+        // Get max display_order for the position
+        $maxOrder = MenuItem::where('position', $position)
+            ->where('parent_id', $parentId)
+            ->max('display_order') ?? -1;
+
+        MenuItem::create([
+            'title' => $page->title,
+            'position' => $position,
+            'type' => 'page',
+            'page_id' => $page->id,
+            'target' => '/' . ltrim($page->full_path, '/'),
+            'parent_id' => $parentId,
+            'display_order' => $maxOrder + 1,
+            'is_active' => true,
+        ]);
     }
 }

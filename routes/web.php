@@ -129,6 +129,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('settings/security/otp', [CompanySettingController::class, 'updateSecurity'])->name('settings.security.otp');
         Route::post('settings/footer/cta', [CompanySettingController::class, 'updateFooterCta'])->name('settings.footer.cta.update');
         Route::post('settings/footer/legal', [CompanySettingController::class, 'updateFooterLegal'])->name('settings.footer.legal.update');
+        Route::post('settings/ai', [CompanySettingController::class, 'updateAiSettings'])->name('settings.ai.update');
         Route::resource('pages', AdminPageController::class);
         Route::resource('menus', MenuItemController::class)->only(['index', 'store', 'destroy']);
         Route::get('menus/page/{page}/sections', [MenuItemController::class, 'sections'])->name('menus.page.sections');

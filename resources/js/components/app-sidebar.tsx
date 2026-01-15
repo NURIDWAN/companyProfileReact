@@ -1,10 +1,26 @@
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavGroup, type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Briefcase, Cog, Database, FileText, Folder, Inbox, LayoutGrid, Mail, MessageSquare, Package, Settings2, UserCog, Users } from 'lucide-react';
+import {
+    BookOpen,
+    Briefcase,
+    Cog,
+    Database,
+    FileText,
+    Folder,
+    Inbox,
+    Layers,
+    LayoutGrid,
+    Mail,
+    MessageSquare,
+    Package,
+    PenSquare,
+    Settings2,
+    UserCog,
+    Users,
+} from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavGroups: NavGroup[] = [
@@ -27,14 +43,26 @@ const mainNavGroups: NavGroup[] = [
                 icon: Folder,
             },
             {
-                title: 'Layanan',
-                href: '/admin/services',
-                icon: Cog,
-            },
-            {
                 title: 'Halaman',
                 href: '/admin/pages',
                 icon: FileText,
+                children: [
+                    {
+                        title: 'Semua Halaman',
+                        href: '/admin/pages',
+                        icon: Layers,
+                    },
+                    {
+                        title: 'Tambah Halaman',
+                        href: '/admin/pages/create',
+                        icon: PenSquare,
+                    },
+                ],
+            },
+            {
+                title: 'Layanan',
+                href: '/admin/services',
+                icon: Cog,
             },
             {
                 title: 'Produk',
@@ -50,6 +78,18 @@ const mainNavGroups: NavGroup[] = [
                 title: 'Blog',
                 href: '/admin/blog-posts',
                 icon: FileText,
+                children: [
+                    {
+                        title: 'Semua Artikel',
+                        href: '/admin/blog-posts',
+                        icon: FileText,
+                    },
+                    {
+                        title: 'Tambah Artikel',
+                        href: '/admin/blog-posts/create',
+                        icon: PenSquare,
+                    },
+                ],
             },
             {
                 title: 'Testimoni',
@@ -70,11 +110,18 @@ const mainNavGroups: NavGroup[] = [
                 title: 'Karir',
                 href: '/admin/job-positions',
                 icon: Briefcase,
-            },
-            {
-                title: 'Lamaran',
-                href: '/admin/job-applications',
-                icon: Inbox,
+                children: [
+                    {
+                        title: 'Posisi',
+                        href: '/admin/job-positions',
+                        icon: Briefcase,
+                    },
+                    {
+                        title: 'Lamaran',
+                        href: '/admin/job-applications',
+                        icon: Inbox,
+                    },
+                ],
             },
             {
                 title: 'Kontak Masuk',

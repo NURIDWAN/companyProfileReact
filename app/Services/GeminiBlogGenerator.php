@@ -2,19 +2,14 @@
 
 namespace App\Services;
 
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Http\Client\RequestException;
-use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use RuntimeException;
 
 class GeminiBlogGenerator
 {
     public function __construct(
-        private readonly ?string $apiKey = null,
-        private readonly ?string $model = null,
+        private readonly ?OpenRouterService $openRouterService = null,
     ) {
     }
 
@@ -24,63 +19,39 @@ class GeminiBlogGenerator
      */
     public function generate(array $options): array
     {
-        $apiKey = $this->apiKey ?: config('services.gemini.key');
-        $model = $this->model ?: config('services.gemini.model', 'gemini-2.5-flash');
+        $service = $this->openRouterService ?? app(OpenRouterService::class);
 
-        if (!$apiKey) {
-            throw new RuntimeException('Gemini API key is not configured.');
+        if (!$service->isConfigured()) {
+            throw new RuntimeException('AI API key is not configured. Set it in Settings or .env file.');
         }
 
-        $payload = [
-            'contents' => [
-                [
-                    'role' => 'user',
-                    'parts' => [
-                        ['text' => $this->buildPrompt($options)],
-                    ],
-                ]
+        $messages = [
+            [
+                'role' => 'system',
+                'content' => 'Kamu adalah copywriter senior di perusahaan layanan teknologi end-to-end (web, mobile, ERP, dan konsultasi produk digital) yang berbasis di Indonesia. Kamu menulis konten dalam format JSON yang valid.',
             ],
-            'generationConfig' => [
-                'temperature' => 0.7,
-                'topK' => 32,
-                'topP' => 0.95,
-                'maxOutputTokens' => 8192,
-                'responseMimeType' => 'application/json',
+            [
+                'role' => 'user',
+                'content' => $this->buildPrompt($options),
             ],
-            'safetySettings' => $this->safetySettings(),
         ];
 
-        $response = $this->sendRequest($model, $payload, $apiKey);
+        $response = $service->chat($messages, [
+            'temperature' => 0.7,
+            'max_tokens' => 8192,
+            'timeout' => 30,
+        ]);
 
-        if ($response->failed() && $response->status() === 404 && !Str::endsWith($model, '-latest')) {
-            $model = "{$model}-latest";
-            $response = $this->sendRequest($model, $payload, $apiKey);
-        }
-
-        if ($response->failed()) {
-            throw new RuntimeException(sprintf(
-                'Gemini request failed (%s)',
-                $response->body() ?: $response->status()
-            ));
-        }
-
-        $textPayload = data_get($response->json(), 'candidates.0.content.parts.0.text');
+        $textPayload = $service->extractContent($response);
 
         if (!$textPayload) {
-            throw new RuntimeException('Gemini response does not contain content.');
+            throw new RuntimeException('AI response does not contain content.');
         }
 
         $decoded = $this->decodeJsonPayload($textPayload);
 
         if (!is_array($decoded)) {
-            // Try to recover from common JSON formatting issues (unescaped newlines)
-            $textPayload = str_replace(["\n", "\r"], ["\\n", "\\r"], $textPayload);
-            // Note: This is a desperate attempt and might break formatting structure, 
-            // but often saves "raw text with newlines" responses.
-            // Better approach: Rely on responseMimeType: application/json which we added.
-
-            // Re-decode after simple attempt, or just throw
-            throw new RuntimeException('Gemini response is not valid JSON. Response length: ' . strlen($textPayload));
+            throw new RuntimeException('AI response is not valid JSON. Response length: ' . strlen($textPayload));
         }
 
         $title = trim((string) Arr::get($decoded, 'title', ''));
@@ -111,7 +82,7 @@ class GeminiBlogGenerator
         $audience = trim((string) ($options['audience'] ?? 'calon klien B2B di Indonesia'));
         $tone = trim((string) ($options['tone'] ?? 'profesional namun mudah dipahami'));
         $cta = trim((string) ($options['call_to_action'] ?? 'Hubungi tim kami untuk konsultasi gratis'));
-        $wordCount = (int) ($options['word_count'] ?? 1000); // Increased default
+        $wordCount = (int) ($options['word_count'] ?? 1000);
         $wordCount = max(300, min(2000, $wordCount));
         $keywords = $this->normalizeKeywords($options['keywords'] ?? null);
         $preset = trim((string) ($options['preset'] ?? ''));
@@ -123,7 +94,6 @@ class GeminiBlogGenerator
         $presetInstruction = $this->presetInstruction($preset);
 
         return <<<PROMPT
-Kamu adalah copywriter senior di perusahaan layanan teknologi end-to-end (web, mobile, ERP, dan konsultasi produk digital) yang berbasis di Indonesia.
 Tulis artikel blog berbahasa Indonesia dengan topik "{$topic}" untuk audiens {$audience}.
 
 Ekspektasi konten:
@@ -162,57 +132,6 @@ PROMPT;
         ));
 
         return array_values($items);
-    }
-
-    /**
-     * @param  array<string, mixed>  $payload
-     */
-    private function sendRequest(string $model, array $payload, string $apiKey): Response
-    {
-        $baseUrl = rtrim(config('services.gemini.endpoint', 'https://generativelanguage.googleapis.com'), '/');
-        $version = trim(config('services.gemini.version', 'v1beta'), '/');
-        $url = sprintf('%s/%s/models/%s:generateContent', $baseUrl, $version, $model);
-
-        try {
-            return Http::timeout(30)
-                ->retry(2, 500)
-                ->acceptJson()
-                ->withHeaders([
-                    'X-Goog-Api-Key' => $apiKey,
-                    'Content-Type' => 'application/json',
-                ])
-                ->post($url, $payload);
-        } catch (ConnectionException | RequestException $exception) {
-            throw new RuntimeException(
-                sprintf('Gemini request failed (%s)', $exception->getMessage()),
-                (int) $exception->getCode(),
-                $exception,
-            );
-        }
-    }
-
-    /**
-     * Safety settings accepted by Gemini 1.5/2.0 API.
-     *
-     * @return array<int, array<string, string>>
-     */
-    private function safetySettings(): array
-    {
-        $categories = [
-            'HARM_CATEGORY_HATE_SPEECH',
-            'HARM_CATEGORY_HARASSMENT',
-            'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-            'HARM_CATEGORY_DANGEROUS_CONTENT',
-            'HARM_CATEGORY_CIVIC_INTEGRITY',
-        ];
-
-        return array_map(
-            static fn(string $category) => [
-                'category' => $category,
-                'threshold' => 'BLOCK_MEDIUM_AND_ABOVE',
-            ],
-            $categories,
-        );
     }
 
     private function normalizeKeywords(?string $keywords): string

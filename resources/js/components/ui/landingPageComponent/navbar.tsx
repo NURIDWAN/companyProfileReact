@@ -99,7 +99,7 @@ export function CompanyNavbar() {
     const brandLogo = brandProps?.logo_url ?? null;
     const logoIconName = brandProps?.logo_icon ?? undefined;
 
-    const iconCollection = LucideIcons as Record<string, ComponentType<LucideProps>>;
+    const iconCollection = LucideIcons as unknown as Record<string, ComponentType<LucideProps>>;
     const LogoIcon = logoIconName ? iconCollection[logoIconName] : undefined;
 
     const initials = brandName

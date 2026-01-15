@@ -24,9 +24,46 @@ interface TestimonialProps {
     metrics?: MetricsItem[];
 }
 
+function TestimonialCard({ testimonial }: { testimonial: TestimonialItem }) {
+    return (
+        <Card className="relative h-full min-w-[320px] max-w-[360px] shrink-0 bg-white p-5 shadow-md dark:border-gray-800 dark:bg-gray-900">
+            <div className="mb-3 flex items-center justify-between">
+                <div className="flex text-amber-400">
+                    {Array.from({ length: testimonial.rating ?? 5 }).map((_, index) => (
+                        <Star key={index} className="h-4 w-4 fill-current" />
+                    ))}
+                </div>
+                <Quote className="h-6 w-6 text-gray-200 dark:text-gray-700" />
+            </div>
+            <CardContent className="mb-4 p-0 text-left">
+                <p className="text-sm italic leading-relaxed text-gray-600 dark:text-gray-300">
+                    "{testimonial.quote}"
+                </p>
+            </CardContent>
+            <div className="mt-auto flex items-center gap-3">
+                <Avatar className="h-10 w-10 ring-2 ring-amber-100 dark:ring-amber-900/40">
+                    <AvatarImage src={testimonial.avatar ?? undefined} alt={testimonial.author_name} />
+                    <AvatarFallback className="bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300">
+                        {testimonial.author_name.charAt(0)}
+                    </AvatarFallback>
+                </Avatar>
+                <div className="text-left">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{testimonial.author_name}</p>
+                    <p className="text-xs text-gray-500">
+                        {testimonial.author_role ?? testimonial.company ?? "Klien"}
+                    </p>
+                </div>
+            </div>
+        </Card>
+    );
+}
+
 export function Testimonial({ testimonials, metrics }: TestimonialProps) {
     const testimonialsData = testimonials ?? [];
     const metricsData = metrics ?? [];
+
+    // Duplicate items for seamless infinite scroll
+    const duplicatedTestimonials = [...testimonialsData, ...testimonialsData];
 
     return (
         <motion.section
@@ -34,93 +71,68 @@ export function Testimonial({ testimonials, metrics }: TestimonialProps) {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, amount: 0.3 }}
-            className="w-full rounded-3xl bg-gray-50 py-12 sm:py-16 lg:py-20 dark:bg-gray-950"
+            className="w-full overflow-hidden rounded-3xl bg-gradient-to-br from-gray-50 to-white py-12 sm:py-14 dark:from-gray-950 dark:to-gray-900"
         >
             <motion.div
                 className="container mx-auto max-w-screen-xl px-4 text-center"
                 variants={containerVariants}
             >
                 <motion.div
-                    className="mb-12"
+                    className="mb-10"
                     variants={itemVariants}
                 >
-                    <p className="mb-2 text-sm font-semibold text-gray-400">&quot; Testimoni Klien &quot;</p>
-                    <h2 className="mb-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
+                    <span className="mb-3 inline-block rounded-full bg-amber-100 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:bg-amber-900/40 dark:text-amber-300">
+                        Testimoni
+                    </span>
+                    <h2 className="mb-3 text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
                         Kata Mereka
                     </h2>
-                    <p className="mx-auto max-w-2xl text-lg text-gray-500 dark:text-gray-400">
-                        Kepuasan dan kepercayaan klien adalah prioritas utama kami. Berikut adalah testimoni dari
-                        mereka yang telah merasakan layanan terbaik kami.
+                    <p className="mx-auto max-w-xl text-base text-gray-500 dark:text-gray-400">
+                        Kepuasan dan kepercayaan klien adalah prioritas utama kami
                     </p>
                 </motion.div>
-
-                {testimonialsData.length ? (
-                    <motion.div
-                        className="grid grid-cols-1 gap-8 md:grid-cols-3"
-                        variants={containerVariants}
-                    >
-                        {testimonialsData.map((testimonial) => (
-                            <motion.div
-                                key={testimonial.id}
-                                variants={itemVariants}
-                                whileHover={{ scale: 1.02 }}
-                                className="h-full"
-                            >
-                                <Card className="relative h-full bg-white p-6 shadow-md dark:border-gray-800 dark:bg-gray-900">
-                                    <div className="mb-4 flex items-center justify-between">
-                                        <div className="flex text-yellow-500">
-                                            {Array.from({ length: testimonial.rating ?? 5 }).map((_, index) => (
-                                                <Star key={index} className="h-5 w-5 fill-current" />
-                                            ))}
-                                        </div>
-                                        <Quote className="absolute right-4 top-4 h-8 w-8 text-gray-200 dark:text-gray-700" />
-                                    </div>
-                                    <CardContent className="mb-6 p-0 text-left">
-                                        <p className="italic text-gray-700 dark:text-gray-300">
-                                            <Quote className="mr-1 inline-block h-4 w-4 -mt-1 text-gray-400 dark:text-gray-600" />
-                                            {testimonial.quote}
-                                            <Quote className="ml-1 inline-block h-4 w-4 -mt-1 rotate-180 text-gray-400 dark:text-gray-600" />
-                                        </p>
-                                    </CardContent>
-                                    <div className="mt-auto flex items-center">
-                                        <Avatar className="mr-4 h-10 w-10">
-                                            <AvatarImage src={testimonial.avatar ?? undefined} alt={testimonial.author_name} />
-                                            <AvatarFallback>{testimonial.author_name.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                        <div className="text-left">
-                                            <p className="font-semibold text-gray-900 dark:text-white">{testimonial.author_name}</p>
-                                            <p className="text-sm text-gray-500">
-                                                {testimonial.author_role ?? testimonial.company ?? "Klien"}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </Card>
-                            </motion.div>
-                        ))}
-                    </motion.div>
-                ) : (
-                    <motion.div
-                        variants={itemVariants}
-                        className="rounded-lg border border-dashed p-8 text-sm text-muted-foreground"
-                    >
-                        Belum ada testimoni yang dipublikasikan.
-                    </motion.div>
-                )}
-
-                {metricsData.length ? (
-                    <motion.div
-                        className="mt-16 flex flex-col items-center justify-center gap-8 md:flex-row"
-                        variants={containerVariants}
-                    >
-                        {metricsData.map((metric) => (
-                            <motion.div key={metric.label} variants={itemVariants} className="flex flex-col items-center">
-                                <p className="text-4xl font-bold text-gray-900 dark:text-white">{metric.value}</p>
-                                <p className="text-sm text-gray-500">{metric.label}</p>
-                            </motion.div>
-                        ))}
-                    </motion.div>
-                ) : null}
             </motion.div>
+
+            {/* Infinite Scroll Container */}
+            {testimonialsData.length ? (
+                <div className="relative">
+                    {/* Gradient Fade Left */}
+                    <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-20 bg-gradient-to-r from-gray-50 to-transparent dark:from-gray-950" />
+                    {/* Gradient Fade Right */}
+                    <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-20 bg-gradient-to-l from-gray-50 to-transparent dark:from-gray-950" />
+
+                    {/* Scrolling Container */}
+                    <div className="flex animate-scroll-x gap-6 py-4 hover:[animation-play-state:paused]">
+                        {duplicatedTestimonials.map((testimonial, index) => (
+                            <TestimonialCard key={`${testimonial.id}-${index}`} testimonial={testimonial} />
+                        ))}
+                    </div>
+                </div>
+            ) : (
+                <div className="container mx-auto max-w-screen-xl px-4">
+                    <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
+                        Belum ada testimoni yang dipublikasikan.
+                    </div>
+                </div>
+            )}
+
+            {/* Metrics Section */}
+            {metricsData.length ? (
+                <motion.div
+                    className="container mx-auto mt-12 flex max-w-screen-xl flex-col items-center justify-center gap-8 px-4 md:flex-row"
+                    variants={containerVariants}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true }}
+                >
+                    {metricsData.map((metric) => (
+                        <motion.div key={metric.label} variants={itemVariants} className="flex flex-col items-center">
+                            <p className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">{metric.value}</p>
+                            <p className="text-sm text-gray-500">{metric.label}</p>
+                        </motion.div>
+                    ))}
+                </motion.div>
+            ) : null}
         </motion.section>
     );
 }

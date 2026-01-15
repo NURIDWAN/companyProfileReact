@@ -158,3 +158,42 @@ it('downloads company settings backup as sql', function () {
     expect($content)->toContain("INSERT INTO `company_settings` (`id`, `key`, `value`, `group`, `created_at`, `updated_at`)");
     expect($content)->toContain("Contoh Perusahaan");
 });
+
+it('updates AI settings', function () {
+    $this->actingAs(User::factory()->create())
+        ->post(route('admin.settings.ai.update'), [
+            'api_key' => 'sk-or-v1-test-key-123',
+            'model' => 'google/gemini-2.0-flash-exp:free',
+            'endpoint' => 'https://openrouter.ai/api/v1',
+        ])
+        ->assertRedirect();
+
+    $setting = CompanySetting::where('key', 'ai.settings')->firstOrFail();
+
+    expect($setting->value)->toMatchArray([
+        'api_key' => 'sk-or-v1-test-key-123',
+        'model' => 'google/gemini-2.0-flash-exp:free',
+        'endpoint' => 'https://openrouter.ai/api/v1',
+    ]);
+});
+
+it('loads AI settings in settings page', function () {
+    CompanySetting::create([
+        'key' => 'ai.settings',
+        'value' => [
+            'api_key' => 'test-api-key',
+            'model' => 'meta-llama/llama-3.2-3b-instruct:free',
+            'endpoint' => 'https://openrouter.ai/api/v1',
+        ],
+        'group' => 'integration',
+    ]);
+
+    $response = $this->actingAs(User::factory()->create())
+        ->get(route('admin.settings.index'));
+
+    $response->assertOk();
+
+    $ai = $response->original->getData()['page']['props']['ai'];
+    expect($ai['api_key'])->toBe('test-api-key');
+    expect($ai['model'])->toBe('meta-llama/llama-3.2-3b-instruct:free');
+});

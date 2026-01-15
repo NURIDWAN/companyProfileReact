@@ -216,3 +216,23 @@
         border-radius: 0.25rem;
     }
 }
+
+/* Infinite Scroll Animation */
+@keyframes scroll-x {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+@layer utilities {
+    .animate-scroll-x {
+        animation: scroll-x 30s linear infinite;
+    }
+    
+    .animate-scroll-x:hover {
+        animation-play-state: paused;
+    }
+}

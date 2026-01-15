@@ -78,7 +78,7 @@ export function RichTextEditor({ value = '', onChange, placeholder, className }:
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
                 },
-                withCredentials: false,
+                withCredentials: true,
                 process: (resp: any) => {
                     if (resp?.url) {
                         return { files: [resp.url] };
@@ -118,7 +118,7 @@ export function RichTextEditor({ value = '', onChange, placeholder, className }:
                     value={value || ''}
                     config={config}
                     onBlur={(content) => onChange(content)}
-                    onChange={() => {}}
+                    onChange={() => { }}
                 />
             </div>
         </div>

@@ -160,6 +160,7 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                     headers: {
                         Accept: "application/json",
                     },
+                    credentials: "same-origin",
                 });
 
                 if (response.ok) {
@@ -222,6 +223,7 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                     headers: {
                         Accept: "application/json",
                     },
+                    credentials: "same-origin",
                 });
 
                 const payload = (await response.json()) as {
@@ -275,6 +277,7 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                     Accept: "application/json",
                     "X-CSRF-TOKEN": csrfToken,
                 },
+                credentials: "same-origin",
                 body: JSON.stringify(requestBody),
             });
 

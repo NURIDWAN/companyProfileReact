@@ -57,6 +57,12 @@ interface SecuritySettings {
     };
 }
 
+interface AiSettings {
+    api_key: string;
+    model: string;
+    endpoint: string;
+}
+
 interface SettingsIndexProps {
     company: CompanyProfile;
     address: CompanyAddress;
@@ -65,6 +71,7 @@ interface SettingsIndexProps {
     footerCta: FooterCta;
     footerLegal: FooterLegal;
     security: SecuritySettings;
+    ai: AiSettings;
 }
 
 export default function SettingsIndex({
@@ -75,6 +82,7 @@ export default function SettingsIndex({
     footerCta,
     footerLegal,
     security,
+    ai,
 }: SettingsIndexProps) {
     const companyForm = useForm({
         ...company,
@@ -98,6 +106,12 @@ export default function SettingsIndex({
         otp_expires_minutes: String(security.otp.expires_minutes),
         otp_resend_cooldown: String(security.otp.resend_cooldown),
     });
+    const aiForm = useForm({
+        api_key: ai.api_key ?? '',
+        model: ai.model ?? 'google/gemini-2.0-flash-exp:free',
+        endpoint: ai.endpoint ?? 'https://openrouter.ai/api/v1',
+    });
+    const [showApiKey, setShowApiKey] = useState(false);
     const [logoPreview, setLogoPreview] = useState<string | null>(company.logo_url ?? null);
     const [logoObjectUrl, setLogoObjectUrl] = useState<string | null>(null);
 
@@ -212,6 +226,13 @@ export default function SettingsIndex({
     const submitFooterLegal: FormEventHandler<HTMLFormElement> = (event) => {
         event.preventDefault();
         footerLegalForm.post(route('admin.settings.footer.legal.update'), {
+            preserveScroll: true,
+        });
+    };
+
+    const submitAi: FormEventHandler<HTMLFormElement> = (event) => {
+        event.preventDefault();
+        aiForm.post(route('admin.settings.ai.update'), {
             preserveScroll: true,
         });
     };
@@ -648,6 +669,92 @@ export default function SettingsIndex({
                                     )}
                                     <Button type="submit" disabled={footerLegalForm.processing}>
                                         {footerLegalForm.processing ? 'Menyimpan...' : 'Simpan tautan'}
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        </form>
+                    </div>
+
+                    <div className="space-y-4">
+                        <header className="mt-8">
+                            <h2 className="text-xl font-semibold">Integrasi AI</h2>
+                            <p className="text-sm text-muted-foreground">
+                                Konfigurasi OpenRouter untuk fitur AI generator (blog, produk enrichment).
+                            </p>
+                        </header>
+
+                        <form onSubmit={submitAi} className="space-y-4">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Pengaturan OpenRouter</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="ai-api-key">API Key</Label>
+                                        <div className="flex gap-2">
+                                            <Input
+                                                id="ai-api-key"
+                                                type={showApiKey ? 'text' : 'password'}
+                                                value={aiForm.data.api_key ?? ''}
+                                                onChange={(event) => aiForm.setData('api_key', event.target.value)}
+                                                placeholder="sk-or-v1-xxxxxxxxxxxx"
+                                                className="flex-1"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setShowApiKey(!showApiKey)}
+                                            >
+                                                {showApiKey ? 'Sembunyikan' : 'Tampilkan'}
+                                            </Button>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Dapatkan API key dari{' '}
+                                            <a
+                                                href="https://openrouter.ai/keys"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-primary underline"
+                                            >
+                                                openrouter.ai/keys
+                                            </a>
+                                        </p>
+                                        <InputError message={aiForm.errors.api_key} />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="ai-model">Model</Label>
+                                        <Input
+                                            id="ai-model"
+                                            value={aiForm.data.model ?? ''}
+                                            onChange={(event) => aiForm.setData('model', event.target.value)}
+                                            placeholder="google/gemini-2.0-flash-exp:free"
+                                        />
+                                        <p className="text-xs text-muted-foreground">
+                                            Model gratis: <code>google/gemini-2.0-flash-exp:free</code>, <code>meta-llama/llama-3.2-3b-instruct:free</code>
+                                        </p>
+                                        <InputError message={aiForm.errors.model} />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="ai-endpoint">Endpoint API</Label>
+                                        <Input
+                                            id="ai-endpoint"
+                                            type="url"
+                                            value={aiForm.data.endpoint ?? ''}
+                                            onChange={(event) => aiForm.setData('endpoint', event.target.value)}
+                                            placeholder="https://openrouter.ai/api/v1"
+                                        />
+                                        <InputError message={aiForm.errors.endpoint} />
+                                    </div>
+                                </CardContent>
+                                <CardFooter className="flex items-center justify-between gap-2">
+                                    {aiForm.recentlySuccessful ? (
+                                        <p className="text-sm text-muted-foreground">Tersimpan.</p>
+                                    ) : (
+                                        <span />
+                                    )}
+                                    <Button type="submit" disabled={aiForm.processing}>
+                                        {aiForm.processing ? 'Menyimpan...' : 'Simpan pengaturan AI'}
                                     </Button>
                                 </CardFooter>
                             </Card>

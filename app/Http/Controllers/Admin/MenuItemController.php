@@ -252,7 +252,8 @@ class MenuItemController extends Controller
 
         if ($data['type'] === 'page' && isset($data['page_id'])) {
             $page = Page::find($data['page_id']);
-            $target = $page ? '/' . ltrim($page->slug, '/') : null;
+            // Use full_path for nested pages (e.g., "tentang-kami/profil")
+            $target = $page ? '/' . ltrim($page->full_path, '/') : null;
         }
 
         if ($data['type'] === 'internal' && $target) {

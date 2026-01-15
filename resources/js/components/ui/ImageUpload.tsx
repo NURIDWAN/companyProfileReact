@@ -44,6 +44,7 @@ export function ImageUpload({ value, onChange, label = "Image", accept = "image/
             const response = await fetch(route("admin.upload.image"), {
                 method: "POST",
                 body: formData,
+                credentials: "same-origin",
                 headers: {
                     "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
                 },

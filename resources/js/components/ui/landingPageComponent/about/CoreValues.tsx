@@ -25,7 +25,7 @@ const ValueCard = ({ icon, title, description, bgColor, iconColor }: ValueCardPr
     </motion.div>
 );
 
-const iconMap = {
+const iconMap: Record<string, React.ReactNode> = {
     zap: <Zap size={32} />,
     award: <Award size={32} />,
     users: <Users size={32} />,

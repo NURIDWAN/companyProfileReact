@@ -81,34 +81,34 @@ const productPresets: Array<{
     call_to_action: string;
     description: string;
 }> = [
-    {
-        id: "saas-scaleup",
-        label: "SaaS Scale-up",
-        target_market: "startup dan scale-up teknologi di Asia Tenggara",
-        tone: "optimistis, data-driven, dan profesional",
-        value_proposition: "implementasi kustom yang cepat dengan dukungan tim lokal",
-        call_to_action: "Diskusikan kebutuhan platform Anda bersama tim kami",
-        description: "Tekankan time-to-market cepat dan dukungan kustomisasi untuk produk digital.",
-    },
-    {
-        id: "enterprise-modernization",
-        label: "Modernisasi Enterprise",
-        target_market: "divisi transformasi digital perusahaan enterprise",
-        tone: "formal, solutif, fokus pada mitigasi risiko",
-        value_proposition: "konsultasi end-to-end dengan tata kelola dan keamanan kelas enterprise",
-        call_to_action: "Jadwalkan sesi konsultasi strategi modernisasi",
-        description: "Soroti keandalan, compliance, dan support panjang.",
-    },
-    {
-        id: "public-sector",
-        label: "Sektor Publik",
-        target_market: "pemerintah daerah / BUMN",
-        tone: "tegas, akuntabel, menekankan dampak sosial",
-        value_proposition: "solusi digital transparan dengan onboarding dan pelatihan tim lapangan",
-        call_to_action: "Pelajari bagaimana kami membantu instansi Anda",
-        description: "Fokus pada kepatuhan regulasi, pelayanan publik, dan keberlanjutan.",
-    },
-];
+        {
+            id: "saas-scaleup",
+            label: "SaaS Scale-up",
+            target_market: "startup dan scale-up teknologi di Asia Tenggara",
+            tone: "optimistis, data-driven, dan profesional",
+            value_proposition: "implementasi kustom yang cepat dengan dukungan tim lokal",
+            call_to_action: "Diskusikan kebutuhan platform Anda bersama tim kami",
+            description: "Tekankan time-to-market cepat dan dukungan kustomisasi untuk produk digital.",
+        },
+        {
+            id: "enterprise-modernization",
+            label: "Modernisasi Enterprise",
+            target_market: "divisi transformasi digital perusahaan enterprise",
+            tone: "formal, solutif, fokus pada mitigasi risiko",
+            value_proposition: "konsultasi end-to-end dengan tata kelola dan keamanan kelas enterprise",
+            call_to_action: "Jadwalkan sesi konsultasi strategi modernisasi",
+            description: "Soroti keandalan, compliance, dan support panjang.",
+        },
+        {
+            id: "public-sector",
+            label: "Sektor Publik",
+            target_market: "pemerintah daerah / BUMN",
+            tone: "tegas, akuntabel, menekankan dampak sosial",
+            value_proposition: "solusi digital transparan dengan onboarding dan pelatihan tim lapangan",
+            call_to_action: "Pelajari bagaimana kami membantu instansi Anda",
+            description: "Fokus pada kepatuhan regulasi, pelayanan publik, dan keberlanjutan.",
+        },
+    ];
 
 export default function ProductForm({ product }: Props) {
     const title = product ? "Edit Produk" : "Tambah Produk";
@@ -179,10 +179,10 @@ export default function ProductForm({ product }: Props) {
             const trimmed = data.name.trim();
             const slug = trimmed
                 ? trimmed
-                      .toLowerCase()
-                      .replace(/[^a-z0-9\s-]/g, "")
-                      .replace(/\s+/g, "-")
-                      .replace(/-+/g, "-")
+                    .toLowerCase()
+                    .replace(/[^a-z0-9\s-]/g, "")
+                    .replace(/\s+/g, "-")
+                    .replace(/-+/g, "-")
                 : "";
             setData("slug", slug);
         }
@@ -198,6 +198,7 @@ export default function ProductForm({ product }: Props) {
                     headers: {
                         Accept: "application/json",
                     },
+                    credentials: "same-origin",
                 });
 
                 if (response.ok) {
@@ -315,6 +316,7 @@ export default function ProductForm({ product }: Props) {
                     headers: {
                         Accept: "application/json",
                     },
+                    credentials: "same-origin",
                 });
 
                 const payload = (await response.json()) as {
@@ -359,9 +361,9 @@ export default function ProductForm({ product }: Props) {
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") ?? "";
             const featureList = data.features
                 ? data.features
-                      .split(/\r?\n/)
-                      .map((item) => item.trim())
-                      .filter((item) => item.length > 0)
+                    .split(/\r?\n/)
+                    .map((item) => item.trim())
+                    .filter((item) => item.length > 0)
                 : [];
 
             const response = await fetch(route("admin.products.enrich"), {
@@ -371,6 +373,7 @@ export default function ProductForm({ product }: Props) {
                     Accept: "application/json",
                     "X-CSRF-TOKEN": csrfToken,
                 },
+                credentials: "same-origin",
                 body: JSON.stringify({
                     ...aiForm,
                     name: data.name,
@@ -459,15 +462,15 @@ export default function ProductForm({ product }: Props) {
     const requestButtonLabel = aiLoading ? (pollingId ? "Memproses..." : "Meminta Gemini...") : "Perkaya via Gemini";
     const highlightList = data.marketing_highlights
         ? data.marketing_highlights
-              .split(/\r?\n/)
-              .map((item) => item.trim())
-              .filter((item) => item.length > 0)
+            .split(/\r?\n/)
+            .map((item) => item.trim())
+            .filter((item) => item.length > 0)
         : [];
     const ctaList = data.cta_variants
         ? data.cta_variants
-              .split(/\r?\n/)
-              .map((item) => item.trim())
-              .filter((item) => item.length > 0)
+            .split(/\r?\n/)
+            .map((item) => item.trim())
+            .filter((item) => item.length > 0)
         : [];
     const previewFaqs = faqRows.filter(
         (faq) => faq.question.trim().length > 0 || faq.answer.trim().length > 0,
@@ -580,459 +583,459 @@ export default function ProductForm({ product }: Props) {
                     </CardFooter>
                 </Card>
                 <form onSubmit={submit} encType="multipart/form-data">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{title}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="grid gap-4">
-                        {generalError && (
-                            <Alert variant="destructive">
-                                <AlertDescription>{generalError}</AlertDescription>
-                            </Alert>
-                        )}
-                        <div className="grid gap-2">
-                            <Label htmlFor="name">Nama</Label>
-                            <Input
-                                id="name"
-                                value={data.name}
-                                onChange={(event) => setData("name", event.target.value)}
-                                required
-                            />
-                            {errors.name && <p className="text-xs text-rose-500">{errors.name}</p>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="slug">Slug</Label>
-                            <Input
-                                id="slug"
-                                value={data.slug}
-                                onChange={(event) => setData("slug", event.target.value)}
-                                required
-                            />
-                            {errors.slug && <p className="text-xs text-rose-500">{errors.slug}</p>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="cover_image">Cover Image (URL)</Label>
-                            <Input
-                                id="cover_image"
-                                value={data.cover_image ?? ""}
-                                onChange={(event) => setData("cover_image", event.target.value)}
-                            />
-                            {errors.cover_image && <p className="text-xs text-rose-500">{errors.cover_image}</p>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="cover_image_file">Upload Cover Image</Label>
-                            <Input
-                                id="cover_image_file"
-                                type="file"
-                                accept="image/*"
-                                onChange={(event) => setData("cover_image_file", event.target.files?.[0] ?? undefined)}
-                            />
-                            {errors.cover_image_file && <p className="text-xs text-rose-500">{errors.cover_image_file}</p>}
-                            {product?.cover_image_url && (
-                                <img src={product.cover_image_url} alt={product.name} className="h-24 w-24 rounded object-cover" />
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{title}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid gap-4">
+                            {generalError && (
+                                <Alert variant="destructive">
+                                    <AlertDescription>{generalError}</AlertDescription>
+                                </Alert>
                             )}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="thumbnail">Thumbnail (URL)</Label>
-                            <Input
-                                id="thumbnail"
-                                value={data.thumbnail ?? ""}
-                                onChange={(event) => setData("thumbnail", event.target.value)}
-                            />
-                            {errors.thumbnail && <p className="text-xs text-rose-500">{errors.thumbnail}</p>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="thumbnail_file">Upload Thumbnail</Label>
-                            <Input
-                                id="thumbnail_file"
-                                type="file"
-                                accept="image/*"
-                                onChange={(event) => setData("thumbnail_file", event.target.files?.[0] ?? undefined)}
-                            />
-                            {errors.thumbnail_file && <p className="text-xs text-rose-500">{errors.thumbnail_file}</p>}
-                            {product?.thumbnail_url && (
-                                <img src={product.thumbnail_url} alt={product.name} className="h-24 w-24 rounded object-cover" />
-                            )}
-                        </div>
-                        <div className="space-y-3 rounded-lg border border-dashed border-border p-4">
-                            <div className="flex items-center justify-between">
-                                <Label className="text-sm font-medium">Galeri Produk (URL)</Label>
-                                <Button type="button" size="sm" variant="outline" onClick={addGalleryRow}>
-                                    Tambah URL
-                                </Button>
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                                Isi dengan tautan gambar tambahan atau unggah file langsung. Urutan pertama akan tampil sebagai gambar utama.
-                            </p>
-                            <div className="space-y-2">
-                                {galleryUrls.map((url, index) => (
-                                    <div key={`gallery-${index}`} className="flex gap-2">
-                                        <Input
-                                            value={url}
-                                            placeholder="https://..."
-                                            onChange={(event) => handleGalleryChange(index, event.target.value)}
-                                        />
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => removeGalleryRow(index)}
-                                            disabled={galleryUrls.length === 1 && url === ""}
-                                        >
-                                            Hapus
-                                        </Button>
-                                    </div>
-                                ))}
+                            <div className="grid gap-2">
+                                <Label htmlFor="name">Nama</Label>
+                                <Input
+                                    id="name"
+                                    value={data.name}
+                                    onChange={(event) => setData("name", event.target.value)}
+                                    required
+                                />
+                                {errors.name && <p className="text-xs text-rose-500">{errors.name}</p>}
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="gallery_files">Upload Gambar Galeri</Label>
+                                <Label htmlFor="slug">Slug</Label>
                                 <Input
-                                    id="gallery_files"
+                                    id="slug"
+                                    value={data.slug}
+                                    onChange={(event) => setData("slug", event.target.value)}
+                                    required
+                                />
+                                {errors.slug && <p className="text-xs text-rose-500">{errors.slug}</p>}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="cover_image">Cover Image (URL)</Label>
+                                <Input
+                                    id="cover_image"
+                                    value={data.cover_image ?? ""}
+                                    onChange={(event) => setData("cover_image", event.target.value)}
+                                />
+                                {errors.cover_image && <p className="text-xs text-rose-500">{errors.cover_image}</p>}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="cover_image_file">Upload Cover Image</Label>
+                                <Input
+                                    id="cover_image_file"
                                     type="file"
                                     accept="image/*"
-                                    multiple
-                                    onChange={(event) => setData("gallery_files", Array.from(event.target.files ?? []))}
+                                    onChange={(event) => setData("cover_image_file", event.target.files?.[0] ?? undefined)}
                                 />
-                                {fieldError("gallery_files") && (
-                                    <p className="text-xs text-rose-500">{fieldError("gallery_files")}</p>
-                                )}
-                            </div>
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="excerpt">Ringkasan</Label>
-                            <Input
-                                id="excerpt"
-                                value={data.excerpt ?? ""}
-                                onChange={(event) => setData("excerpt", event.target.value)}
-                            />
-                            {errors.excerpt && <p className="text-xs text-rose-500">{errors.excerpt}</p>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="description">Deskripsi</Label>
-                            <RichTextEditor
-                                value={data.description ?? ''}
-                                onChange={(value) => setData("description", value)}
-                                placeholder="Paparkan fitur utama, manfaat, dan konteks penggunaan produk."
-                            />
-                            {errors.description && <p className="text-xs text-rose-500">{errors.description}</p>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="features">Fitur (pisahkan dengan enter)</Label>
-                            <textarea
-                                id="features"
-                                className="min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                value={data.features}
-                                onChange={(event) => setData("features", event.target.value)}
-                            />
-                            {errors.features && <p className="text-xs text-rose-500">{errors.features}</p>}
-                        </div>
-                        <div className="space-y-4 rounded-lg border border-dashed border-border p-4">
-                            <div>
-                                <p className="text-sm font-semibold text-foreground">Konten Pemasaran & FAQ</p>
-                                <p className="text-xs text-muted-foreground">
-                                    Bagian ini dapat diisi secara manual atau menggunakan tombol Gemini di atas.
-                                </p>
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="marketing_summary">Ringkasan Pemasaran</Label>
-                                <textarea
-                                    id="marketing_summary"
-                                    className="min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                    value={data.marketing_summary ?? ""}
-                                    onChange={(event) => setData("marketing_summary", event.target.value)}
-                                />
-                                {errors.marketing_summary && (
-                                    <p className="text-xs text-rose-500">{errors.marketing_summary}</p>
+                                {errors.cover_image_file && <p className="text-xs text-rose-500">{errors.cover_image_file}</p>}
+                                {product?.cover_image_url && (
+                                    <img src={product.cover_image_url} alt={product.name} className="h-24 w-24 rounded object-cover" />
                                 )}
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="marketing_highlights">Highlight (pisahkan dengan enter)</Label>
-                                <textarea
-                                    id="marketing_highlights"
-                                    className="min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                    value={data.marketing_highlights ?? ""}
-                                    onChange={(event) => setData("marketing_highlights", event.target.value)}
-                                />
-                                {errors.marketing_highlights && (
-                                    <p className="text-xs text-rose-500">{errors.marketing_highlights}</p>
-                                )}
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="meta_title">Meta Title</Label>
+                                <Label htmlFor="thumbnail">Thumbnail (URL)</Label>
                                 <Input
-                                    id="meta_title"
-                                    value={data.meta_title ?? ""}
-                                    onChange={(event) => setData("meta_title", event.target.value)}
+                                    id="thumbnail"
+                                    value={data.thumbnail ?? ""}
+                                    onChange={(event) => setData("thumbnail", event.target.value)}
                                 />
-                                {errors.meta_title && <p className="text-xs text-rose-500">{errors.meta_title}</p>}
+                                {errors.thumbnail && <p className="text-xs text-rose-500">{errors.thumbnail}</p>}
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="meta_description">Meta Description</Label>
-                                <textarea
-                                    id="meta_description"
-                                    className="min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                    value={data.meta_description ?? ""}
-                                    onChange={(event) => setData("meta_description", event.target.value)}
-                                />
-                                {errors.meta_description && <p className="text-xs text-rose-500">{errors.meta_description}</p>}
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="og_title">OG Title</Label>
+                                <Label htmlFor="thumbnail_file">Upload Thumbnail</Label>
                                 <Input
-                                    id="og_title"
-                                    value={data.og_title ?? ""}
-                                    onChange={(event) => setData("og_title", event.target.value)}
+                                    id="thumbnail_file"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(event) => setData("thumbnail_file", event.target.files?.[0] ?? undefined)}
                                 />
-                                {errors.og_title && <p className="text-xs text-rose-500">{errors.og_title}</p>}
+                                {errors.thumbnail_file && <p className="text-xs text-rose-500">{errors.thumbnail_file}</p>}
+                                {product?.thumbnail_url && (
+                                    <img src={product.thumbnail_url} alt={product.name} className="h-24 w-24 rounded object-cover" />
+                                )}
                             </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="cta_variants">CTA Variants (pisahkan dengan enter)</Label>
-                                <textarea
-                                    id="cta_variants"
-                                    className="min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                    value={data.cta_variants ?? ""}
-                                    onChange={(event) => setData("cta_variants", event.target.value)}
-                                />
-                                {errors.cta_variants && <p className="text-xs text-rose-500">{errors.cta_variants}</p>}
-                            </div>
-                            <div className="space-y-3">
+                            <div className="space-y-3 rounded-lg border border-dashed border-border p-4">
                                 <div className="flex items-center justify-between">
-                                    <Label className="text-sm font-medium">FAQ Produk</Label>
-                                    <Button type="button" size="sm" variant="outline" onClick={addFaqRow}>
-                                        Tambah FAQ
+                                    <Label className="text-sm font-medium">Galeri Produk (URL)</Label>
+                                    <Button type="button" size="sm" variant="outline" onClick={addGalleryRow}>
+                                        Tambah URL
                                     </Button>
                                 </div>
                                 <p className="text-xs text-muted-foreground">
-                                    Minimal 1 pertanyaan. Pastikan jawaban ringkas agar mudah dibaca calon klien.
+                                    Isi dengan tautan gambar tambahan atau unggah file langsung. Urutan pertama akan tampil sebagai gambar utama.
+                                </p>
+                                <div className="space-y-2">
+                                    {galleryUrls.map((url, index) => (
+                                        <div key={`gallery-${index}`} className="flex gap-2">
+                                            <Input
+                                                value={url}
+                                                placeholder="https://..."
+                                                onChange={(event) => handleGalleryChange(index, event.target.value)}
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => removeGalleryRow(index)}
+                                                disabled={galleryUrls.length === 1 && url === ""}
+                                            >
+                                                Hapus
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="gallery_files">Upload Gambar Galeri</Label>
+                                    <Input
+                                        id="gallery_files"
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        onChange={(event) => setData("gallery_files", Array.from(event.target.files ?? []))}
+                                    />
+                                    {fieldError("gallery_files") && (
+                                        <p className="text-xs text-rose-500">{fieldError("gallery_files")}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="excerpt">Ringkasan</Label>
+                                <Input
+                                    id="excerpt"
+                                    value={data.excerpt ?? ""}
+                                    onChange={(event) => setData("excerpt", event.target.value)}
+                                />
+                                {errors.excerpt && <p className="text-xs text-rose-500">{errors.excerpt}</p>}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="description">Deskripsi</Label>
+                                <RichTextEditor
+                                    value={data.description ?? ''}
+                                    onChange={(value) => setData("description", value)}
+                                    placeholder="Paparkan fitur utama, manfaat, dan konteks penggunaan produk."
+                                />
+                                {errors.description && <p className="text-xs text-rose-500">{errors.description}</p>}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="features">Fitur (pisahkan dengan enter)</Label>
+                                <textarea
+                                    id="features"
+                                    className="min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                    value={data.features}
+                                    onChange={(event) => setData("features", event.target.value)}
+                                />
+                                {errors.features && <p className="text-xs text-rose-500">{errors.features}</p>}
+                            </div>
+                            <div className="space-y-4 rounded-lg border border-dashed border-border p-4">
+                                <div>
+                                    <p className="text-sm font-semibold text-foreground">Konten Pemasaran & FAQ</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Bagian ini dapat diisi secara manual atau menggunakan tombol Gemini di atas.
+                                    </p>
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="marketing_summary">Ringkasan Pemasaran</Label>
+                                    <textarea
+                                        id="marketing_summary"
+                                        className="min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                        value={data.marketing_summary ?? ""}
+                                        onChange={(event) => setData("marketing_summary", event.target.value)}
+                                    />
+                                    {errors.marketing_summary && (
+                                        <p className="text-xs text-rose-500">{errors.marketing_summary}</p>
+                                    )}
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="marketing_highlights">Highlight (pisahkan dengan enter)</Label>
+                                    <textarea
+                                        id="marketing_highlights"
+                                        className="min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                        value={data.marketing_highlights ?? ""}
+                                        onChange={(event) => setData("marketing_highlights", event.target.value)}
+                                    />
+                                    {errors.marketing_highlights && (
+                                        <p className="text-xs text-rose-500">{errors.marketing_highlights}</p>
+                                    )}
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="meta_title">Meta Title</Label>
+                                    <Input
+                                        id="meta_title"
+                                        value={data.meta_title ?? ""}
+                                        onChange={(event) => setData("meta_title", event.target.value)}
+                                    />
+                                    {errors.meta_title && <p className="text-xs text-rose-500">{errors.meta_title}</p>}
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="meta_description">Meta Description</Label>
+                                    <textarea
+                                        id="meta_description"
+                                        className="min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                        value={data.meta_description ?? ""}
+                                        onChange={(event) => setData("meta_description", event.target.value)}
+                                    />
+                                    {errors.meta_description && <p className="text-xs text-rose-500">{errors.meta_description}</p>}
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="og_title">OG Title</Label>
+                                    <Input
+                                        id="og_title"
+                                        value={data.og_title ?? ""}
+                                        onChange={(event) => setData("og_title", event.target.value)}
+                                    />
+                                    {errors.og_title && <p className="text-xs text-rose-500">{errors.og_title}</p>}
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="cta_variants">CTA Variants (pisahkan dengan enter)</Label>
+                                    <textarea
+                                        id="cta_variants"
+                                        className="min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                        value={data.cta_variants ?? ""}
+                                        onChange={(event) => setData("cta_variants", event.target.value)}
+                                    />
+                                    {errors.cta_variants && <p className="text-xs text-rose-500">{errors.cta_variants}</p>}
+                                </div>
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <Label className="text-sm font-medium">FAQ Produk</Label>
+                                        <Button type="button" size="sm" variant="outline" onClick={addFaqRow}>
+                                            Tambah FAQ
+                                        </Button>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Minimal 1 pertanyaan. Pastikan jawaban ringkas agar mudah dibaca calon klien.
+                                    </p>
+                                    <div className="space-y-3">
+                                        {faqRows.map((faq, index) => (
+                                            <div key={`faq-${index}`} className="space-y-3 rounded-xl border border-border p-4">
+                                                <div className="grid gap-2">
+                                                    <Label htmlFor={`faq-question-${index}`}>Pertanyaan</Label>
+                                                    <Input
+                                                        id={`faq-question-${index}`}
+                                                        value={faq.question}
+                                                        onChange={(event) => updateFaq(index, "question", event.target.value)}
+                                                        placeholder="Contoh: Apakah layanan ini bisa dikustom?"
+                                                    />
+                                                    {fieldError(`faqs.${index}.question`) && (
+                                                        <p className="text-xs text-rose-500">
+                                                            {fieldError(`faqs.${index}.question`)}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                <div className="grid gap-2">
+                                                    <Label htmlFor={`faq-answer-${index}`}>Jawaban</Label>
+                                                    <textarea
+                                                        id={`faq-answer-${index}`}
+                                                        className="min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                                        value={faq.answer}
+                                                        onChange={(event) => updateFaq(index, "answer", event.target.value)}
+                                                        placeholder="Tuliskan jawaban singkat namun meyakinkan."
+                                                    />
+                                                    {fieldError(`faqs.${index}.answer`) && (
+                                                        <p className="text-xs text-rose-500">
+                                                            {fieldError(`faqs.${index}.answer`)}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                <div className="flex justify-end">
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => removeFaqRow(index)}
+                                                        disabled={faqRows.length === 1}
+                                                    >
+                                                        Hapus FAQ
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="category">Kategori</Label>
+                                <Input
+                                    id="category"
+                                    value={data.category ?? ""}
+                                    onChange={(event) => setData("category", event.target.value)}
+                                />
+                                {errors.category && <p className="text-xs text-rose-500">{errors.category}</p>}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="price">Harga</Label>
+                                <Input
+                                    id="price"
+                                    value={data.price ?? ""}
+                                    onChange={(event) => setData("price", event.target.value)}
+                                />
+                                {errors.price && <p className="text-xs text-rose-500">{errors.price}</p>}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="purchase_url">Link Pembelian e-Commerce</Label>
+                                <Input
+                                    id="purchase_url"
+                                    placeholder="https://tokopedia.com/..."
+                                    value={data.purchase_url ?? ""}
+                                    onChange={(event) => setData("purchase_url", event.target.value)}
+                                />
+                                {errors.purchase_url && <p className="text-xs text-rose-500">{errors.purchase_url}</p>}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="whatsapp_number">Nomor WhatsApp Produk</Label>
+                                <Input
+                                    id="whatsapp_number"
+                                    value={data.whatsapp_number ?? ""}
+                                    onChange={(event) => setData("whatsapp_number", event.target.value)}
+                                    placeholder="Contoh: 628123456789"
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Gunakan format internasional tanpa spasi atau tanda baca (misal 628123456789).
+                                </p>
+                                {errors.whatsapp_number && <p className="text-xs text-rose-500">{errors.whatsapp_number}</p>}
+                            </div>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-sm font-medium">Variasi Harga</Label>
+                                    <Button type="button" size="sm" variant="outline" onClick={addVariantRow}>
+                                        Tambah Variasi
+                                    </Button>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    Tambahkan paket harga berbeda (misalnya Basic, Standard, atau Premium). Jika dikosongkan, sistem akan menggunakan harga utama.
                                 </p>
                                 <div className="space-y-3">
-                                    {faqRows.map((faq, index) => (
-                                        <div key={`faq-${index}`} className="space-y-3 rounded-xl border border-border p-4">
-                                            <div className="grid gap-2">
-                                                <Label htmlFor={`faq-question-${index}`}>Pertanyaan</Label>
-                                                <Input
-                                                    id={`faq-question-${index}`}
-                                                    value={faq.question}
-                                                    onChange={(event) => updateFaq(index, "question", event.target.value)}
-                                                    placeholder="Contoh: Apakah layanan ini bisa dikustom?"
-                                                />
-                                                {fieldError(`faqs.${index}.question`) && (
-                                                    <p className="text-xs text-rose-500">
-                                                        {fieldError(`faqs.${index}.question`)}
-                                                    </p>
-                                                )}
+                                    {variantRows.map((variant, index) => (
+                                        <div key={`variant-${index}`} className="space-y-3 rounded-xl border border-border p-3">
+                                            <div className="grid gap-3 md:grid-cols-2">
+                                                <div className="grid gap-2">
+                                                    <Label>Nama Paket</Label>
+                                                    <Input
+                                                        value={variant.name ?? ""}
+                                                        onChange={(event) => updateVariant(index, "name", event.target.value)}
+                                                    />
+                                                    {fieldError(`price_variants.${index}.name`) && (
+                                                        <p className="text-xs text-rose-500">
+                                                            {fieldError(`price_variants.${index}.name`)}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                <div className="grid gap-2">
+                                                    <Label>Harga</Label>
+                                                    <Input
+                                                        value={variant.price ?? ""}
+                                                        onChange={(event) => updateVariant(index, "price", event.target.value)}
+                                                        placeholder="4500000"
+                                                    />
+                                                    {fieldError(`price_variants.${index}.price`) && (
+                                                        <p className="text-xs text-rose-500">
+                                                            {fieldError(`price_variants.${index}.price`)}
+                                                        </p>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <div className="grid gap-2">
-                                                <Label htmlFor={`faq-answer-${index}`}>Jawaban</Label>
-                                                <textarea
-                                                    id={`faq-answer-${index}`}
-                                                    className="min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                                    value={faq.answer}
-                                                    onChange={(event) => updateFaq(index, "answer", event.target.value)}
-                                                    placeholder="Tuliskan jawaban singkat namun meyakinkan."
-                                                />
-                                                {fieldError(`faqs.${index}.answer`) && (
-                                                    <p className="text-xs text-rose-500">
-                                                        {fieldError(`faqs.${index}.answer`)}
-                                                    </p>
-                                                )}
+                                            <div className="grid gap-3 md:grid-cols-3">
+                                                <div className="grid gap-2">
+                                                    <Label>Harga Coret (Opsional)</Label>
+                                                    <Input
+                                                        value={variant.compare_at_price ?? ""}
+                                                        onChange={(event) =>
+                                                            updateVariant(index, "compare_at_price", event.target.value)
+                                                        }
+                                                        placeholder="5000000"
+                                                    />
+                                                </div>
+                                                <div className="grid gap-2">
+                                                    <Label>SKU</Label>
+                                                    <Input
+                                                        value={variant.sku ?? ""}
+                                                        onChange={(event) => updateVariant(index, "sku", event.target.value)}
+                                                    />
+                                                </div>
+                                                <div className="grid gap-2">
+                                                    <Label>Stok</Label>
+                                                    <Input
+                                                        value={variant.stock ?? ""}
+                                                        onChange={(event) => updateVariant(index, "stock", event.target.value)}
+                                                        placeholder="50"
+                                                    />
+                                                </div>
                                             </div>
                                             <div className="flex justify-end">
                                                 <Button
                                                     type="button"
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={() => removeFaqRow(index)}
-                                                    disabled={faqRows.length === 1}
+                                                    onClick={() => removeVariantRow(index)}
+                                                    disabled={variantRows.length === 1}
                                                 >
-                                                    Hapus FAQ
+                                                    Hapus Variasi
                                                 </Button>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="category">Kategori</Label>
-                            <Input
-                                id="category"
-                                value={data.category ?? ""}
-                                onChange={(event) => setData("category", event.target.value)}
-                            />
-                            {errors.category && <p className="text-xs text-rose-500">{errors.category}</p>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="price">Harga</Label>
-                            <Input
-                                id="price"
-                                value={data.price ?? ""}
-                                onChange={(event) => setData("price", event.target.value)}
-                            />
-                            {errors.price && <p className="text-xs text-rose-500">{errors.price}</p>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="purchase_url">Link Pembelian e-Commerce</Label>
-                            <Input
-                                id="purchase_url"
-                                placeholder="https://tokopedia.com/..."
-                                value={data.purchase_url ?? ""}
-                                onChange={(event) => setData("purchase_url", event.target.value)}
-                            />
-                            {errors.purchase_url && <p className="text-xs text-rose-500">{errors.purchase_url}</p>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="whatsapp_number">Nomor WhatsApp Produk</Label>
-                            <Input
-                                id="whatsapp_number"
-                                value={data.whatsapp_number ?? ""}
-                                onChange={(event) => setData("whatsapp_number", event.target.value)}
-                                placeholder="Contoh: 628123456789"
-                            />
-                            <p className="text-xs text-muted-foreground">
-                                Gunakan format internasional tanpa spasi atau tanda baca (misal 628123456789).
-                            </p>
-                            {errors.whatsapp_number && <p className="text-xs text-rose-500">{errors.whatsapp_number}</p>}
-                        </div>
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <Label className="text-sm font-medium">Variasi Harga</Label>
-                                <Button type="button" size="sm" variant="outline" onClick={addVariantRow}>
-                                    Tambah Variasi
-                                </Button>
+                            <div className="grid gap-2 md:grid-cols-2">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="clients">Jumlah Klien</Label>
+                                    <Input
+                                        id="clients"
+                                        type="number"
+                                        min="0"
+                                        value={data.clients ?? ""}
+                                        onChange={(event) => setData("clients", event.target.value)}
+                                    />
+                                    {errors.clients && <p className="text-xs text-rose-500">{errors.clients}</p>}
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="rating">Rating</Label>
+                                    <Input
+                                        id="rating"
+                                        type="number"
+                                        min="0"
+                                        max="5"
+                                        step="0.1"
+                                        value={data.rating ?? ""}
+                                        onChange={(event) => setData("rating", event.target.value)}
+                                    />
+                                    {errors.rating && <p className="text-xs text-rose-500">{errors.rating}</p>}
+                                </div>
                             </div>
-                            <p className="text-xs text-muted-foreground">
-                                Tambahkan paket harga berbeda (misalnya Basic, Standard, atau Premium). Jika dikosongkan, sistem akan menggunakan harga utama.
-                            </p>
-                            <div className="space-y-3">
-                                {variantRows.map((variant, index) => (
-                                    <div key={`variant-${index}`} className="space-y-3 rounded-xl border border-border p-3">
-                                        <div className="grid gap-3 md:grid-cols-2">
-                                            <div className="grid gap-2">
-                                                <Label>Nama Paket</Label>
-                                                <Input
-                                                    value={variant.name ?? ""}
-                                                    onChange={(event) => updateVariant(index, "name", event.target.value)}
-                                                />
-                                                {fieldError(`price_variants.${index}.name`) && (
-                                                    <p className="text-xs text-rose-500">
-                                                        {fieldError(`price_variants.${index}.name`)}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            <div className="grid gap-2">
-                                                <Label>Harga</Label>
-                                                <Input
-                                                    value={variant.price ?? ""}
-                                                    onChange={(event) => updateVariant(index, "price", event.target.value)}
-                                                    placeholder="4500000"
-                                                />
-                                                {fieldError(`price_variants.${index}.price`) && (
-                                                    <p className="text-xs text-rose-500">
-                                                        {fieldError(`price_variants.${index}.price`)}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="grid gap-3 md:grid-cols-3">
-                                            <div className="grid gap-2">
-                                                <Label>Harga Coret (Opsional)</Label>
-                                                <Input
-                                                    value={variant.compare_at_price ?? ""}
-                                                    onChange={(event) =>
-                                                        updateVariant(index, "compare_at_price", event.target.value)
-                                                    }
-                                                    placeholder="5000000"
-                                                />
-                                            </div>
-                                            <div className="grid gap-2">
-                                                <Label>SKU</Label>
-                                                <Input
-                                                    value={variant.sku ?? ""}
-                                                    onChange={(event) => updateVariant(index, "sku", event.target.value)}
-                                                />
-                                            </div>
-                                            <div className="grid gap-2">
-                                                <Label>Stok</Label>
-                                                <Input
-                                                    value={variant.stock ?? ""}
-                                                    onChange={(event) => updateVariant(index, "stock", event.target.value)}
-                                                    placeholder="50"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="flex justify-end">
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => removeVariantRow(index)}
-                                                disabled={variantRows.length === 1}
-                                            >
-                                                Hapus Variasi
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="grid gap-2 md:grid-cols-2">
-                            <div className="grid gap-2">
-                                <Label htmlFor="clients">Jumlah Klien</Label>
-                                <Input
-                                    id="clients"
-                                    type="number"
-                                    min="0"
-                                    value={data.clients ?? ""}
-                                    onChange={(event) => setData("clients", event.target.value)}
+                            <label className="flex items-center gap-2">
+                                <Checkbox
+                                    checked={data.is_active}
+                                    onCheckedChange={(checked) => setData("is_active", Boolean(checked))}
                                 />
-                                {errors.clients && <p className="text-xs text-rose-500">{errors.clients}</p>}
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="rating">Rating</Label>
-                                <Input
-                                    id="rating"
-                                    type="number"
-                                    min="0"
-                                    max="5"
-                                    step="0.1"
-                                    value={data.rating ?? ""}
-                                    onChange={(event) => setData("rating", event.target.value)}
+                                <span>Aktif</span>
+                            </label>
+                            {errors.is_active && <p className="text-xs text-rose-500">{errors.is_active}</p>}
+                            <label className="flex items-center gap-2">
+                                <Checkbox
+                                    checked={data.popular}
+                                    onCheckedChange={(checked) => setData("popular", Boolean(checked))}
                                 />
-                                {errors.rating && <p className="text-xs text-rose-500">{errors.rating}</p>}
-                            </div>
-                        </div>
-                        <label className="flex items-center gap-2">
-                            <Checkbox
-                                checked={data.is_active}
-                                onCheckedChange={(checked) => setData("is_active", Boolean(checked))}
-                            />
-                            <span>Aktif</span>
-                        </label>
-                        {errors.is_active && <p className="text-xs text-rose-500">{errors.is_active}</p>}
-                        <label className="flex items-center gap-2">
-                            <Checkbox
-                                checked={data.popular}
-                                onCheckedChange={(checked) => setData("popular", Boolean(checked))}
-                            />
-                            <span>Tandai sebagai produk populer</span>
-                        </label>
-                        {errors.popular && <p className="text-xs text-rose-500">{errors.popular}</p>}
-                        <label className="flex items-center gap-2">
-                            <Checkbox
-                                checked={data.demo}
-                                onCheckedChange={(checked) => setData("demo", Boolean(checked))}
-                            />
-                            <span>Sediakan demo</span>
-                        </label>
-                        {errors.demo && <p className="text-xs text-rose-500">{errors.demo}</p>}
-                    </CardContent>
-                    <CardFooter className="flex justify-end gap-2">
-                        <Button type="submit" disabled={processing}>
-                            {product ? "Simpan Perubahan" : "Simpan"}
-                        </Button>
-                    </CardFooter>
-                </Card>
+                                <span>Tandai sebagai produk populer</span>
+                            </label>
+                            {errors.popular && <p className="text-xs text-rose-500">{errors.popular}</p>}
+                            <label className="flex items-center gap-2">
+                                <Checkbox
+                                    checked={data.demo}
+                                    onCheckedChange={(checked) => setData("demo", Boolean(checked))}
+                                />
+                                <span>Sediakan demo</span>
+                            </label>
+                            {errors.demo && <p className="text-xs text-rose-500">{errors.demo}</p>}
+                        </CardContent>
+                        <CardFooter className="flex justify-end gap-2">
+                            <Button type="submit" disabled={processing}>
+                                {product ? "Simpan Perubahan" : "Simpan"}
+                            </Button>
+                        </CardFooter>
+                    </Card>
                 </form>
             </div>
             <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>

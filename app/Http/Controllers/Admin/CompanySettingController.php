@@ -83,6 +83,13 @@ class CompanySettingController extends Controller
             ],
         ];
 
+        $aiSettings = (array) data_get($settings, 'ai.settings', []);
+        $ai = [
+            'api_key' => data_get($aiSettings, 'api_key', ''),
+            'model' => data_get($aiSettings, 'model', config('services.openrouter.model', 'google/gemini-2.0-flash-exp:free')),
+            'endpoint' => data_get($aiSettings, 'endpoint', config('services.openrouter.endpoint', 'https://openrouter.ai/api/v1')),
+        ];
+
         return Inertia::render('admin/settings/Index', [
             'company' => $company,
             'address' => $address,
@@ -91,6 +98,7 @@ class CompanySettingController extends Controller
             'footerCta' => $footerCta,
             'footerLegal' => $footerLegal,
             'security' => $security,
+            'ai' => $ai,
         ]);
     }
 
@@ -112,6 +120,25 @@ class CompanySettingController extends Controller
         $this->saveSetting('security.otp', $config, 'security');
 
         return back()->with('success', 'Pengaturan keamanan berhasil diperbarui.');
+    }
+
+    public function updateAiSettings(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'api_key' => ['nullable', 'string', 'max:255'],
+            'model' => ['nullable', 'string', 'max:255'],
+            'endpoint' => ['nullable', 'url', 'max:500'],
+        ]);
+
+        $config = array_filter([
+            'api_key' => $data['api_key'] ?? null,
+            'model' => $data['model'] ?? null,
+            'endpoint' => $data['endpoint'] ?? null,
+        ], fn($value) => $value !== null && $value !== '');
+
+        $this->saveSetting('ai.settings', $config, 'integration');
+
+        return back()->with('success', 'Pengaturan AI berhasil diperbarui.');
     }
 
     public function downloadBackup(): StreamedResponse

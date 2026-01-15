@@ -2,19 +2,14 @@
 
 namespace App\Services;
 
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Http\Client\RequestException;
-use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use RuntimeException;
 
 class GeminiProductEnricher
 {
     public function __construct(
-        private readonly ?string $apiKey = null,
-        private readonly ?string $model = null,
+        private readonly ?OpenRouterService $openRouterService = null,
     ) {
     }
 
@@ -24,53 +19,39 @@ class GeminiProductEnricher
      */
     public function enrich(array $payload): array
     {
-        $apiKey = $this->apiKey ?: config('services.gemini.key');
-        $model = $this->model ?: config('services.gemini.model', 'gemini-2.5-flash');
+        $service = $this->openRouterService ?? app(OpenRouterService::class);
 
-        if (!$apiKey) {
-            throw new RuntimeException('Gemini API key is not configured.');
+        if (!$service->isConfigured()) {
+            throw new RuntimeException('AI API key is not configured. Set it in Settings or .env file.');
         }
 
-        $requestPayload = [
-            'contents' => [[
-                'role' => 'user',
-                'parts' => [
-                    ['text' => $this->buildPrompt($payload)],
-                ],
-            ]],
-            'generationConfig' => [
-                'temperature' => 0.65,
-                'topK' => 40,
-                'topP' => 0.9,
-                'maxOutputTokens' => 1024,
-                'responseMimeType' => 'application/json',
+        $messages = [
+            [
+                'role' => 'system',
+                'content' => 'Kamu adalah AI product marketer dari perusahaan konsultan teknologi bernama Harmony Strategic Group. Kamu menghasilkan konten dalam format JSON yang valid.',
             ],
-            'safetySettings' => $this->safetySettings(),
+            [
+                'role' => 'user',
+                'content' => $this->buildPrompt($payload),
+            ],
         ];
 
-        $response = $this->sendRequest($model, $requestPayload, $apiKey);
+        $response = $service->chat($messages, [
+            'temperature' => 0.65,
+            'max_tokens' => 1024,
+            'timeout' => 25,
+        ]);
 
-        if ($response->failed() && $response->status() === 404 && !Str::endsWith($model, '-latest')) {
-            $response = $this->sendRequest("{$model}-latest", $requestPayload, $apiKey);
-        }
-
-        if ($response->failed()) {
-            throw new RuntimeException(sprintf(
-                'Gemini request failed (%s)',
-                $response->body() ?: $response->status()
-            ));
-        }
-
-        $textPayload = data_get($response->json(), 'candidates.0.content.parts.0.text');
+        $textPayload = $service->extractContent($response);
 
         if (!$textPayload) {
-            throw new RuntimeException('Gemini response does not contain content.');
+            throw new RuntimeException('AI response does not contain content.');
         }
 
         $decoded = $this->decodeJsonPayload($textPayload);
 
         if (!is_array($decoded)) {
-            throw new RuntimeException('Gemini response is not valid JSON.');
+            throw new RuntimeException('AI response is not valid JSON.');
         }
 
         return [
@@ -118,7 +99,6 @@ class GeminiProductEnricher
         $presetInstruction = $this->presetInstruction($preset);
 
         return <<<PROMPT
-Kamu adalah AI product marketer dari perusahaan konsultan teknologi bernama Harmony Strategic Group.
 Produk yang ingin dipromosikan bernama "{$name}" di kategori {$category}. Target utamanya adalah {$targetMarket}.
 
 {$contextBlock}
@@ -149,33 +129,6 @@ Keluarkan DALAM FORMAT JSON dengan struktur persis berikut:
 
 Jangan tambahkan teks selain JSON valid.
 PROMPT;
-    }
-
-    /**
-     * @param  array<string, mixed>  $payload
-     */
-    private function sendRequest(string $model, array $payload, string $apiKey): Response
-    {
-        $baseUrl = rtrim(config('services.gemini.endpoint', 'https://generativelanguage.googleapis.com'), '/');
-        $version = trim(config('services.gemini.version', 'v1beta'), '/');
-        $url = sprintf('%s/%s/models/%s:generateContent', $baseUrl, $version, $model);
-
-        try {
-            return Http::timeout(25)
-                ->retry(2, 500)
-                ->acceptJson()
-                ->withHeaders([
-                    'X-Goog-Api-Key' => $apiKey,
-                    'Content-Type' => 'application/json',
-                ])
-                ->post($url, $payload);
-        } catch (ConnectionException|RequestException $exception) {
-            throw new RuntimeException(
-                sprintf('Gemini request failed (%s)', $exception->getMessage()),
-                (int) $exception->getCode(),
-                $exception,
-            );
-        }
     }
 
     /**
@@ -247,28 +200,6 @@ PROMPT;
         }
 
         return null;
-    }
-
-    /**
-     * @return array<int, array<string, string>>
-     */
-    private function safetySettings(): array
-    {
-        $categories = [
-            'HARM_CATEGORY_HATE_SPEECH',
-            'HARM_CATEGORY_HARASSMENT',
-            'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-            'HARM_CATEGORY_DANGEROUS_CONTENT',
-            'HARM_CATEGORY_CIVIC_INTEGRITY',
-        ];
-
-        return array_map(
-            static fn (string $category) => [
-                'category' => $category,
-                'threshold' => 'BLOCK_MEDIUM_AND_ABOVE',
-            ],
-            $categories,
-        );
     }
 
     private function presetInstruction(?string $preset): string
