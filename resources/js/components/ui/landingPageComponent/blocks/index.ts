@@ -26,3 +26,12 @@ export { Gallery, type GalleryContent } from './Gallery';
 export { AccordionBlock, type AccordionBlockContent } from './AccordionBlock';
 export { TabsBlock, type TabsBlockContent } from './TabsBlock';
 export { Timeline, type TimelineContent } from './Timeline';
+
+// New blocks
+export { SliderCarousel, type SliderCarouselContent } from './SliderCarousel';
+export { VideoEmbed, type VideoEmbedContent } from './VideoEmbed';
+export { PricingTable, type PricingTableContent } from './PricingTable';
+export { PartnersSection, type PartnersSectionContent } from './PartnersSection';
+export { CounterSection, type CounterSectionContent } from './CounterSection';
+export { FeatureCards, type FeatureCardsContent } from './FeatureCards';
+export { BannerAlert, type BannerAlertContent } from './BannerAlert';

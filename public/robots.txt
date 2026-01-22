@@ -1,2 +1,18 @@
+# robots.txt for Company Profile Website
 User-agent: *
-Disallow:
+Allow: /
+
+# Disallow admin and authenticated areas
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /login
+Disallow: /register
+Disallow: /password
+Disallow: /logout
+Disallow: /api
+Disallow: /sanctum
+Disallow: /_ignition
+
+# Sitemap location
+Sitemap: https://honda-ciledug.com/sitemap.xml

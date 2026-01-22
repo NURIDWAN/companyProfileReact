@@ -22,22 +22,29 @@ import VisionMissionSection from '@/components/ui/landingPageComponent/about/vis
 import {
     AccordionBlock,
     AdvantagesSection,
+    BannerAlert,
     CareerBenefits,
     CareerHero,
     CareerPositions,
     ContactInfo,
     ContactMap,
+    CounterSection,
     FaqSection,
+    FeatureCards,
     Gallery,
     MetricsSection,
+    PartnersSection,
+    PricingTable,
     ProcessSection,
     ProductFeatures,
     ProductGallery,
     ProductHero,
     ServiceSummary,
+    SliderCarousel,
     TabsBlock,
     TechStackSection,
     Timeline,
+    VideoEmbed,
     WhyChooseUs,
 } from '@/components/ui/landingPageComponent/blocks';
 
@@ -294,6 +301,35 @@ export default function StaticPage() {
 
         if (type === 'timeline') {
             return <Timeline content={parsed} />;
+        }
+
+        // ==================== NEW BLOCKS ====================
+        if (type === 'slider') {
+            return <SliderCarousel content={parsed} />;
+        }
+
+        if (type === 'video_embed') {
+            return <VideoEmbed content={parsed} />;
+        }
+
+        if (type === 'pricing_table') {
+            return <PricingTable content={parsed} />;
+        }
+
+        if (type === 'partners') {
+            return <PartnersSection content={parsed} />;
+        }
+
+        if (type === 'counter') {
+            return <CounterSection content={parsed} />;
+        }
+
+        if (type === 'feature_cards') {
+            return <FeatureCards content={parsed} />;
+        }
+
+        if (type === 'banner') {
+            return <BannerAlert content={parsed} />;
         }
 
         // ==================== FALLBACK: Plain HTML ====================

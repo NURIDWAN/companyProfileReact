@@ -29,7 +29,6 @@ class PageRequest extends FormRequest
                     ->where(fn ($query) => $query->where('parent_id', $parentId)),
             ],
             'parent_id' => ['nullable', 'exists:pages,id'],
-            'body' => ['nullable', 'string'],
             'meta_title' => ['nullable', 'string', 'max:180'],
             'meta_description' => ['nullable', 'string'],
             'meta_keywords' => ['nullable', 'string'],

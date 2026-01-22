@@ -27,6 +27,7 @@ interface SectionBlockProps {
     index: number;
     totalSections: number;
     sectionTypes: Array<{ value: string; label: string }>;
+    sectionTypeGroups?: Record<string, { label: string; items: Array<{ value: string; label: string }> }>;
     onUpdate: (section: SectionFormData) => void;
     onDelete: () => void;
     onMoveUp: () => void;
@@ -42,7 +43,17 @@ function slugify(text: string) {
         .replace(/-+/g, '-');
 }
 
-export function SectionBlock({ section, index, totalSections, sectionTypes, onUpdate, onDelete, onMoveUp, onMoveDown }: SectionBlockProps) {
+export function SectionBlock({
+    section,
+    index,
+    totalSections,
+    sectionTypes,
+    sectionTypeGroups,
+    onUpdate,
+    onDelete,
+    onMoveUp,
+    onMoveDown,
+}: SectionBlockProps) {
     const [isOpen, setIsOpen] = useState(true);
     const type = section.type ?? 'plain';
     const dataSection = section.data ?? {};
@@ -154,11 +165,21 @@ export function SectionBlock({ section, index, totalSections, sectionTypes, onUp
                                     value={type}
                                     onChange={(e) => onUpdate({ ...section, type: e.target.value, data: {} })}
                                 >
-                                    {sectionTypes.map((opt) => (
-                                        <option key={opt.value} value={opt.value}>
-                                            {opt.label}
-                                        </option>
-                                    ))}
+                                    {sectionTypeGroups
+                                        ? Object.entries(sectionTypeGroups).map(([key, group]) => (
+                                              <optgroup key={key} label={group.label}>
+                                                  {group.items.map((opt) => (
+                                                      <option key={opt.value} value={opt.value}>
+                                                          {opt.label}
+                                                      </option>
+                                                  ))}
+                                              </optgroup>
+                                          ))
+                                        : sectionTypes.map((opt) => (
+                                              <option key={opt.value} value={opt.value}>
+                                                  {opt.label}
+                                              </option>
+                                          ))}
                                 </select>
                             </div>
                         </div>
@@ -903,6 +924,233 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
                     </div>
                 </div>
                 <TimelineItemsField items={data.items ?? []} onUpdate={(items) => onUpdate({ items })} />
+            </div>
+        );
+    }
+
+    // ==================== NEW BLOCKS ====================
+
+    // Slider/Carousel
+    if (type === 'slider') {
+        return (
+            <div className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium">Heading (Opsional)</Label>
+                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium">Description (Opsional)</Label>
+                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
+                    </div>
+                </div>
+                <div className="grid gap-4 md:grid-cols-4">
+                    <div className="flex items-center gap-2">
+                        <Checkbox id="autoplay" checked={data.autoplay ?? true} onCheckedChange={(checked) => onUpdate({ autoplay: !!checked })} />
+                        <Label htmlFor="autoplay" className="text-xs">
+                            Autoplay
+                        </Label>
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium">Interval (ms)</Label>
+                        <Input
+                            type="number"
+                            min={1000}
+                            step={500}
+                            value={data.interval ?? 5000}
+                            onChange={(e) => onUpdate({ interval: Number(e.target.value) })}
+                        />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Checkbox id="showDots" checked={data.showDots ?? true} onCheckedChange={(checked) => onUpdate({ showDots: !!checked })} />
+                        <Label htmlFor="showDots" className="text-xs">
+                            Show Dots
+                        </Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Checkbox
+                            id="showArrows"
+                            checked={data.showArrows ?? true}
+                            onCheckedChange={(checked) => onUpdate({ showArrows: !!checked })}
+                        />
+                        <Label htmlFor="showArrows" className="text-xs">
+                            Show Arrows
+                        </Label>
+                    </div>
+                </div>
+                <SliderSlidesField slides={data.slides ?? []} onUpdate={(slides) => onUpdate({ slides })} />
+            </div>
+        );
+    }
+
+    // Video Embed
+    if (type === 'video_embed') {
+        return (
+            <div className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium">Heading (Opsional)</Label>
+                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium">Description (Opsional)</Label>
+                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
+                    </div>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium">Video URL (YouTube/Vimeo)</Label>
+                        <Input
+                            value={data.video_url ?? ''}
+                            onChange={(e) => onUpdate({ video_url: e.target.value })}
+                            placeholder="https://www.youtube.com/watch?v=..."
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium">Aspect Ratio</Label>
+                        <select
+                            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                            value={data.aspect_ratio ?? '16:9'}
+                            onChange={(e) => onUpdate({ aspect_ratio: e.target.value })}
+                        >
+                            <option value="16:9">16:9 (Widescreen)</option>
+                            <option value="4:3">4:3 (Standard)</option>
+                            <option value="1:1">1:1 (Square)</option>
+                            <option value="21:9">21:9 (Ultrawide)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Pricing Table
+    if (type === 'pricing_table') {
+        return (
+            <div className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium">Heading</Label>
+                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium">Description</Label>
+                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
+                    </div>
+                </div>
+                <PricingPlansField plans={data.plans ?? []} onUpdate={(plans) => onUpdate({ plans })} />
+            </div>
+        );
+    }
+
+    // Partners/Clients Logo
+    if (type === 'partners') {
+        return (
+            <div className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium">Heading</Label>
+                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium">Description</Label>
+                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Columns</Label>
+                    <Input type="number" min={3} max={6} value={data.columns ?? 5} onChange={(e) => onUpdate({ columns: Number(e.target.value) })} />
+                </div>
+                <PartnersLogosField logos={data.logos ?? []} onUpdate={(logos) => onUpdate({ logos })} />
+            </div>
+        );
+    }
+
+    // Counter/Number
+    if (type === 'counter') {
+        return (
+            <div className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium">Heading (Opsional)</Label>
+                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium">Description (Opsional)</Label>
+                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
+                    </div>
+                </div>
+                <CounterItemsField items={data.items ?? []} onUpdate={(items) => onUpdate({ items })} />
+            </div>
+        );
+    }
+
+    // Feature Cards
+    if (type === 'feature_cards') {
+        return (
+            <div className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium">Heading</Label>
+                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium">Description</Label>
+                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Columns</Label>
+                    <Input type="number" min={2} max={4} value={data.columns ?? 3} onChange={(e) => onUpdate({ columns: Number(e.target.value) })} />
+                </div>
+                <ItemsWithIconField items={data.items ?? []} onUpdate={(items) => onUpdate({ items })} itemLabel="Feature Card" />
+            </div>
+        );
+    }
+
+    // Banner/Alert
+    if (type === 'banner') {
+        return (
+            <div className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium">Tipe Banner</Label>
+                        <select
+                            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                            value={data.banner_type ?? 'info'}
+                            onChange={(e) => onUpdate({ banner_type: e.target.value })}
+                        >
+                            <option value="info">Info (Blue)</option>
+                            <option value="success">Success (Green)</option>
+                            <option value="warning">Warning (Yellow)</option>
+                            <option value="error">Error (Red)</option>
+                        </select>
+                    </div>
+                    <div className="flex items-center gap-2 pt-6">
+                        <Checkbox id="closable" checked={data.closable ?? false} onCheckedChange={(checked) => onUpdate({ closable: !!checked })} />
+                        <Label htmlFor="closable" className="text-xs">
+                            Bisa Ditutup
+                        </Label>
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Judul</Label>
+                    <Input value={data.title ?? ''} onChange={(e) => onUpdate({ title: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Konten</Label>
+                    <Textarea value={data.content ?? ''} onChange={(e) => onUpdate({ content: e.target.value })} />
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium">CTA Label (Opsional)</Label>
+                        <Input value={data.cta_label ?? ''} onChange={(e) => onUpdate({ cta_label: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium">CTA Link (Opsional)</Label>
+                        <Input value={data.cta_link ?? ''} onChange={(e) => onUpdate({ cta_link: e.target.value })} />
+                    </div>
+                </div>
             </div>
         );
     }
@@ -1726,6 +1974,387 @@ function TimelineItemsField({
                 onClick={() => onUpdate([...items, { date: '', title: '', description: '', icon: '' }])}
             >
                 <PlusCircle className="mr-2 h-4 w-4" /> Tambah Timeline Item
+            </Button>
+        </div>
+    );
+}
+
+// ==================== NEW HELPER COMPONENTS ====================
+
+// Slider Slides Field
+function SliderSlidesField({
+    slides,
+    onUpdate,
+}: {
+    slides: Array<{ image?: string; title?: string; description?: string; link?: string }>;
+    onUpdate: (slides: Array<{ image?: string; title?: string; description?: string; link?: string }>) => void;
+}) {
+    return (
+        <div className="space-y-3">
+            <Label className="text-sm font-semibold">Slides</Label>
+            <div className="space-y-3">
+                {slides.map((slide, idx) => (
+                    <div key={idx} className="space-y-3 rounded-lg border bg-background p-4">
+                        <div className="flex items-start justify-between">
+                            <span className="text-sm font-medium">Slide {idx + 1}</span>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => onUpdate(slides.filter((_, i) => i !== idx))}
+                            >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                        </div>
+                        <ImageUpload
+                            value={slide.image ?? null}
+                            onChange={(url) => {
+                                const updated = [...slides];
+                                updated[idx] = { ...slide, image: url ?? '' };
+                                onUpdate(updated);
+                            }}
+                            label="Gambar Slide"
+                        />
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="space-y-1">
+                                <Label className="text-xs text-muted-foreground">Title (Opsional)</Label>
+                                <Input
+                                    value={slide.title ?? ''}
+                                    onChange={(e) => {
+                                        const updated = [...slides];
+                                        updated[idx] = { ...slide, title: e.target.value };
+                                        onUpdate(updated);
+                                    }}
+                                    placeholder="Judul slide"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-xs text-muted-foreground">Link (Opsional)</Label>
+                                <Input
+                                    value={slide.link ?? ''}
+                                    onChange={(e) => {
+                                        const updated = [...slides];
+                                        updated[idx] = { ...slide, link: e.target.value };
+                                        onUpdate(updated);
+                                    }}
+                                    placeholder="/products"
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-1">
+                            <Label className="text-xs text-muted-foreground">Description (Opsional)</Label>
+                            <Textarea
+                                value={slide.description ?? ''}
+                                onChange={(e) => {
+                                    const updated = [...slides];
+                                    updated[idx] = { ...slide, description: e.target.value };
+                                    onUpdate(updated);
+                                }}
+                                placeholder="Deskripsi slide"
+                            />
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => onUpdate([...slides, { image: '', title: '', description: '', link: '' }])}
+            >
+                <PlusCircle className="mr-2 h-4 w-4" /> Tambah Slide
+            </Button>
+        </div>
+    );
+}
+
+// Pricing Plans Field
+function PricingPlansField({
+    plans,
+    onUpdate,
+}: {
+    plans: Array<{
+        name?: string;
+        price?: string;
+        period?: string;
+        features?: string[];
+        cta_label?: string;
+        cta_link?: string;
+        is_popular?: boolean;
+    }>;
+    onUpdate: (plans: Array<any>) => void;
+}) {
+    return (
+        <div className="space-y-3">
+            <Label className="text-sm font-semibold">Pricing Plans</Label>
+            <div className="space-y-3">
+                {plans.map((plan, idx) => (
+                    <div key={idx} className="space-y-3 rounded-lg border bg-background p-4">
+                        <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium">Plan {idx + 1}</span>
+                                <div className="flex items-center gap-1">
+                                    <Checkbox
+                                        id={`popular-${idx}`}
+                                        checked={plan.is_popular ?? false}
+                                        onCheckedChange={(checked) => {
+                                            const updated = [...plans];
+                                            updated[idx] = { ...plan, is_popular: !!checked };
+                                            onUpdate(updated);
+                                        }}
+                                    />
+                                    <Label htmlFor={`popular-${idx}`} className="text-xs">
+                                        Popular
+                                    </Label>
+                                </div>
+                            </div>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => onUpdate(plans.filter((_, i) => i !== idx))}
+                            >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-3">
+                            <div className="space-y-1">
+                                <Label className="text-xs text-muted-foreground">Nama Plan</Label>
+                                <Input
+                                    value={plan.name ?? ''}
+                                    onChange={(e) => {
+                                        const updated = [...plans];
+                                        updated[idx] = { ...plan, name: e.target.value };
+                                        onUpdate(updated);
+                                    }}
+                                    placeholder="Basic"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-xs text-muted-foreground">Harga</Label>
+                                <Input
+                                    value={plan.price ?? ''}
+                                    onChange={(e) => {
+                                        const updated = [...plans];
+                                        updated[idx] = { ...plan, price: e.target.value };
+                                        onUpdate(updated);
+                                    }}
+                                    placeholder="Rp 99.000"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-xs text-muted-foreground">Period</Label>
+                                <Input
+                                    value={plan.period ?? ''}
+                                    onChange={(e) => {
+                                        const updated = [...plans];
+                                        updated[idx] = { ...plan, period: e.target.value };
+                                        onUpdate(updated);
+                                    }}
+                                    placeholder="/bulan"
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-1">
+                            <Label className="text-xs text-muted-foreground">Features (satu per baris)</Label>
+                            <Textarea
+                                value={(plan.features ?? []).join('\n')}
+                                onChange={(e) => {
+                                    const updated = [...plans];
+                                    updated[idx] = { ...plan, features: e.target.value.split('\n').filter((f) => f.trim()) };
+                                    onUpdate(updated);
+                                }}
+                                placeholder="10 GB Storage&#10;Email Support&#10;Free Updates"
+                                rows={4}
+                            />
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="space-y-1">
+                                <Label className="text-xs text-muted-foreground">CTA Label</Label>
+                                <Input
+                                    value={plan.cta_label ?? ''}
+                                    onChange={(e) => {
+                                        const updated = [...plans];
+                                        updated[idx] = { ...plan, cta_label: e.target.value };
+                                        onUpdate(updated);
+                                    }}
+                                    placeholder="Pilih Plan"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-xs text-muted-foreground">CTA Link</Label>
+                                <Input
+                                    value={plan.cta_link ?? ''}
+                                    onChange={(e) => {
+                                        const updated = [...plans];
+                                        updated[idx] = { ...plan, cta_link: e.target.value };
+                                        onUpdate(updated);
+                                    }}
+                                    placeholder="/checkout?plan=basic"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                    onUpdate([
+                        ...plans,
+                        { name: '', price: '', period: '/bulan', features: [], cta_label: 'Pilih Plan', cta_link: '', is_popular: false },
+                    ])
+                }
+            >
+                <PlusCircle className="mr-2 h-4 w-4" /> Tambah Plan
+            </Button>
+        </div>
+    );
+}
+
+// Partners Logos Field
+function PartnersLogosField({
+    logos,
+    onUpdate,
+}: {
+    logos: Array<{ image?: string; name?: string; link?: string }>;
+    onUpdate: (logos: Array<{ image?: string; name?: string; link?: string }>) => void;
+}) {
+    return (
+        <div className="space-y-3">
+            <Label className="text-sm font-semibold">Logos</Label>
+            <div className="grid gap-3 md:grid-cols-2">
+                {logos.map((logo, idx) => (
+                    <div key={idx} className="flex items-start gap-3 rounded-lg border bg-background p-3">
+                        <div className="flex-1 space-y-2">
+                            <ImageUpload
+                                value={logo.image ?? null}
+                                onChange={(url) => {
+                                    const updated = [...logos];
+                                    updated[idx] = { ...logo, image: url ?? '' };
+                                    onUpdate(updated);
+                                }}
+                                label="Logo"
+                            />
+                            <Input
+                                value={logo.name ?? ''}
+                                onChange={(e) => {
+                                    const updated = [...logos];
+                                    updated[idx] = { ...logo, name: e.target.value };
+                                    onUpdate(updated);
+                                }}
+                                placeholder="Nama Partner"
+                            />
+                            <Input
+                                value={logo.link ?? ''}
+                                onChange={(e) => {
+                                    const updated = [...logos];
+                                    updated[idx] = { ...logo, link: e.target.value };
+                                    onUpdate(updated);
+                                }}
+                                placeholder="https://partner.com"
+                            />
+                        </div>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 shrink-0"
+                            onClick={() => onUpdate(logos.filter((_, i) => i !== idx))}
+                        >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                    </div>
+                ))}
+            </div>
+            <Button type="button" variant="outline" size="sm" onClick={() => onUpdate([...logos, { image: '', name: '', link: '' }])}>
+                <PlusCircle className="mr-2 h-4 w-4" /> Tambah Logo
+            </Button>
+        </div>
+    );
+}
+
+// Counter Items Field
+function CounterItemsField({
+    items,
+    onUpdate,
+}: {
+    items: Array<{ value?: string; suffix?: string; label?: string; icon?: string }>;
+    onUpdate: (items: Array<{ value?: string; suffix?: string; label?: string; icon?: string }>) => void;
+}) {
+    return (
+        <div className="space-y-3">
+            <Label className="text-sm font-semibold">Counter Items</Label>
+            <div className="space-y-3">
+                {items.map((item, idx) => (
+                    <div key={idx} className="flex items-start gap-3 rounded-lg border bg-background p-3">
+                        <div className="w-40 shrink-0">
+                            <Label className="mb-1 block text-[10px] text-muted-foreground">Icon</Label>
+                            <IconPicker
+                                value={item.icon ?? ''}
+                                onChange={(val) => {
+                                    const updated = [...items];
+                                    updated[idx] = { ...item, icon: val };
+                                    onUpdate(updated);
+                                }}
+                            />
+                        </div>
+                        <div className="grid flex-1 gap-2 md:grid-cols-3">
+                            <div className="space-y-1">
+                                <Label className="text-xs text-muted-foreground">Nilai</Label>
+                                <Input
+                                    value={item.value ?? ''}
+                                    onChange={(e) => {
+                                        const updated = [...items];
+                                        updated[idx] = { ...item, value: e.target.value };
+                                        onUpdate(updated);
+                                    }}
+                                    placeholder="100"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-xs text-muted-foreground">Suffix</Label>
+                                <Input
+                                    value={item.suffix ?? ''}
+                                    onChange={(e) => {
+                                        const updated = [...items];
+                                        updated[idx] = { ...item, suffix: e.target.value };
+                                        onUpdate(updated);
+                                    }}
+                                    placeholder="+ / % / K"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-xs text-muted-foreground">Label</Label>
+                                <Input
+                                    value={item.label ?? ''}
+                                    onChange={(e) => {
+                                        const updated = [...items];
+                                        updated[idx] = { ...item, label: e.target.value };
+                                        onUpdate(updated);
+                                    }}
+                                    placeholder="Happy Clients"
+                                />
+                            </div>
+                        </div>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="mt-5 h-8 w-8 shrink-0"
+                            onClick={() => onUpdate(items.filter((_, i) => i !== idx))}
+                        >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                    </div>
+                ))}
+            </div>
+            <Button type="button" variant="outline" size="sm" onClick={() => onUpdate([...items, { value: '', suffix: '+', label: '', icon: '' }])}>
+                <PlusCircle className="mr-2 h-4 w-4" /> Tambah Counter
             </Button>
         </div>
     );

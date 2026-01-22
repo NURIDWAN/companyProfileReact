@@ -127,7 +127,6 @@ class PageController extends Controller
             'parent_id' => $validated['parent_id'] ?? null,
             'title' => $validated['title'],
             'slug' => $slug && trim($slug) !== '' ? Str::slug($slug) : Str::slug($validated['title']),
-            'body' => $validated['body'] ?? null,
             'meta_title' => $validated['meta_title'] ?? null,
             'meta_description' => $validated['meta_description'] ?? null,
             'meta_keywords' => $keywordsArray,
@@ -136,9 +135,8 @@ class PageController extends Controller
 
         if ($isPublished) {
             $data['status'] = 'published';
-            $data['published_at'] = isset($validated['published_at'])
-                ? Carbon::parse($validated['published_at'])
-                : ($page?->published_at ?? now());
+            // Auto-fill published_at with current time if not already set
+            $data['published_at'] = $page?->published_at ?? now();
         } else {
             $data['status'] = 'draft';
             $data['published_at'] = null;

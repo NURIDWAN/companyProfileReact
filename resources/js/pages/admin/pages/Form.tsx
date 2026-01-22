@@ -20,7 +20,6 @@ type PagePayload = {
     meta_title?: string | null;
     meta_description?: string | null;
     meta_keywords?: string[] | null;
-    published_at?: string | null;
     display_order?: number | null;
     sections?: SectionPayload[];
 };
@@ -66,7 +65,6 @@ type PageFormData = {
     meta_description: string;
     meta_keywords: string;
     is_published: boolean;
-    published_at: string;
     display_order: number;
     sections: SectionFormData[];
     add_to_menu: boolean;
@@ -83,56 +81,93 @@ function slugify(text: string) {
         .replace(/-+/g, '-');
 }
 
-const sectionTypes = [
-    { value: 'plain', label: 'Konten Biasa (HTML)' },
+// Grouped section types for better organization
+const sectionTypeGroups: Record<string, { label: string; items: Array<{ value: string; label: string }> }> = {
+    general: {
+        label: 'Umum',
+        items: [
+            { value: 'plain', label: 'Konten Biasa (HTML)' },
+            { value: 'slider', label: 'Slider/Carousel' },
+            { value: 'video_embed', label: 'Video Embed' },
+            { value: 'pricing_table', label: 'Pricing Table' },
+            { value: 'partners', label: 'Partners/Clients Logo' },
+            { value: 'counter', label: 'Counter/Number' },
+            { value: 'feature_cards', label: 'Feature Cards' },
+            { value: 'banner', label: 'Banner/Alert' },
+        ],
+    },
+    home: {
+        label: 'Home',
+        items: [
+            { value: 'hero_home', label: 'Hero' },
+            { value: 'about_intro', label: 'About Summary' },
+            { value: 'service_overview', label: 'Service Highlight' },
+            { value: 'why_us', label: 'Why Choose Us' },
+            { value: 'testimonials_home', label: 'Testimonials' },
+            { value: 'metrics_home', label: 'Metrics/Stats' },
+            { value: 'blog_preview', label: 'Blog Preview' },
+            { value: 'cta_home', label: 'CTA' },
+        ],
+    },
+    about: {
+        label: 'About',
+        items: [
+            { value: 'about_overview', label: 'Overview' },
+            { value: 'about_vision', label: 'Visi & Misi' },
+            { value: 'about_values', label: 'Values' },
+            { value: 'about_statistics', label: 'Stats' },
+            { value: 'about_team', label: 'Team' },
+            { value: 'about_cta', label: 'CTA' },
+        ],
+    },
+    service: {
+        label: 'Service',
+        items: [
+            { value: 'service_hero', label: 'Hero' },
+            { value: 'service_summary', label: 'Summary' },
+            { value: 'service_offerings', label: 'Offerings' },
+            { value: 'service_tech_stack', label: 'Tech Stack' },
+            { value: 'service_process', label: 'Process' },
+            { value: 'service_advantages', label: 'Advantages' },
+            { value: 'service_faqs', label: 'FAQ' },
+        ],
+    },
+    product: {
+        label: 'Product',
+        items: [
+            { value: 'product_hero', label: 'Hero' },
+            { value: 'product_features', label: 'Features' },
+            { value: 'product_gallery', label: 'Gallery' },
+        ],
+    },
+    career: {
+        label: 'Career',
+        items: [
+            { value: 'career_hero', label: 'Hero' },
+            { value: 'career_benefits', label: 'Benefits' },
+            { value: 'career_positions', label: 'Positions' },
+        ],
+    },
+    contact: {
+        label: 'Contact',
+        items: [
+            { value: 'contact_info', label: 'Info' },
+            { value: 'contact_map', label: 'Map' },
+        ],
+    },
+    ui: {
+        label: 'UI Components',
+        items: [
+            { value: 'gallery', label: 'Gallery' },
+            { value: 'accordion', label: 'Accordion' },
+            { value: 'tabs', label: 'Tabs' },
+            { value: 'timeline', label: 'Timeline' },
+        ],
+    },
+};
 
-    // Home
-    { value: 'hero_home', label: 'Home - Hero' },
-    { value: 'about_intro', label: 'Home - About Summary' },
-    { value: 'service_overview', label: 'Home - Service Highlight' },
-    { value: 'why_us', label: 'Home - Why Choose Us' },
-    { value: 'testimonials_home', label: 'Home - Testimonials' },
-    { value: 'metrics_home', label: 'Home - Metrics/Stats' },
-    { value: 'blog_preview', label: 'Home - Blog Preview' },
-    { value: 'cta_home', label: 'Home - CTA' },
-
-    // About
-    { value: 'about_overview', label: 'About - Overview' },
-    { value: 'about_vision', label: 'About - Visi & Misi' },
-    { value: 'about_values', label: 'About - Values' },
-    { value: 'about_statistics', label: 'About - Stats' },
-    { value: 'about_team', label: 'About - Team' },
-    { value: 'about_cta', label: 'About - CTA' },
-
-    // Service
-    { value: 'service_hero', label: 'Service - Hero' },
-    { value: 'service_summary', label: 'Service - Summary' },
-    { value: 'service_offerings', label: 'Service - Offerings' },
-    { value: 'service_tech_stack', label: 'Service - Tech Stack' },
-    { value: 'service_process', label: 'Service - Process' },
-    { value: 'service_advantages', label: 'Service - Advantages' },
-    { value: 'service_faqs', label: 'Service - FAQ' },
-
-    // Product
-    { value: 'product_hero', label: 'Product - Hero' },
-    { value: 'product_features', label: 'Product - Features' },
-    { value: 'product_gallery', label: 'Product - Gallery' },
-
-    // Career
-    { value: 'career_hero', label: 'Career - Hero' },
-    { value: 'career_benefits', label: 'Career - Benefits' },
-    { value: 'career_positions', label: 'Career - Positions' },
-
-    // Contact
-    { value: 'contact_info', label: 'Contact - Info' },
-    { value: 'contact_map', label: 'Contact - Map' },
-
-    // General UI
-    { value: 'gallery', label: 'UI - Gallery' },
-    { value: 'accordion', label: 'UI - Accordion' },
-    { value: 'tabs', label: 'UI - Tabs' },
-    { value: 'timeline', label: 'UI - Timeline' },
-];
+// Flatten for backward compatibility with SectionBlock
+const sectionTypes = Object.values(sectionTypeGroups).flatMap((group) => group.items);
 
 export default function PageForm({ page, parents = [], menuItems }: Props) {
     const title = page ? 'Edit Halaman' : 'Tambah Halaman';
@@ -202,7 +237,6 @@ export default function PageForm({ page, parents = [], menuItems }: Props) {
         meta_description: page?.meta_description ?? '',
         meta_keywords: page?.meta_keywords?.join(', ') ?? '',
         is_published: page?.status === 'published',
-        published_at: page?.published_at?.slice(0, 16) ?? '',
         display_order: page?.display_order ?? 0,
         sections:
             page?.sections?.map((section) => ({
@@ -385,6 +419,7 @@ export default function PageForm({ page, parents = [], menuItems }: Props) {
                                                     index={index}
                                                     totalSections={data.sections.length}
                                                     sectionTypes={sectionTypes}
+                                                    sectionTypeGroups={sectionTypeGroups}
                                                     onUpdate={(updated) => updateSection(index, updated)}
                                                     onDelete={() => deleteSection(index)}
                                                     onMoveUp={() => moveSection(index, 'up')}
@@ -437,17 +472,6 @@ export default function PageForm({ page, parents = [], menuItems }: Props) {
                                                 </option>
                                             ))}
                                         </select>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="published_at">Tanggal Publish</Label>
-                                        <Input
-                                            id="published_at"
-                                            type="datetime-local"
-                                            value={data.published_at ?? ''}
-                                            onChange={(e) => setData('published_at', e.target.value)}
-                                            className="h-9"
-                                        />
                                     </div>
 
                                     <div className="space-y-2">

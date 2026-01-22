@@ -33,28 +33,29 @@ export function HeroModern({ content }: HeroModernProps) {
       className="w-full overflow-hidden bg-white dark:bg-gray-900"
     >
       <motion.div
-        className="container mx-auto grid max-w-screen-xl px-4 py-8 lg:grid-cols-12 lg:gap-8 lg:py-16 xl:gap-0"
+        className="container mx-auto grid max-w-6xl items-center gap-8 px-4 py-6 sm:px-6 lg:grid-cols-2 lg:gap-10 lg:py-10 lg:px-8"
         variants={containerVariants}
       >
+        {/* Kolom Teks */}
         <motion.div
-          className="mr-auto place-self-center lg:col-span-7"
+          className="flex flex-col justify-center space-y-4 lg:space-y-6"
           variants={slideIn}
         >
           <motion.h1
             variants={itemVariants}
-            className="mb-4 max-w-2xl text-4xl font-extrabold leading-none tracking-tight text-gray-900 dark:text-white md:text-5xl xl:text-6xl"
+            className="max-w-xl text-3xl font-extrabold leading-snug tracking-tight text-gray-900 dark:text-white md:text-4xl lg:text-5xl"
           >
             {heading}
           </motion.h1>
           <motion.p
             variants={itemVariants}
-            className="mb-6 max-w-2xl font-light text-gray-500 dark:text-gray-400 md:text-lg lg:mb-8 lg:text-xl"
+            className="max-w-lg text-base font-light text-gray-500 dark:text-gray-400 md:text-lg"
           >
             {subheading}
           </motion.p>
           <motion.div
             variants={itemVariants}
-            className="flex space-x-4"
+            className="flex flex-wrap gap-4"
           >
             {primaryLabel && (
               <Button asChild size="lg" className="transition-transform hover:scale-105">
@@ -69,19 +70,20 @@ export function HeroModern({ content }: HeroModernProps) {
           </motion.div>
         </motion.div>
 
+        {/* Kolom Gambar */}
         {imageUrl && (
           <motion.div
-            className="hidden lg:col-span-5 lg:mt-0 lg:flex"
+            className="flex items-center justify-center order-first lg:order-last lg:justify-end"
             variants={scaleUp}
             whileHover={{ scale: 1.02 }}
           >
-            <img
-              src={imageUrl}
-              alt={heading ?? "Hero image"}
-              width={700}
-              height={700}
-              className="rounded-lg object-cover"
-            />
+            <div className="relative w-full max-w-sm lg:max-w-md aspect-[4/3] overflow-hidden rounded-2xl shadow-xl bg-gray-100 dark:bg-gray-800">
+              <img
+                src={imageUrl}
+                alt={heading ?? "Hero image"}
+                className="w-full h-full object-cover"
+              />
+            </div>
           </motion.div>
         )}
       </motion.div>

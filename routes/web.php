@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\BlogPostController;
 use App\Http\Controllers\Admin\CompanySettingController;
 use App\Http\Controllers\Admin\JobPositionController;
 use App\Http\Controllers\Admin\ContactMessageController;
+
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ServiceController;
@@ -88,6 +89,7 @@ Route::group([], function () {
     Route::post('/contact', [LandingController::class, 'submitContact'])
         ->middleware('landing.page:contact')
         ->name('contact.store');
+
 });
 
 
@@ -104,6 +106,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->except(['show'])
             ->middleware('can:manage-users');
         Route::resource('services', ServiceController::class);
+
         Route::get('gemini-requests/{geminiRequest:uuid}', [GeminiRequestController::class, 'show'])->name('gemini-requests.show');
         Route::get('gemini/status', [GeminiRequestController::class, 'health'])->name('gemini.status');
         Route::post('products/enrich', [ProductController::class, 'enrich'])->name('products.enrich');
