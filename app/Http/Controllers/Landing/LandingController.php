@@ -7,15 +7,15 @@ use App\Http\Requests\Landing\ContactMessageRequest;
 use App\Models\BlogPost;
 use App\Models\CompanySetting;
 use App\Models\ContactMessage;
-use App\Models\User;
-use App\Notifications\ContactMessageReceived;
 use App\Models\JobPosition;
+use App\Models\Page;
 use App\Models\Product;
 use App\Models\Project;
 use App\Models\Service;
 use App\Models\TeamMember;
 use App\Models\Testimonial;
-use App\Models\Page;
+use App\Models\User;
+use App\Notifications\ContactMessageReceived;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Notification;
@@ -27,6 +27,7 @@ use Inertia\Response;
 class LandingController extends Controller
 {
     protected ?array $seoCache = null;
+
     protected string $defaultLanguage;
 
     public function __construct()
@@ -41,16 +42,16 @@ class LandingController extends Controller
             ->with([
                 'sections' => function ($q) {
                     $q->where('is_active', true)->orderBy('display_order');
-                }
+                },
             ])
             ->first();
 
-        if (!$page) {
+        if (! $page) {
             return null;
         }
 
         foreach ($page->sections as $section) {
-            if (!$section->content) {
+            if (! $section->content) {
                 continue;
             }
             try {
@@ -149,6 +150,24 @@ class LandingController extends Controller
         $advantagesSection = $this->pageSectionData('service', 'service_advantages');
         $faqSection = $this->pageSectionData('service', 'service_faqs');
 
+        $sections = $this->getSectionVisibility('service', [
+            'service_hero' => 'hero',
+            'service_summary' => 'summary',
+            'service_offerings' => 'offerings',
+            'service_tech_stack' => 'tech_stack',
+            'service_process' => 'process',
+            'service_advantages' => 'advantages',
+            'service_faqs' => 'faq',
+        ], [
+            'hero' => true,
+            'summary' => true,
+            'offerings' => true,
+            'tech_stack' => true,
+            'process' => true,
+            'advantages' => true,
+            'faq' => true,
+        ]);
+
         return Inertia::render('landingPage/Service', [
             'services' => $this->servicePayload(Service::query()->active()->orderBy('display_order')->get()),
             'hero' => $heroSection ? $this->transformServiceHero($heroSection) : null,
@@ -158,6 +177,7 @@ class LandingController extends Controller
             'processSection' => $processSection ? $this->transformProcessSection($processSection) : null,
             'advantagesSection' => $advantagesSection ? $this->transformAdvantagesSection($advantagesSection) : null,
             'faqSection' => $faqSection ? $this->transformFaqSection($faqSection) : null,
+            'sections' => $sections,
             'seo' => $this->seo('service'),
         ]);
     }
@@ -178,6 +198,22 @@ class LandingController extends Controller
                 ->get()
         );
 
+        $sections = $this->getSectionVisibility('about', [
+            'about_overview' => 'overview',
+            'about_vision' => 'vision',
+            'about_values' => 'values',
+            'about_statistics' => 'statistics',
+            'about_team' => 'team',
+            'about_cta' => 'cta',
+        ], [
+            'overview' => true,
+            'vision' => true,
+            'values' => true,
+            'statistics' => true,
+            'team' => true,
+            'cta' => true,
+        ]);
+
         return Inertia::render('landingPage/About', [
             'overview' => $overview,
             'vision' => $vision,
@@ -186,6 +222,7 @@ class LandingController extends Controller
             'team' => $team,
             'teamMembers' => $teamMembers, // Now using DB data
             'cta' => $cta,
+            'sections' => $sections,
             'seo' => $this->seo('about'),
         ]);
     }
@@ -200,12 +237,23 @@ class LandingController extends Controller
         $statsSetting = $this->pageSectionData('product', 'product_stats');
         $productHeroSetting = $this->pageSectionData('product', 'product_hero');
 
+        $sections = $this->getSectionVisibility('product', [
+            'product_hero' => 'hero',
+            'product_cta' => 'cta',
+            'product_stats' => 'stats',
+        ], [
+            'hero' => true,
+            'cta' => true,
+            'stats' => true,
+        ]);
+
         return Inertia::render('landingPage/Product', [
             'products' => $this->productPayload($products),
             'categories' => $categories,
             'productCta' => $ctaSetting ? $this->transformProductCta($ctaSetting) : null,
             'productStats' => $statsSetting ? $this->transformProductStats($statsSetting) : null,
             'productHero' => $productHeroSetting ? $this->transformSection($productHeroSetting) : null,
+            'sections' => $sections,
             'seo' => $this->seo('product'),
         ]);
     }
@@ -214,9 +262,16 @@ class LandingController extends Controller
     {
         $projectHeroSetting = $this->pageSectionData('project', 'project_hero');
 
+        $sections = $this->getSectionVisibility('project', [
+            'project_hero' => 'hero',
+        ], [
+            'hero' => true,
+        ]);
+
         return Inertia::render('landingPage/Project', [
             'projects' => $this->projectPayload(Project::query()->orderByDesc('started_at')->orderByDesc('id')->get()),
             'projectHero' => $projectHeroSetting ? $this->transformSection($projectHeroSetting) : null,
+            'sections' => $sections,
             'seo' => $this->seo('project'),
         ]);
     }
@@ -225,9 +280,16 @@ class LandingController extends Controller
     {
         $careerHeroSetting = $this->pageSectionData('career', 'career_hero');
 
+        $sections = $this->getSectionVisibility('career', [
+            'career_hero' => 'hero',
+        ], [
+            'hero' => true,
+        ]);
+
         return Inertia::render('landingPage/Career', [
             'positions' => $this->careerPayload(JobPosition::query()->where('is_active', true)->latest('posted_at')->get()),
             'careerHero' => $careerHeroSetting ? $this->transformSection($careerHeroSetting) : null,
+            'sections' => $sections,
             'seo' => $this->seo('career'),
         ]);
     }
@@ -252,11 +314,17 @@ class LandingController extends Controller
         $categories = \App\Models\Category::query()
             ->orderBy('name')
             ->get()
-            ->map(fn($cat) => [
+            ->map(fn ($cat) => [
                 'id' => $cat->id,
                 'name' => $cat->name,
                 'slug' => $cat->slug,
             ]);
+
+        $sections = $this->getSectionVisibility('blog', [
+            'blog_hero' => 'hero',
+        ], [
+            'hero' => true,
+        ]);
 
         return Inertia::render('landingPage/Blog', [
             'articles' => $this->articlePayload(
@@ -271,6 +339,7 @@ class LandingController extends Controller
             'categories' => $categories,
             'currentCategory' => null,
             'blogHero' => $this->transformSection($blogHeroSetting),
+            'sections' => $sections,
             'seo' => $this->seo('blog'),
         ]);
     }
@@ -284,17 +353,17 @@ class LandingController extends Controller
                 'id' => $category->name,
             ],
             'heading' => [
-                'id' => 'Artikel ' . $category->name,
+                'id' => 'Artikel '.$category->name,
             ],
             'description' => [
-                'id' => $category->description ?? 'Kumpulan artikel dalam kategori ' . $category->name . '.',
+                'id' => $category->description ?? 'Kumpulan artikel dalam kategori '.$category->name.'.',
             ],
         ], $blogHeroSetting);
 
         $categories = \App\Models\Category::query()
             ->orderBy('name')
             ->get()
-            ->map(fn($cat) => [
+            ->map(fn ($cat) => [
                 'id' => $cat->id,
                 'name' => $cat->name,
                 'slug' => $cat->slug,
@@ -319,21 +388,29 @@ class LandingController extends Controller
             ],
             'blogHero' => $this->transformSection($blogHeroSetting),
             'seo' => $this->seo('blog', [
-                'title' => 'Artikel ' . $category->name,
-                'description' => $category->description ?? 'Kumpulan artikel dalam kategori ' . $category->name,
+                'title' => 'Artikel '.$category->name,
+                'description' => $category->description ?? 'Kumpulan artikel dalam kategori '.$category->name,
             ]),
         ]);
     }
-
 
     public function contact(): Response
     {
         $heroSection = $this->pageSectionData('contact', 'contact_hero');
         $infoSection = $this->pageSectionData('contact', 'contact_info');
 
+        $sections = $this->getSectionVisibility('contact', [
+            'contact_hero' => 'hero',
+            'contact_info' => 'info',
+        ], [
+            'hero' => true,
+            'info' => true,
+        ]);
+
         return Inertia::render('landingPage/Contact', [
             'contactHero' => $heroSection,
             'contactInfo' => $infoSection,
+            'sections' => $sections,
             'seo' => $this->seo('contact'),
         ]);
     }
@@ -465,7 +542,7 @@ class LandingController extends Controller
 
     private function servicePayload(Collection $services): array
     {
-        return $services->map(fn(Service $service) => [
+        return $services->map(fn (Service $service) => [
             'id' => $service->id,
             'title' => $this->translateIfNeeded($service->name),
             'slug' => $service->slug,
@@ -477,12 +554,12 @@ class LandingController extends Controller
 
     private function articlePayload(Collection $posts): array
     {
-        return $posts->map(fn(BlogPost $post) => $this->transformArticle($post))->all();
+        return $posts->map(fn (BlogPost $post) => $this->transformArticle($post))->all();
     }
 
     private function testimonialPayload(Collection $testimonials): array
     {
-        return $testimonials->map(fn(Testimonial $testimonial) => [
+        return $testimonials->map(fn (Testimonial $testimonial) => [
             'id' => $testimonial->id,
             'author_name' => $testimonial->author_name,
             'author_role' => $this->translateIfNeeded($testimonial->author_role),
@@ -495,7 +572,7 @@ class LandingController extends Controller
 
     private function teamPayload(Collection $members): array
     {
-        return $members->map(fn(TeamMember $member) => [
+        return $members->map(fn (TeamMember $member) => [
             'id' => $member->id,
             'name' => $member->name,
             'role' => $this->translateIfNeeded($member->role),
@@ -507,23 +584,23 @@ class LandingController extends Controller
 
     private function careerPayload(Collection $positions): array
     {
-        return $positions->map(fn(JobPosition $position) => $this->transformJob($position))->all();
+        return $positions->map(fn (JobPosition $position) => $this->transformJob($position))->all();
     }
 
     private function productPayload(Collection $products): array
     {
-        return $products->map(fn(Product $product) => $this->transformProduct($product))->all();
+        return $products->map(fn (Product $product) => $this->transformProduct($product))->all();
     }
 
     private function projectPayload(Collection $projects): array
     {
-        return $projects->map(fn(Project $project) => $this->transformProject($project))->all();
+        return $projects->map(fn (Project $project) => $this->transformProject($project))->all();
     }
 
     private function landingSections(): array
     {
-        // Return default enabled sections
-        return [
+        // Default visibility
+        $defaults = [
             'hero' => true,
             'about' => true,
             'services' => true,
@@ -533,6 +610,58 @@ class LandingController extends Controller
             'final_cta' => true,
             'metrics' => true,
         ];
+
+        // Mapping dari __type ke visibility key
+        $typeToKey = [
+            'hero_home' => 'hero',
+            'about_intro' => 'about',
+            'service_overview' => 'services',
+            'testimonials_home' => 'testimonials',
+            'team_home' => 'team',
+            'blog_preview' => 'articles',
+            'cta_home' => 'final_cta',
+            'metrics_home' => 'metrics',
+        ];
+
+        return $this->getSectionVisibility('home', $typeToKey, $defaults);
+    }
+
+    /**
+     * Get section visibility from database based on page_sections.is_active
+     */
+    private function getSectionVisibility(string $pageSlug, array $typeMapping, array $defaults): array
+    {
+        $visibility = $defaults;
+
+        $page = Page::query()
+            ->where('slug', $pageSlug)
+            ->with(['sections'])
+            ->first();
+
+        if (! $page) {
+            return $visibility;
+        }
+
+        foreach ($page->sections as $section) {
+            if (! $section->content) {
+                continue;
+            }
+
+            try {
+                $content = json_decode($section->content, true);
+            } catch (\Throwable $e) {
+                continue;
+            }
+
+            $type = $content['__type'] ?? null;
+            $key = $typeMapping[$type] ?? null;
+
+            if ($key !== null) {
+                $visibility[$key] = (bool) $section->is_active;
+            }
+        }
+
+        return $visibility;
     }
 
     private function setting(string $key, $default = [])
@@ -577,7 +706,7 @@ class LandingController extends Controller
                     'label' => $this->localizedText($metric['label'] ?? null) ?? '',
                 ];
             })
-            ->filter(fn($metric) => $metric['value'] !== '')
+            ->filter(fn ($metric) => $metric['value'] !== '')
             ->values()
             ->all();
     }
@@ -614,7 +743,7 @@ class LandingController extends Controller
                         'detail' => $this->localizedText($contact['detail'] ?? null),
                     ];
                 })
-                ->filter(fn($contact) => $contact['title'] || $contact['detail'])
+                ->filter(fn ($contact) => $contact['title'] || $contact['detail'])
                 ->values()
                 ->all(),
         ];
@@ -642,21 +771,21 @@ class LandingController extends Controller
             : [];
 
         $stats = collect($overview['stats'] ?? [])
-            ->map(fn($item) => [
+            ->map(fn ($item) => [
                 'value' => (string) ($item['value'] ?? ''),
                 'label' => (string) ($item['label'] ?? ''),
             ])
-            ->filter(fn($item) => $item['value'] !== '' && $item['label'] !== '')
+            ->filter(fn ($item) => $item['value'] !== '' && $item['label'] !== '')
             ->values()
             ->all();
 
         $highlights = collect($overview['highlights'] ?? [])
-            ->map(fn($item) => [
+            ->map(fn ($item) => [
                 'icon' => (string) ($item['icon'] ?? 'zap'),
                 'title' => (string) ($item['title'] ?? ''),
                 'description' => (string) ($item['description'] ?? ''),
             ])
-            ->filter(fn($item) => $item['title'] !== '')
+            ->filter(fn ($item) => $item['title'] !== '')
             ->values()
             ->all();
 
@@ -693,7 +822,7 @@ class LandingController extends Controller
                     'description' => $value['description'] ?? '',
                 ];
             })
-            ->filter(fn($item) => $item['title'] !== '')
+            ->filter(fn ($item) => $item['title'] !== '')
             ->values()
             ->all();
     }
@@ -701,20 +830,20 @@ class LandingController extends Controller
     private function transformAboutStatistics(array $statistics): array
     {
         $primary = collect($statistics['primary'] ?? [])
-            ->map(fn($item) => [
+            ->map(fn ($item) => [
                 'value' => (string) ($item['value'] ?? ''),
                 'label' => (string) ($item['label'] ?? ''),
             ])
-            ->filter(fn($item) => $item['value'] !== '' && $item['label'] !== '')
+            ->filter(fn ($item) => $item['value'] !== '' && $item['label'] !== '')
             ->values()
             ->all();
 
         $secondary = collect($statistics['secondary'] ?? [])
-            ->map(fn($item) => [
+            ->map(fn ($item) => [
                 'value' => (string) ($item['value'] ?? ''),
                 'label' => (string) ($item['label'] ?? ''),
             ])
-            ->filter(fn($item) => $item['value'] !== '' && $item['label'] !== '')
+            ->filter(fn ($item) => $item['value'] !== '' && $item['label'] !== '')
             ->values()
             ->all();
 
@@ -752,13 +881,13 @@ class LandingController extends Controller
         $team = array_replace_recursive($defaults, $team);
 
         $members = collect($team['members'] ?? [])
-            ->map(fn($member) => [
+            ->map(fn ($member) => [
                 'name' => $member['name'] ?? '',
                 'role' => $member['role'] ?? '',
                 'image' => $member['image'] ?? '',
                 'description' => $member['description'] ?? '',
             ])
-            ->filter(fn($member) => $member['name'] !== '')
+            ->filter(fn ($member) => $member['name'] !== '')
             ->values()
             ->all();
 
@@ -773,12 +902,12 @@ class LandingController extends Controller
     private function transformAboutCta(array $cta): array
     {
         $contacts = collect($cta['contacts'] ?? [])
-            ->map(fn($contact) => [
+            ->map(fn ($contact) => [
                 'icon' => $contact['icon'] ?? 'phone',
                 'title' => $contact['title'] ?? '',
                 'detail' => $contact['detail'] ?? '',
             ])
-            ->filter(fn($contact) => $contact['title'] !== '' && $contact['detail'] !== '')
+            ->filter(fn ($contact) => $contact['title'] !== '' && $contact['detail'] !== '')
             ->values()
             ->all();
 
@@ -797,12 +926,12 @@ class LandingController extends Controller
     private function transformServiceHero(array $hero): array
     {
         $stats = collect($hero['stats'] ?? [])
-            ->map(fn($stat) => [
+            ->map(fn ($stat) => [
                 'value' => $stat['value'] ?? '',
                 'label' => $stat['label'] ?? '',
                 'desc' => $stat['desc'] ?? '',
             ])
-            ->filter(fn($stat) => $stat['value'] !== '')
+            ->filter(fn ($stat) => $stat['value'] !== '')
             ->values()
             ->all();
 
@@ -835,12 +964,12 @@ class LandingController extends Controller
             'heading' => $this->localizedText($offerings['heading'] ?? null),
             'description' => $this->localizedText($offerings['description'] ?? null),
             'items' => collect($offerings['items'] ?? [])
-                ->map(fn($item) => [
+                ->map(fn ($item) => [
                     'title' => $this->localizedText($item['title'] ?? null),
                     'description' => $this->localizedText($item['description'] ?? null),
                     'icon' => $item['icon'] ?? null,
                 ])
-                ->filter(fn($item) => $item['title'])
+                ->filter(fn ($item) => $item['title'])
                 ->values()
                 ->all(),
         ];
@@ -853,14 +982,14 @@ class LandingController extends Controller
             'heading' => $this->localizedText($techStack['heading'] ?? null),
             'description' => $this->localizedText($techStack['description'] ?? null),
             'items' => collect($techStack['categories'] ?? [])
-                ->map(fn($category) => [
+                ->map(fn ($category) => [
                     'name' => $this->localizedText($category['name'] ?? null),
                     'items' => $category['items'] ?? [],
                     // Use 'items' array directly for list of tech strings
                     // Frontend likely needs to be updated to render this structure
                     'logo' => null, // Deprecated in favor of categories
                 ])
-                ->filter(fn($item) => $item['name'])
+                ->filter(fn ($item) => $item['name'])
                 ->values()
                 ->all(),
         ];
@@ -873,13 +1002,13 @@ class LandingController extends Controller
             'heading' => $this->localizedText($process['heading'] ?? null),
             'description' => $this->localizedText($process['description'] ?? null),
             'items' => collect($process['items'] ?? $process['steps'] ?? [])
-                ->map(fn($item) => [
+                ->map(fn ($item) => [
                     'step' => $this->localizedText($item['step'] ?? null),
                     'title' => $this->localizedText($item['title'] ?? null),
                     'description' => $this->localizedText($item['description'] ?? null),
                     'icon' => $item['icon'] ?? $item['iconName'] ?? null,
                 ])
-                ->filter(fn($item) => $item['title'])
+                ->filter(fn ($item) => $item['title'])
                 ->values()
                 ->all(),
         ];
@@ -892,12 +1021,12 @@ class LandingController extends Controller
             'heading' => $this->localizedText($advantages['heading'] ?? null),
             'description' => $this->localizedText($advantages['description'] ?? null),
             'items' => collect($advantages['items'] ?? [])
-                ->map(fn($item) => [
+                ->map(fn ($item) => [
                     'title' => $this->localizedText($item['title'] ?? null),
                     'description' => $this->localizedText($item['description'] ?? null),
                     'icon' => $item['icon'] ?? $item['iconName'] ?? null,
                 ])
-                ->filter(fn($item) => $item['title'])
+                ->filter(fn ($item) => $item['title'])
                 ->values()
                 ->all(),
         ];
@@ -910,11 +1039,11 @@ class LandingController extends Controller
             'heading' => $this->localizedText($faq['heading'] ?? null),
             'description' => $this->localizedText($faq['description'] ?? null),
             'items' => collect($faq['items'] ?? [])
-                ->map(fn($item) => [
+                ->map(fn ($item) => [
                     'question' => $this->localizedText($item['question'] ?? null),
                     'answer' => $this->localizedText($item['answer'] ?? null),
                 ])
-                ->filter(fn($item) => $item['question'])
+                ->filter(fn ($item) => $item['question'])
                 ->values()
                 ->all(),
         ];
@@ -922,7 +1051,7 @@ class LandingController extends Controller
 
     private function imageUrl(?string $path): ?string
     {
-        if (!$path) {
+        if (! $path) {
             return null;
         }
 
@@ -934,20 +1063,20 @@ class LandingController extends Controller
     private function transformProduct(Product $product): array
     {
         $features = collect($product->features ?? [])
-            ->map(fn($feature) => is_string($feature) ? trim($feature) : $feature)
+            ->map(fn ($feature) => is_string($feature) ? trim($feature) : $feature)
             ->filter()
             ->values()
             ->all();
 
         $gallery = collect($product->gallery ?? [])
-            ->map(fn($image) => $this->imageUrl(is_array($image) ? ($image['url'] ?? null) : $image))
+            ->map(fn ($image) => $this->imageUrl(is_array($image) ? ($image['url'] ?? null) : $image))
             ->filter()
             ->values()
             ->all();
 
         $variants = collect($product->price_variants ?? [])
             ->map(function ($variant) {
-                if (!is_array($variant)) {
+                if (! is_array($variant)) {
                     return null;
                 }
 
@@ -962,7 +1091,7 @@ class LandingController extends Controller
                     'price_formatted' => $price !== null ? $this->formatCurrency($price) : null,
                     'compare_at_price_formatted' => $compare !== null ? $this->formatCurrency($compare) : null,
                     'stock' => isset($variant['stock']) ? (int) $variant['stock'] : null,
-                ], fn($value) => $value !== null);
+                ], fn ($value) => $value !== null);
             })
             ->filter()
             ->values()
@@ -987,14 +1116,14 @@ class LandingController extends Controller
             'marketing_highlights' => $this->translateList($product->marketing_highlights ?? []),
             'faqs' => collect($product->faqs ?? [])
                 ->map(function ($faq) {
-                    if (!is_array($faq)) {
+                    if (! is_array($faq)) {
                         return null;
                     }
 
                     $question = $this->translateIfNeeded($faq['question'] ?? null);
                     $answer = $this->translateIfNeeded($faq['answer'] ?? null);
 
-                    if (!$question || !$answer) {
+                    if (! $question || ! $answer) {
                         return null;
                     }
 
@@ -1077,12 +1206,12 @@ class LandingController extends Controller
 
     private function normalizeRequirements(?string $requirements): array
     {
-        if (!$requirements) {
+        if (! $requirements) {
             return [];
         }
 
         return collect(preg_split('/\r\n|\r|\n/', $requirements))
-            ->map(fn($line) => trim($line))
+            ->map(fn ($line) => trim($line))
             ->filter()
             ->values()
             ->all();
@@ -1104,7 +1233,6 @@ class LandingController extends Controller
 
         return array_merge($defaults, $overrides);
     }
-
 
     private function localizedText($value): ?string
     {
@@ -1149,18 +1277,18 @@ class LandingController extends Controller
             if ($this->isAssoc($value)) {
                 $localized = $value[$locale] ?? null;
 
-                if (is_array($localized) && !empty($localized)) {
+                if (is_array($localized) && ! empty($localized)) {
                     return $this->cleanList($localized);
                 }
 
                 $baseList = $value[$sourceLanguage] ?? null;
 
-                if (is_array($baseList) && !empty($baseList)) {
+                if (is_array($baseList) && ! empty($baseList)) {
                     return $this->cleanList($baseList);
                 }
 
                 foreach ($value as $items) {
-                    if (is_array($items) && !empty($items)) {
+                    if (is_array($items) && ! empty($items)) {
                         return $this->cleanList($items);
                     }
                 }
@@ -1181,7 +1309,7 @@ class LandingController extends Controller
     private function cleanList(array $items): array
     {
         return collect($items)
-            ->map(fn($item) => trim((string) $item))
+            ->map(fn ($item) => trim((string) $item))
             ->filter()
             ->values()
             ->all();
@@ -1195,11 +1323,11 @@ class LandingController extends Controller
     private function resolvePriceRange(?float $basePrice, array $variants): ?array
     {
         $prices = collect($variants)
-            ->map(fn($variant) => $variant['price'] ?? null)
-            ->filter(fn($price) => $price !== null)
+            ->map(fn ($variant) => $variant['price'] ?? null)
+            ->filter(fn ($price) => $price !== null)
             ->push($basePrice)
-            ->filter(fn($price) => $price !== null)
-            ->map(fn($price) => (float) $price)
+            ->filter(fn ($price) => $price !== null)
+            ->map(fn ($price) => (float) $price)
             ->sort()
             ->values();
 
@@ -1222,7 +1350,7 @@ class LandingController extends Controller
 
     private function formatCurrency(float $value): string
     {
-        return 'Rp ' . number_format($value, 0, ',', '.');
+        return 'Rp '.number_format($value, 0, ',', '.');
     }
 
     private function translateIfNeeded(?string $text): ?string

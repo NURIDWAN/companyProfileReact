@@ -50,20 +50,21 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
-            'ziggy' => fn(): array => [
+            'ziggy' => fn (): array => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
-            'sidebarOpen' => !$request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'navigation' => $this->navigation(),
+            'footerNavigation' => $this->footerNavigation(),
             'footer' => $this->footerContent(),
             'branding' => $this->branding(),
             'companyAddress' => $this->companyAddress(),
             'companyContacts' => $this->companyContacts(),
             'companySocials' => $this->companySocials(),
             'flash' => [
-                'success' => fn() => $request->session()->get('success'),
-                'error' => fn() => $request->session()->get('error'),
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
             ],
         ];
     }
@@ -103,7 +104,7 @@ class HandleInertiaRequests extends Middleware
                             : ($stateItem['active'] ?? $item['default_active'] ?? true),
                     ];
                 })
-                ->filter(fn($item) => $item['active'])
+                ->filter(fn ($item) => $item['active'])
                 ->sortBy('order')
                 ->values();
 
@@ -115,8 +116,8 @@ class HandleInertiaRequests extends Middleware
                 ->get()
                 ->map(function (Page $page, int $index) {
                     return [
-                        'key' => 'page-' . $page->slug,
-                        'href' => '/' . $page->slug,
+                        'key' => 'page-'.$page->slug,
+                        'href' => '/'.$page->slug,
                         'labels' => ['id' => $page->title, 'en' => $page->title],
                         'order' => 100 + $index,
                         'active' => true,
@@ -131,7 +132,7 @@ class HandleInertiaRequests extends Middleware
         $primary = $roots
             ->map(function (MenuItem $item) use ($menuItems) {
                 $href = match ($item->type) {
-                    'page' => $item->page ? '/' . $item->page->full_path : $item->target,
+                    'page' => $item->page ? '/'.$item->page->full_path : $item->target,
                     default => $item->target,
                 };
 
@@ -140,7 +141,7 @@ class HandleInertiaRequests extends Middleware
 
                 $childrenFromMenu = $menuChildren->map(function (MenuItem $child) {
                     $childHref = match ($child->type) {
-                        'page' => $child->page ? '/' . $child->page->full_path : $child->target,
+                        'page' => $child->page ? '/'.$child->page->full_path : $child->target,
                         default => $child->target,
                     };
 
@@ -151,7 +152,7 @@ class HandleInertiaRequests extends Middleware
                     }
 
                     return [
-                        'key' => 'menu-' . $child->id,
+                        'key' => 'menu-'.$child->id,
                         'href' => $childHref,
                         'labels' => ['id' => $child->title, 'en' => $child->title],
                         'order' => $child->display_order,
@@ -168,13 +169,13 @@ class HandleInertiaRequests extends Middleware
 
                 // Merge menu children and page children
                 $allChildren = $childrenFromMenu->concat($childrenFromPages)
-                    ->filter(fn($child) => $child['href'])
+                    ->filter(fn ($child) => $child['href'])
                     ->sortBy('order')
                     ->values()
                     ->all();
 
                 return [
-                    'key' => 'menu-' . $item->id,
+                    'key' => 'menu-'.$item->id,
                     'href' => $href,
                     'labels' => ['id' => $item->title, 'en' => $item->title],
                     'order' => $item->display_order,
@@ -182,7 +183,7 @@ class HandleInertiaRequests extends Middleware
                     'children' => $allChildren,
                 ];
             })
-            ->filter(fn($item) => $item['href'])
+            ->filter(fn ($item) => $item['href'])
             ->sortBy('order')
             ->values()
             ->all();
@@ -210,8 +211,8 @@ class HandleInertiaRequests extends Middleware
 
         return $children->map(function (\App\Models\Page $page, int $index) use ($maxDepth, $currentDepth) {
             return [
-                'key' => 'page-child-' . $page->id,
-                'href' => '/' . $page->full_path,
+                'key' => 'page-child-'.$page->id,
+                'href' => '/'.$page->full_path,
                 'labels' => ['id' => $page->title, 'en' => $page->title],
                 'order' => 1000 + ($page->display_order ?? $index),
                 'active' => true,
@@ -228,6 +229,59 @@ class HandleInertiaRequests extends Middleware
         return array_replace_recursive($defaults, $stored);
     }
 
+    /**
+     * Get footer navigation from menu_items database
+     */
+    protected function footerNavigation(): array
+    {
+        $menuItems = MenuItem::query()
+            ->with('page')
+            ->active()
+            ->where('position', 'footer')
+            ->orderBy('parent_id')
+            ->orderBy('display_order')
+            ->orderBy('title')
+            ->get()
+            ->groupBy('parent_id');
+
+        $roots = $menuItems->get(null) ?? collect();
+
+        if ($roots->isEmpty()) {
+            // Return default footer columns from config landing.footer
+            return [];
+        }
+
+        // Build footer columns (groups with their children)
+        $columns = $roots->map(function (MenuItem $group) use ($menuItems) {
+            $children = ($menuItems->get($group->id) ?? collect())
+                ->where('is_active', true)
+                ->map(function (MenuItem $child) {
+                    $href = match ($child->type) {
+                        'page' => $child->page ? '/'.$child->page->full_path : $child->target,
+                        default => $child->target,
+                    };
+
+                    return [
+                        'label' => $child->title,
+                        'href' => $href,
+                    ];
+                })
+                ->filter(fn ($item) => $item['href'])
+                ->values()
+                ->all();
+
+            return [
+                'title' => $group->title,
+                'links' => $children,
+            ];
+        })
+            ->filter(fn ($column) => count($column['links']) > 0)
+            ->values()
+            ->all();
+
+        return $columns;
+    }
+
     protected function branding(): array
     {
         $name = $this->resolveScalarSetting('company.name', config('app.name'));
@@ -240,7 +294,7 @@ class HandleInertiaRequests extends Middleware
             'tagline' => $tagline,
             'logo_url' => $this->resolveImageUrl($logoPath),
             'logo_icon' => $logoIcon,
-        ], fn($value) => $value !== null && $value !== '');
+        ], fn ($value) => $value !== null && $value !== '');
     }
 
     protected function companyAddress(): array
@@ -284,7 +338,7 @@ class HandleInertiaRequests extends Middleware
     {
         $setting = CompanySetting::query()->where('key', $key)->first();
 
-        if (!$setting) {
+        if (! $setting) {
             return $default;
         }
 
@@ -307,7 +361,7 @@ class HandleInertiaRequests extends Middleware
 
     protected function resolveImageUrl(?string $path): ?string
     {
-        if (!$path) {
+        if (! $path) {
             return null;
         }
 

@@ -6,16 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\CompanySetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Throwable;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class CompanySettingController extends Controller
 {
@@ -90,6 +90,18 @@ class CompanySettingController extends Controller
             'endpoint' => data_get($aiSettings, 'endpoint', config('services.openrouter.endpoint', 'https://openrouter.ai/api/v1')),
         ];
 
+        $faviconIco = data_get($settings, 'branding.favicon_ico');
+        $faviconSvg = data_get($settings, 'branding.favicon_svg');
+        $appleTouchIcon = data_get($settings, 'branding.apple_touch_icon');
+        $branding = [
+            'favicon_ico' => $faviconIco ?? '',
+            'favicon_ico_url' => $this->resolveImageUrl($faviconIco),
+            'favicon_svg' => $faviconSvg ?? '',
+            'favicon_svg_url' => $this->resolveImageUrl($faviconSvg),
+            'apple_touch_icon' => $appleTouchIcon ?? '',
+            'apple_touch_icon_url' => $this->resolveImageUrl($appleTouchIcon),
+        ];
+
         return Inertia::render('admin/settings/Index', [
             'company' => $company,
             'address' => $address,
@@ -99,9 +111,9 @@ class CompanySettingController extends Controller
             'footerLegal' => $footerLegal,
             'security' => $security,
             'ai' => $ai,
+            'branding' => $branding,
         ]);
     }
-
 
     public function updateSecurity(Request $request): RedirectResponse
     {
@@ -134,7 +146,7 @@ class CompanySettingController extends Controller
             'api_key' => $data['api_key'] ?? null,
             'model' => $data['model'] ?? null,
             'endpoint' => $data['endpoint'] ?? null,
-        ], fn($value) => $value !== null && $value !== '');
+        ], fn ($value) => $value !== null && $value !== '');
 
         $this->saveSetting('ai.settings', $config, 'integration');
 
@@ -145,20 +157,20 @@ class CompanySettingController extends Controller
     {
         $rows = DB::table('company_settings')->orderBy('id')->get();
         $generatedAt = now();
-        $filename = 'company_settings_backup_' . $generatedAt->format('Y_m_d_His') . '.sql';
+        $filename = 'company_settings_backup_'.$generatedAt->format('Y_m_d_His').'.sql';
 
         $quote = static function ($value): string {
             if ($value === null) {
                 return 'NULL';
             }
 
-            return "'" . str_replace("'", "''", (string) $value) . "'";
+            return "'".str_replace("'", "''", (string) $value)."'";
         };
 
         return response()->streamDownload(function () use ($rows, $generatedAt, $quote): void {
-            echo '-- Backup of company_settings generated at ' . $generatedAt->toDateTimeString() . PHP_EOL;
-            echo 'SET FOREIGN_KEY_CHECKS=0;' . PHP_EOL . PHP_EOL;
-            echo 'TRUNCATE TABLE `company_settings`;' . PHP_EOL . PHP_EOL;
+            echo '-- Backup of company_settings generated at '.$generatedAt->toDateTimeString().PHP_EOL;
+            echo 'SET FOREIGN_KEY_CHECKS=0;'.PHP_EOL.PHP_EOL;
+            echo 'TRUNCATE TABLE `company_settings`;'.PHP_EOL.PHP_EOL;
 
             foreach ($rows as $row) {
                 $id = (int) $row->id;
@@ -178,15 +190,14 @@ class CompanySettingController extends Controller
                     $updatedAt
                 );
 
-                echo $insert . PHP_EOL;
+                echo $insert.PHP_EOL;
             }
 
-            echo PHP_EOL . 'SET FOREIGN_KEY_CHECKS=1;' . PHP_EOL;
+            echo PHP_EOL.'SET FOREIGN_KEY_CHECKS=1;'.PHP_EOL;
         }, $filename, [
             'Content-Type' => 'application/sql; charset=UTF-8',
         ]);
     }
-
 
     public function create(): Response
     {
@@ -321,7 +332,7 @@ class CompanySettingController extends Controller
                     'email' => $data['email'] ?? null,
                     'whatsapp' => $data['whatsapp'] ?? null,
                     'address' => $existingAddress,
-                ], fn($value) => $value !== null && $value !== '');
+                ], fn ($value) => $value !== null && $value !== '');
 
                 return $footer;
             });
@@ -355,6 +366,7 @@ class CompanySettingController extends Controller
 
         $this->updateFooterContent(function (array $footer) use ($data) {
             $footer['cta'] = $data;
+
             return $footer;
         });
 
@@ -369,11 +381,73 @@ class CompanySettingController extends Controller
         ]);
 
         $this->updateFooterContent(function (array $footer) use ($data) {
-            $footer['legal'] = array_filter($data, fn($value) => $value !== null && $value !== '');
+            $footer['legal'] = array_filter($data, fn ($value) => $value !== null && $value !== '');
+
             return $footer;
         });
 
         return redirect()->route('admin.settings.index')->with('success', 'Tautan legal footer berhasil diperbarui.');
+    }
+
+    public function updateBranding(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'favicon_ico' => ['nullable', 'string', 'max:500'],
+            'favicon_ico_file' => ['nullable', 'file', 'mimes:ico,png', 'max:512'],
+            'favicon_svg' => ['nullable', 'string', 'max:500'],
+            'favicon_svg_file' => ['nullable', 'file', 'mimes:svg,svgz', 'max:512'],
+            'apple_touch_icon' => ['nullable', 'string', 'max:500'],
+            'apple_touch_icon_file' => ['nullable', 'image', 'max:512'],
+        ]);
+
+        DB::transaction(function () use ($request, $data) {
+            // Handle favicon.ico
+            $faviconIcoPath = CompanySetting::query()->where('key', 'branding.favicon_ico')->value('value');
+            if ($file = $request->file('favicon_ico_file')) {
+                if ($faviconIcoPath && Str::startsWith($faviconIcoPath, 'branding/')) {
+                    Storage::disk('public')->delete($faviconIcoPath);
+                }
+                $faviconIcoPath = $file->storeAs('branding', 'favicon.ico', 'public');
+            } elseif (($data['favicon_ico'] ?? null) === '') {
+                if ($faviconIcoPath && Str::startsWith($faviconIcoPath, 'branding/')) {
+                    Storage::disk('public')->delete($faviconIcoPath);
+                }
+                $faviconIcoPath = null;
+            }
+            $this->saveSetting('branding.favicon_ico', $faviconIcoPath, 'branding');
+
+            // Handle favicon.svg
+            $faviconSvgPath = CompanySetting::query()->where('key', 'branding.favicon_svg')->value('value');
+            if ($file = $request->file('favicon_svg_file')) {
+                if ($faviconSvgPath && Str::startsWith($faviconSvgPath, 'branding/')) {
+                    Storage::disk('public')->delete($faviconSvgPath);
+                }
+                $faviconSvgPath = $file->storeAs('branding', 'favicon.svg', 'public');
+            } elseif (($data['favicon_svg'] ?? null) === '') {
+                if ($faviconSvgPath && Str::startsWith($faviconSvgPath, 'branding/')) {
+                    Storage::disk('public')->delete($faviconSvgPath);
+                }
+                $faviconSvgPath = null;
+            }
+            $this->saveSetting('branding.favicon_svg', $faviconSvgPath, 'branding');
+
+            // Handle apple-touch-icon
+            $appleTouchPath = CompanySetting::query()->where('key', 'branding.apple_touch_icon')->value('value');
+            if ($file = $request->file('apple_touch_icon_file')) {
+                if ($appleTouchPath && Str::startsWith($appleTouchPath, 'branding/')) {
+                    Storage::disk('public')->delete($appleTouchPath);
+                }
+                $appleTouchPath = $file->storeAs('branding', 'apple-touch-icon.png', 'public');
+            } elseif (($data['apple_touch_icon'] ?? null) === '') {
+                if ($appleTouchPath && Str::startsWith($appleTouchPath, 'branding/')) {
+                    Storage::disk('public')->delete($appleTouchPath);
+                }
+                $appleTouchPath = null;
+            }
+            $this->saveSetting('branding.apple_touch_icon', $appleTouchPath, 'branding');
+        });
+
+        return redirect()->route('admin.settings.index')->with('success', 'Favicon berhasil diperbarui.');
     }
 
     public function destroy(CompanySetting $setting): RedirectResponse
@@ -433,7 +507,7 @@ class CompanySettingController extends Controller
 
     protected function resolveImageUrl(?string $path): ?string
     {
-        if (!$path) {
+        if (! $path) {
             return null;
         }
 

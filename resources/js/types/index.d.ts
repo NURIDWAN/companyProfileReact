@@ -106,6 +106,7 @@ export interface SharedData {
     navigation?: {
         primary: NavigationLink[];
     };
+    footerNavigation?: FooterColumn[];
     footer?: FooterContent;
     branding?: BrandingInfo;
     companyAddress?: CompanyAddress;

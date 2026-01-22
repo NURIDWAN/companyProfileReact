@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
 use App\Models\GeminiRequest;
-use App\Jobs\ProcessGeminiRequest;
-use Illuminate\Http\RedirectResponse;
+use App\Models\Product;
+use App\Services\GeminiProductEnricher;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -16,9 +16,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use Throwable;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class ProductController extends Controller
 {
@@ -34,7 +34,7 @@ class ProductController extends Controller
         return Inertia::render('admin/products/Form');
     }
 
-    public function enrich(Request $request): JsonResponse
+    public function enrich(Request $request, GeminiProductEnricher $enricher): JsonResponse
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -51,22 +51,51 @@ class ProductController extends Controller
 
         $data['features'] = $this->cleanList(collect($data['features'] ?? []));
 
-        $model = config('services.gemini.model', 'gemini-2.5-flash');
+        $model = config('services.openrouter.model', 'google/gemini-2.0-flash-exp:free');
+        $startedAt = microtime(true);
 
         $geminiRequest = GeminiRequest::create([
             'user_id' => $request->user()?->id,
             'type' => 'product',
             'model' => $model,
+            'status' => 'processing',
             'summary' => Str::limit($data['name'], 120),
             'options' => $data,
+            'started_at' => now(),
         ]);
 
-        ProcessGeminiRequest::dispatch($geminiRequest);
+        try {
+            $result = $enricher->enrich($data);
+            $finishedAt = microtime(true);
 
-        return response()->json([
-            'request_id' => $geminiRequest->uuid,
-            'status' => $geminiRequest->status,
-        ]);
+            $geminiRequest->update([
+                'status' => 'completed',
+                'result' => $result,
+                'finished_at' => now(),
+                'duration_ms' => (int) (($finishedAt - $startedAt) * 1000),
+            ]);
+
+            return response()->json([
+                'status' => 'completed',
+                'result' => $result,
+            ]);
+        } catch (Throwable $e) {
+            Log::error('Product enrichment failed', [
+                'gemini_request_id' => $geminiRequest->id,
+                'message' => $e->getMessage(),
+            ]);
+
+            $geminiRequest->update([
+                'status' => 'failed',
+                'error_message' => $e->getMessage(),
+                'finished_at' => now(),
+            ]);
+
+            return response()->json([
+                'status' => 'failed',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function store(Request $request): RedirectResponse
@@ -225,7 +254,7 @@ class ProductController extends Controller
 
         $variants = $this->prepareVariants(collect($request->input('price_variants', [])));
 
-        if ($variants->isNotEmpty() && !$request->filled('price')) {
+        if ($variants->isNotEmpty() && ! $request->filled('price')) {
             $data['price'] = $variants
                 ->map(fn (array $variant) => $variant['price'] ?? null)
                 ->filter()
@@ -241,7 +270,7 @@ class ProductController extends Controller
 
     private function normalizeLines(?string $value): array
     {
-        if (!$value) {
+        if (! $value) {
             return [];
         }
 
@@ -256,7 +285,7 @@ class ProductController extends Controller
     {
         return $items
             ->map(function ($item) {
-                if (!is_array($item)) {
+                if (! is_array($item)) {
                     return null;
                 }
 
@@ -321,7 +350,7 @@ class ProductController extends Controller
     {
         return $variants
             ->map(function ($variant) {
-                if (!is_array($variant)) {
+                if (! is_array($variant)) {
                     return null;
                 }
 
@@ -365,7 +394,7 @@ class ProductController extends Controller
             if (substr_count($normalized, '.') > 1) {
                 $parts = explode('.', $normalized);
                 $decimal = array_pop($parts);
-                $normalized = implode('', $parts) . '.' . $decimal;
+                $normalized = implode('', $parts).'.'.$decimal;
             }
 
             return (float) $normalized;

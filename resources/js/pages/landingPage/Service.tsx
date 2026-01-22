@@ -1,35 +1,32 @@
-import LandingPageLayout from '@/layouts/landingPage-layouts';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { usePage } from '@inertiajs/react';
+import LandingPageLayout from '@/layouts/landingPage-layouts';
+import { serviceIconRegistry } from '@/lib/service-icons';
 import type { PageProps } from '@inertiajs/core';
+import { usePage } from '@inertiajs/react';
 import {
     Activity,
     CircuitBoard,
     Cloud,
     Code,
     Handshake,
-    LayoutTemplate,
     Layers,
+    LayoutTemplate,
     Leaf,
-    LifeBuoy,
     LineChart,
     Package,
     Paintbrush,
     Rocket,
     Search,
-    Shield,
     Smartphone,
-    Sparkles,
     Trophy,
     Users,
     Workflow,
     Zap,
     type LucideIcon,
 } from 'lucide-react';
-import { serviceIconRegistry } from '@/lib/service-icons';
 
 type ServiceItem = {
     id: number;
@@ -107,6 +104,9 @@ type FaqSection = SectionCopy & {
     items?: FaqItem[];
 };
 
+type SectionKey = 'hero' | 'summary' | 'offerings' | 'tech_stack' | 'process' | 'advantages' | 'faq';
+type SectionVisibility = Partial<Record<SectionKey, boolean>>;
+
 type ServicePageProps = PageProps & {
     services?: ServiceItem[];
     hero?: ServiceHero;
@@ -116,6 +116,7 @@ type ServicePageProps = PageProps & {
     processSection?: ProcessSection;
     advantagesSection?: AdvantagesSection;
     faqSection?: FaqSection;
+    sections?: SectionVisibility;
 };
 
 const iconRegistry: Record<string, LucideIcon> = serviceIconRegistry;
@@ -224,23 +225,19 @@ const FALLBACK_FAQ: FaqSection = {
     items: [
         {
             question: 'Berapa lama waktu rata-rata sebuah program berjalan?',
-            answer:
-                'Durasi bergantung pada ruang lingkup. Program penguatan proses biasanya berlangsung 6-12 minggu, sementara transformasi berskala besar dapat berjalan lebih panjang dengan beberapa fase.',
+            answer: 'Durasi bergantung pada ruang lingkup. Program penguatan proses biasanya berlangsung 6-12 minggu, sementara transformasi berskala besar dapat berjalan lebih panjang dengan beberapa fase.',
         },
         {
             question: 'Apakah kami mendapatkan laporan perkembangan secara rutin?',
-            answer:
-                'Ya. Kami menyiapkan jalur komunikasi dan dashboard monitoring agar setiap pemangku kepentingan dapat memantau status dan rekomendasi berikutnya.',
+            answer: 'Ya. Kami menyiapkan jalur komunikasi dan dashboard monitoring agar setiap pemangku kepentingan dapat memantau status dan rekomendasi berikutnya.',
         },
         {
             question: 'Bagaimana pendampingan setelah program selesai?',
-            answer:
-                'Kami menyediakan paket sustainment yang mencakup coaching, audit berkala, dan dukungan pengelolaan perubahan agar manfaat program tetap terjaga.',
+            answer: 'Kami menyediakan paket sustainment yang mencakup coaching, audit berkala, dan dukungan pengelolaan perubahan agar manfaat program tetap terjaga.',
         },
         {
             question: 'Bagaimana struktur investasi layanan?',
-            answer:
-                'Investasi ditentukan oleh kompleksitas, lokasi, dan target hasil. Setelah asesmen awal kami menyusun proposal lengkap beserta tahapan pembayaran yang transparan.',
+            answer: 'Investasi ditentukan oleh kompleksitas, lokasi, dan target hasil. Setelah asesmen awal kami menyusun proposal lengkap beserta tahapan pembayaran yang transparan.',
         },
     ],
 };
@@ -273,7 +270,6 @@ const serviceHighlights = [
     },
 ];
 
-
 function resolveIcon(icon: string | LucideIcon | null | undefined, fallback: LucideIcon): LucideIcon {
     if (typeof icon === 'string') {
         return iconRegistry[icon] ?? fallback;
@@ -290,22 +286,19 @@ function ServicesHeroSection({ hero }: { hero: ServiceHero }) {
 
     return (
         <section className="relative overflow-hidden">
-            <div
-                className="relative bg-cover bg-center"
-                style={{ backgroundImage: `url(${backgroundImage})` }}
-            >
+            <div className="relative bg-cover bg-center" style={{ backgroundImage: `url(${backgroundImage})` }}>
                 <div className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-slate-900/60 to-indigo-900/50" />
                 <div className="relative container mx-auto flex min-h-[540px] flex-col items-center justify-center gap-8 px-6 py-32 text-center text-white">
-                    <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.3em] text-indigo-100">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-xs tracking-[0.3em] text-indigo-100 uppercase">
                         {hero.badge ?? 'SERVICES'}
                     </div>
-                    <h1 className="max-w-4xl text-4xl font-semibold leading-tight sm:text-5xl md:text-6xl">
+                    <h1 className="max-w-4xl text-4xl leading-tight font-semibold sm:text-5xl md:text-6xl">
                         <span>{hero.heading ?? FALLBACK_HERO.heading}</span>{' '}
-                        {hero.highlight ? <span className="text-transparent bg-gradient-to-r from-indigo-200 to-cyan-200 bg-clip-text">{hero.highlight}</span> : null}
+                        {hero.highlight ? (
+                            <span className="bg-gradient-to-r from-indigo-200 to-cyan-200 bg-clip-text text-transparent">{hero.highlight}</span>
+                        ) : null}
                     </h1>
-                    {hero.subheading ? (
-                        <p className="mx-auto max-w-3xl text-lg text-slate-200 md:text-xl">{hero.subheading}</p>
-                    ) : null}
+                    {hero.subheading ? <p className="mx-auto max-w-3xl text-lg text-slate-200 md:text-xl">{hero.subheading}</p> : null}
                     {(primaryReady || secondaryReady) && (
                         <div className="mt-4 flex flex-wrap justify-center gap-4">
                             {primaryReady ? (
@@ -314,7 +307,12 @@ function ServicesHeroSection({ hero }: { hero: ServiceHero }) {
                                 </Button>
                             ) : null}
                             {secondaryReady ? (
-                                <Button size="lg" variant="ghost" className="rounded-full border border-white/40 text-white hover:bg-white/10" asChild>
+                                <Button
+                                    size="lg"
+                                    variant="ghost"
+                                    className="rounded-full border border-white/40 text-white hover:bg-white/10"
+                                    asChild
+                                >
                                     <a href={hero.secondary_link ?? '#'}>{hero.secondary_label}</a>
                                 </Button>
                             ) : null}
@@ -337,8 +335,6 @@ function ServicesHeroSection({ hero }: { hero: ServiceHero }) {
         </section>
     );
 }
-
-
 
 function ServiceHighlightsSection() {
     return (
@@ -380,17 +376,12 @@ function DynamicServicesSummary({ services, copy }: { services: ServiceItem[]; c
                             {copy.badge}
                         </Badge>
                     ) : null}
-                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
-                        {copy.heading ?? FALLBACK_SUMMARY.heading}
-                    </h2>
-                    {copy.description ? (
-                        <p className="mx-auto mt-3 max-w-3xl text-base text-muted-foreground">{copy.description}</p>
-                    ) : null}
+                    <h2 className="text-3xl font-bold text-gray-900 md:text-4xl dark:text-white">{copy.heading ?? FALLBACK_SUMMARY.heading}</h2>
+                    {copy.description ? <p className="mx-auto mt-3 max-w-3xl text-base text-muted-foreground">{copy.description}</p> : null}
                 </div>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     {services.map((service, index) => {
-                        const Icon =
-                            (service.icon && iconRegistry[service.icon]) || summaryIconCycle[index % summaryIconCycle.length];
+                        const Icon = (service.icon && iconRegistry[service.icon]) || summaryIconCycle[index % summaryIconCycle.length];
 
                         return (
                             <Card
@@ -403,7 +394,7 @@ function DynamicServicesSummary({ services, copy }: { services: ServiceItem[]; c
                                     </div>
                                     <div>
                                         <CardTitle className="text-xl font-semibold">{service.title}</CardTitle>
-                                        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">service track</p>
+                                        <p className="text-xs tracking-[0.3em] text-slate-400 uppercase">service track</p>
                                     </div>
                                 </CardHeader>
                                 <CardContent className="text-sm text-muted-foreground dark:text-slate-300">
@@ -413,10 +404,7 @@ function DynamicServicesSummary({ services, copy }: { services: ServiceItem[]; c
                                             dangerouslySetInnerHTML={{ __html: service.description }}
                                         />
                                     ) : (
-                                        <p>
-                                            {service.excerpt ??
-                                                'Solusi teknologi yang disesuaikan dengan kebutuhan organisasi Anda.'}
-                                        </p>
+                                        <p>{service.excerpt ?? 'Solusi teknologi yang disesuaikan dengan kebutuhan organisasi Anda.'}</p>
                                     )}
                                 </CardContent>
                             </Card>
@@ -441,12 +429,8 @@ function OurServicesSection({ copy, items }: { copy: SectionCopy; items: Highlig
                             {copy.badge}
                         </Badge>
                     ) : null}
-                    <h2 className="text-3xl font-bold text-gray-800 dark:text-white md:text-4xl">
-                        {copy.heading ?? FALLBACK_OFFERINGS.heading}
-                    </h2>
-                    {copy.description ? (
-                        <p className="mx-auto mt-3 max-w-3xl text-lg text-gray-600 dark:text-gray-400">{copy.description}</p>
-                    ) : null}
+                    <h2 className="text-3xl font-bold text-gray-800 md:text-4xl dark:text-white">{copy.heading ?? FALLBACK_OFFERINGS.heading}</h2>
+                    {copy.description ? <p className="mx-auto mt-3 max-w-3xl text-lg text-gray-600 dark:text-gray-400">{copy.description}</p> : null}
                     <div className="mx-auto mt-4 h-1 w-24 rounded-full bg-indigo-500" />
                 </div>
                 {cards.length ? (
@@ -469,8 +453,7 @@ function OurServicesSection({ copy, items }: { copy: SectionCopy; items: Highlig
                                     </CardHeader>
                                     <CardContent>
                                         <p className="text-gray-600 dark:text-gray-400">
-                                            {item.description ??
-                                                'Detail layanan akan segera tersedia untuk memberikan gambaran menyeluruh.'}
+                                            {item.description ?? 'Detail layanan akan segera tersedia untuk memberikan gambaran menyeluruh.'}
                                         </p>
                                     </CardContent>
                                 </Card>
@@ -499,14 +482,8 @@ function TechStackSection({ data }: { data: TechStackSection }) {
                             {data.badge}
                         </Badge>
                     ) : null}
-                    <h2 className="text-3xl font-bold text-gray-800 dark:text-white md:text-4xl">
-                        {data.heading ?? FALLBACK_TECH_STACK.heading}
-                    </h2>
-                    {data.description ? (
-                        <p className="mx-auto mt-3 max-w-3xl text-lg text-gray-600 dark:text-gray-400">
-                            {data.description}
-                        </p>
-                    ) : null}
+                    <h2 className="text-3xl font-bold text-gray-800 md:text-4xl dark:text-white">{data.heading ?? FALLBACK_TECH_STACK.heading}</h2>
+                    {data.description ? <p className="mx-auto mt-3 max-w-3xl text-lg text-gray-600 dark:text-gray-400">{data.description}</p> : null}
                     <div className="mx-auto mt-4 h-1 w-24 rounded-full bg-indigo-500" />
                 </div>
 
@@ -524,7 +501,10 @@ function TechStackSection({ data }: { data: TechStackSection }) {
                                         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
                                             {category.icon ? (
                                                 iconRegistry[category.icon] ? (
-                                                    (() => { const IconComp = iconRegistry[category.icon]; return <IconComp className="h-6 w-6" />; })()
+                                                    (() => {
+                                                        const IconComp = iconRegistry[category.icon];
+                                                        return <IconComp className="h-6 w-6" />;
+                                                    })()
                                                 ) : (
                                                     <Layers className="h-6 w-6" />
                                                 )
@@ -532,9 +512,7 @@ function TechStackSection({ data }: { data: TechStackSection }) {
                                                 <Icon className="h-6 w-6" />
                                             )}
                                         </div>
-                                        <CardTitle className="text-xl font-bold text-slate-800 dark:text-white">
-                                            {category.name}
-                                        </CardTitle>
+                                        <CardTitle className="text-xl font-bold text-slate-800 dark:text-white">{category.name}</CardTitle>
                                     </CardHeader>
                                 </Card>
                             );
@@ -573,21 +551,22 @@ function OurProcessSection({ data }: { data: ProcessSection }) {
                             {data.badge}
                         </Badge>
                     ) : null}
-                    <h2 className="text-3xl font-bold text-gray-800 dark:text-white md:text-4xl">
-                        {data.heading ?? FALLBACK_PROCESS.heading}
-                    </h2>
+                    <h2 className="text-3xl font-bold text-gray-800 md:text-4xl dark:text-white">{data.heading ?? FALLBACK_PROCESS.heading}</h2>
                     <div className="mx-auto mt-4 h-1 w-24 rounded-full bg-indigo-500" />
                 </div>
                 {items.length ? (
                     <div className="relative mx-auto max-w-5xl">
-                        <div className="absolute inset-y-0 left-8 hidden w-px bg-gradient-to-b from-indigo-200 via-indigo-400 to-indigo-200 dark:from-indigo-950 dark:via-indigo-700 dark:to-indigo-950 md:block" />
+                        <div className="absolute inset-y-0 left-8 hidden w-px bg-gradient-to-b from-indigo-200 via-indigo-400 to-indigo-200 md:block dark:from-indigo-950 dark:via-indigo-700 dark:to-indigo-950" />
                         <div className="space-y-10">
                             {items.map((item, index) => {
                                 const fallbackIcon = iconRegistry[FALLBACK_PROCESS.items?.[index]?.icon ?? 'Search'] ?? Search;
                                 const Icon = resolveIcon(item.icon, fallbackIcon);
 
                                 return (
-                                    <div key={`${item.step}-${item.title}`} className="relative flex flex-col gap-6 rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-md dark:border-white/10 dark:bg-slate-900/60 md:flex-row md:items-center">
+                                    <div
+                                        key={`${item.step}-${item.title}`}
+                                        className="relative flex flex-col gap-6 rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-md md:flex-row md:items-center dark:border-white/10 dark:bg-slate-900/60"
+                                    >
                                         <div className="flex items-center gap-4 md:w-1/3">
                                             <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-200">
                                                 <Icon className="h-7 w-7" />
@@ -627,14 +606,12 @@ function WhyChooseUsSection({ data }: { data: AdvantagesSection }) {
             <div className="container mx-auto px-6">
                 <div className="mb-16 text-center">
                     {data.badge ? (
-                        <Badge variant="secondary" className="mb-4 text-sm bg-white/10 text-white">
+                        <Badge variant="secondary" className="mb-4 bg-white/10 text-sm text-white">
                             {data.badge}
                         </Badge>
                     ) : null}
                     <h2 className="text-3xl font-bold md:text-4xl">{data.heading ?? FALLBACK_ADVANTAGES.heading}</h2>
-                    {data.description ? (
-                        <p className="mx-auto mt-3 max-w-3xl text-indigo-100">{data.description}</p>
-                    ) : null}
+                    {data.description ? <p className="mx-auto mt-3 max-w-3xl text-indigo-100">{data.description}</p> : null}
                     <div className="mx-auto mt-4 h-1 w-24 rounded-full bg-white/50" />
                 </div>
                 {items.length ? (
@@ -683,12 +660,8 @@ function FaqSection({ data }: { data: FaqSection }) {
                             {data.badge}
                         </Badge>
                     ) : null}
-                    <h2 className="text-3xl font-bold text-gray-800 dark:text-white md:text-4xl">
-                        {data.heading ?? FALLBACK_FAQ.heading}
-                    </h2>
-                    {data.description ? (
-                        <p className="mx-auto mt-3 max-w-3xl text-lg text-gray-600 dark:text-gray-400">{data.description}</p>
-                    ) : null}
+                    <h2 className="text-3xl font-bold text-gray-800 md:text-4xl dark:text-white">{data.heading ?? FALLBACK_FAQ.heading}</h2>
+                    {data.description ? <p className="mx-auto mt-3 max-w-3xl text-lg text-gray-600 dark:text-gray-400">{data.description}</p> : null}
                     <div className="mx-auto mt-4 h-1 w-24 rounded-full bg-indigo-500" />
                 </div>
                 {items.length ? (
@@ -709,10 +682,8 @@ function FaqSection({ data }: { data: FaqSection }) {
                                                 {faq.question}
                                             </div>
                                         </AccordionTrigger>
-                                        <AccordionContent className="bg-slate-50/50 px-6 pb-4 pt-0 text-base leading-relaxed text-gray-600 dark:bg-slate-900/50 dark:text-gray-300">
-                                            <div className="ml-11 border-t border-slate-100 pt-3 dark:border-white/5">
-                                                {faq.answer}
-                                            </div>
+                                        <AccordionContent className="bg-slate-50/50 px-6 pt-0 pb-4 text-base leading-relaxed text-gray-600 dark:bg-slate-900/50 dark:text-gray-300">
+                                            <div className="ml-11 border-t border-slate-100 pt-3 dark:border-white/5">{faq.answer}</div>
                                         </AccordionContent>
                                     </AccordionItem>
                                 ))}
@@ -720,9 +691,7 @@ function FaqSection({ data }: { data: FaqSection }) {
                         </div>
                     </div>
                 ) : (
-                    <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-                        FAQ belum tersedia.
-                    </div>
+                    <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">FAQ belum tersedia.</div>
                 )}
             </div>
         </section>
@@ -739,7 +708,11 @@ export default function ServicesPage() {
         processSection,
         advantagesSection,
         faqSection,
+        sections,
     } = usePage<ServicePageProps>().props;
+
+    const visibility = sections ?? {};
+    const isEnabled = (key: SectionKey) => visibility[key] ?? true;
 
     const heroContent = { ...FALLBACK_HERO, ...(hero ?? {}) };
     const summaryCopy = { ...FALLBACK_SUMMARY, ...(summarySection ?? {}) };
@@ -766,14 +739,14 @@ export default function ServicesPage() {
     };
 
     const configuredHighlightItems =
-        offeringsSection?.items?.filter((item) => item?.title)?.map((item) => ({
-            title: item.title,
-            description: item.description,
-            iconName: item.iconName,
-            icon: item.icon,
-        })) ?? [];
-
-
+        offeringsSection?.items
+            ?.filter((item) => item?.title)
+            ?.map((item) => ({
+                title: item.title,
+                description: item.description,
+                iconName: item.iconName,
+                icon: item.icon,
+            })) ?? [];
 
     const fallbackHighlightItems = serviceHighlights.map((item) => ({
         title: item.title,
@@ -785,20 +758,26 @@ export default function ServicesPage() {
 
     return (
         <LandingPageLayout>
-            <ServicesHeroSection hero={heroContent} />
+            {isEnabled('hero') && <ServicesHeroSection hero={heroContent} />}
 
-            <div id="konsultasi-mutu">
-                <OurServicesSection copy={offeringsCopy} items={highlightItems} />
-            </div>
+            {isEnabled('offerings') && (
+                <div id="konsultasi-mutu">
+                    <OurServicesSection copy={offeringsCopy} items={highlightItems} />
+                </div>
+            )}
 
-            <div id="pengaduan">
-                <TechStackSection data={techStackData} />
-            </div>
-            <OurProcessSection data={processData} />
-            <div id="kritik-saran">
-                <WhyChooseUsSection data={advantagesData} />
-            </div>
-            <FaqSection data={faqData} />
+            {isEnabled('tech_stack') && (
+                <div id="pengaduan">
+                    <TechStackSection data={techStackData} />
+                </div>
+            )}
+            {isEnabled('process') && <OurProcessSection data={processData} />}
+            {isEnabled('advantages') && (
+                <div id="kritik-saran">
+                    <WhyChooseUsSection data={advantagesData} />
+                </div>
+            )}
+            {isEnabled('faq') && <FaqSection data={faqData} />}
         </LandingPageLayout>
     );
 }

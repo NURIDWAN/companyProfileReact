@@ -266,16 +266,34 @@ export default function PageForm({ page, parents = [], menuItems }: Props) {
     const onSubmit: FormEventHandler<HTMLFormElement> = (event) => {
         event.preventDefault();
 
-        form.transform((payload) => {
-            const transformed = { ...payload };
-            const sections = (payload.sections ?? []).map((section) => ({
-                ...section,
-                content: serializeContent(section),
-            }));
-            return page ? { ...transformed, sections, _method: 'put' } : { ...transformed, sections };
-        });
+        // Transform sections to serialize their content properly
+        const transformedSections = (data.sections ?? []).map((section) => ({
+            id: section.id,
+            title: section.title,
+            slug: section.slug,
+            content: serializeContent(section),
+            display_order: section.display_order,
+            is_active: section.is_active,
+        }));
+
+        const payload = {
+            parent_id: data.parent_id,
+            title: data.title,
+            slug: data.slug,
+            meta_title: data.meta_title,
+            meta_description: data.meta_description,
+            meta_keywords: data.meta_keywords,
+            is_published: data.is_published,
+            display_order: data.display_order,
+            sections: transformedSections,
+            add_to_menu: data.add_to_menu,
+            menu_position: data.menu_position,
+            menu_parent_id: data.menu_parent_id,
+            ...(page ? { _method: 'put' } : {}),
+        };
 
         form.post(action, {
+            data: payload,
             preserveScroll: true,
         });
     };

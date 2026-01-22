@@ -3,28 +3,28 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\ProcessGeminiRequest;
 use App\Models\BlogPost;
 use App\Models\Category;
 use App\Models\GeminiRequest;
 use App\Models\User;
+use App\Services\GeminiBlogGenerator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Str;
-use Illuminate\Support\Carbon;
-use Throwable;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class BlogPostController extends Controller
 {
-    public function generate(Request $request): JsonResponse
+    public function generate(Request $request, GeminiBlogGenerator $generator): JsonResponse
     {
         $validated = $request->validate([
             'topic' => ['required', 'string', 'max:255'],
@@ -36,22 +36,51 @@ class BlogPostController extends Controller
             'preset' => ['nullable', 'string', 'max:120'],
         ]);
 
-        $model = config('services.gemini.model', 'gemini-2.5-flash');
+        $model = config('services.openrouter.model', 'google/gemini-2.0-flash-exp:free');
+        $startedAt = microtime(true);
 
         $geminiRequest = GeminiRequest::create([
             'user_id' => $request->user()?->id,
             'type' => 'blog',
             'model' => $model,
+            'status' => 'processing',
             'summary' => Str::limit($validated['topic'], 120),
             'options' => $validated,
+            'started_at' => now(),
         ]);
 
-        ProcessGeminiRequest::dispatch($geminiRequest);
+        try {
+            $result = $generator->generate($validated);
+            $finishedAt = microtime(true);
 
-        return response()->json([
-            'request_id' => $geminiRequest->uuid,
-            'status' => $geminiRequest->status,
-        ]);
+            $geminiRequest->update([
+                'status' => 'completed',
+                'result' => $result,
+                'finished_at' => now(),
+                'duration_ms' => (int) (($finishedAt - $startedAt) * 1000),
+            ]);
+
+            return response()->json([
+                'status' => 'completed',
+                'result' => $result,
+            ]);
+        } catch (Throwable $e) {
+            Log::error('Blog generation failed', [
+                'gemini_request_id' => $geminiRequest->id,
+                'message' => $e->getMessage(),
+            ]);
+
+            $geminiRequest->update([
+                'status' => 'failed',
+                'error_message' => $e->getMessage(),
+                'finished_at' => now(),
+            ]);
+
+            return response()->json([
+                'status' => 'failed',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function uploadImage(Request $request): JsonResponse
@@ -219,12 +248,12 @@ class BlogPostController extends Controller
 
     private function normalizeLines(?string $value): array
     {
-        if (!$value) {
+        if (! $value) {
             return [];
         }
 
         return collect(preg_split('/\r?\n/', $value))
-            ->map(fn($line) => trim($line))
+            ->map(fn ($line) => trim($line))
             ->filter()
             ->values()
             ->all();

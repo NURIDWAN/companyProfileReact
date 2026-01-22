@@ -2,25 +2,22 @@
 
 use App\Http\Controllers\Admin\BlogPostController;
 use App\Http\Controllers\Admin\CompanySettingController;
-use App\Http\Controllers\Admin\JobPositionController;
 use App\Http\Controllers\Admin\ContactMessageController;
-
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ImageUploadController;
+use App\Http\Controllers\Admin\JobApplicationController;
+use App\Http\Controllers\Admin\JobPositionController;
+use App\Http\Controllers\Admin\MenuItemController;
+use App\Http\Controllers\Admin\PageController as AdminPageController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\TeamMemberController;
 use App\Http\Controllers\Admin\TestimonialController;
-use App\Http\Controllers\Admin\JobApplicationController;
 use App\Http\Controllers\Admin\UserManagementController;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\GeminiRequestController;
-use App\Http\Controllers\Admin\PageController as AdminPageController;
-use App\Http\Controllers\Admin\ImageUploadController;
-use App\Http\Controllers\Admin\MenuItemController;
 use App\Http\Controllers\Landing\LandingController;
 use App\Http\Controllers\Landing\PageController as LandingPageController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -92,7 +89,6 @@ Route::group([], function () {
 
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | Authenticated Routes
@@ -107,8 +103,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->middleware('can:manage-users');
         Route::resource('services', ServiceController::class);
 
-        Route::get('gemini-requests/{geminiRequest:uuid}', [GeminiRequestController::class, 'show'])->name('gemini-requests.show');
-        Route::get('gemini/status', [GeminiRequestController::class, 'health'])->name('gemini.status');
         Route::post('products/enrich', [ProductController::class, 'enrich'])->name('products.enrich');
         Route::resource('products', ProductController::class);
         Route::resource('projects', ProjectController::class);
@@ -133,6 +127,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('settings/footer/cta', [CompanySettingController::class, 'updateFooterCta'])->name('settings.footer.cta.update');
         Route::post('settings/footer/legal', [CompanySettingController::class, 'updateFooterLegal'])->name('settings.footer.legal.update');
         Route::post('settings/ai', [CompanySettingController::class, 'updateAiSettings'])->name('settings.ai.update');
+        Route::post('settings/branding', [CompanySettingController::class, 'updateBranding'])->name('settings.branding.update');
         Route::resource('pages', AdminPageController::class);
         Route::resource('menus', MenuItemController::class)->only(['index', 'store', 'destroy']);
         Route::get('menus/page/{page}/sections', [MenuItemController::class, 'sections'])->name('menus.page.sections');
@@ -148,14 +143,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | Other Route Files
 |--------------------------------------------------------------------------
 */
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';
 
 // Catch-all untuk halaman statis dengan path (termasuk nested path seperti tentang-kami/profil)
 Route::get('/{path}', [LandingPageController::class, 'show'])

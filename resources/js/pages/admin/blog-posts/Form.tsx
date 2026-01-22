@@ -1,16 +1,16 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import AppLayout from "@/layouts/app-layout";
-import { Head, Link, useForm } from "@inertiajs/react";
-import { FormEventHandler, useCallback, useEffect, useMemo, useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
-import { RichTextEditor } from "@/components/RichTextEditor";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RichTextEditor } from '@/components/RichTextEditor';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import AppLayout from '@/layouts/app-layout';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { FormEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
 
 type BlogPost = {
     id: number;
@@ -67,31 +67,31 @@ const blogPresets: Array<{
     call_to_action: string;
     description: string;
 }> = [
-        {
-            id: "friendly-startup",
-            label: "Friendly Startup",
-            tone: "hangat, optimistis, penuh energi",
-            audience: "founder startup dan pemilik bisnis digital",
-            call_to_action: "Diskusikan ide Anda dengan tim kami",
-            description: "Cocok untuk artikel ringan dan menginspirasi dengan sentuhan storytelling.",
-        },
-        {
-            id: "enterprise",
-            label: "Enterprise & Korporasi",
-            tone: "formal, strategis, fokus ROI",
-            audience: "C-level dan direktur perusahaan enterprise",
-            call_to_action: "Jadwalkan sesi konsultasi strategis",
-            description: "Tekankan mitigasi risiko dan dampak bisnis terukur.",
-        },
-        {
-            id: "public-sector",
-            label: "Sektor Publik",
-            tone: "profesional, mengedepankan kepatuhan",
-            audience: "pejabat pemda/BUMN",
-            call_to_action: "Pelajari cara kami mendampingi instansi Anda",
-            description: "Soroti transparansi, keberlanjutan, dan manfaat sosial.",
-        },
-    ];
+    {
+        id: 'friendly-startup',
+        label: 'Friendly Startup',
+        tone: 'hangat, optimistis, penuh energi',
+        audience: 'founder startup dan pemilik bisnis digital',
+        call_to_action: 'Diskusikan ide Anda dengan tim kami',
+        description: 'Cocok untuk artikel ringan dan menginspirasi dengan sentuhan storytelling.',
+    },
+    {
+        id: 'enterprise',
+        label: 'Enterprise & Korporasi',
+        tone: 'formal, strategis, fokus ROI',
+        audience: 'C-level dan direktur perusahaan enterprise',
+        call_to_action: 'Jadwalkan sesi konsultasi strategis',
+        description: 'Tekankan mitigasi risiko dan dampak bisnis terukur.',
+    },
+    {
+        id: 'public-sector',
+        label: 'Sektor Publik',
+        tone: 'profesional, mengedepankan kepatuhan',
+        audience: 'pejabat pemda/BUMN',
+        call_to_action: 'Pelajari cara kami mendampingi instansi Anda',
+        description: 'Soroti transparansi, keberlanjutan, dan manfaat sosial.',
+    },
+];
 
 interface Props {
     post?: BlogPost;
@@ -100,33 +100,33 @@ interface Props {
 }
 
 export default function BlogPostForm({ post, users = [], categories = [] }: Props) {
-    const title = post ? "Edit Artikel" : "Tulis Artikel";
+    const title = post ? 'Edit Artikel' : 'Tulis Artikel';
     const form = useForm({
-        author_id: post?.author_id ?? "",
-        category_id: post?.category_id ?? "",
-        title: post?.title ?? "",
-        slug: post?.slug ?? "",
-        excerpt: post?.excerpt ?? "",
-        body: post?.body ?? "",
-        cover_image: post?.cover_image ?? "",
+        author_id: post?.author_id ?? '',
+        category_id: post?.category_id ?? '',
+        title: post?.title ?? '',
+        slug: post?.slug ?? '',
+        excerpt: post?.excerpt ?? '',
+        body: post?.body ?? '',
+        cover_image: post?.cover_image ?? '',
         cover_image_file: undefined as File | undefined,
         is_published: post?.is_published ?? false,
-        published_at: post?.published_at?.slice(0, 16) ?? "",
-        meta_title: post?.meta_title ?? "",
-        meta_description: post?.meta_description ?? "",
-        og_title: post?.og_title ?? "",
-        cta_variants: post?.cta_variants?.length ? post.cta_variants.join("\n") : "",
+        published_at: post?.published_at?.slice(0, 16) ?? '',
+        meta_title: post?.meta_title ?? '',
+        meta_description: post?.meta_description ?? '',
+        og_title: post?.og_title ?? '',
+        cta_variants: post?.cta_variants?.length ? post.cta_variants.join('\n') : '',
     });
 
     const defaultAiForm = useMemo<AiFormState>(
         () => ({
-            topic: post?.title ?? "",
-            tone: "Profesional dan persuasif",
-            audience: "pemilik bisnis dan decision maker perusahaan",
-            keywords: "",
-            call_to_action: "Jadwalkan konsultasi dengan tim kami",
-            word_count: "700",
-            preset: "friendly-startup",
+            topic: post?.title ?? '',
+            tone: 'Profesional dan persuasif',
+            audience: 'pemilik bisnis dan decision maker perusahaan',
+            keywords: '',
+            call_to_action: 'Jadwalkan konsultasi dengan tim kami',
+            word_count: '700',
+            preset: 'friendly-startup',
         }),
         [post],
     );
@@ -138,14 +138,12 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
     const [aiLoading, setAiLoading] = useState(false);
     const [previewOpen, setPreviewOpen] = useState(false);
     const [selectedPreset, setSelectedPreset] = useState(defaultAiForm.preset);
-    const [geminiStatus, setGeminiStatus] = useState<{ status: string; message?: string } | null>(null);
-    const [pollingId, setPollingId] = useState<string | null>(null);
 
     const { data, setData, processing, errors } = form;
     const generalError = (errors as typeof errors & { general?: string }).general;
 
     const action = useMemo(() => {
-        return post ? route("admin.blog-posts.update", post.id) : route("admin.blog-posts.store");
+        return post ? route('admin.blog-posts.update', post.id) : route('admin.blog-posts.store');
     }, [post]);
 
     useEffect(() => {
@@ -153,110 +151,53 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
         setSelectedPreset(defaultAiForm.preset);
     }, [defaultAiForm]);
 
-    useEffect(() => {
-        const fetchStatus = async () => {
-            try {
-                const response = await fetch(route("admin.gemini.status"), {
-                    headers: {
-                        Accept: "application/json",
-                    },
-                    credentials: "same-origin",
-                });
-
-                if (response.ok) {
-                    const payload = (await response.json()) as { status: string; message?: string };
-                    setGeminiStatus(payload);
-                }
-            } catch (error) {
-                console.warn("Gemini status unavailable", error);
+    const applyGeneration = useCallback(
+        (payload: GenerationPayload) => {
+            if (payload.title) {
+                setData('title', payload.title);
             }
-        };
 
-        fetchStatus();
-    }, []);
-
-    const applyGeneration = useCallback((payload: GenerationPayload) => {
-        if (payload.title) {
-            setData("title", payload.title);
-        }
-
-        if (payload.slug) {
-            setData("slug", payload.slug);
-        }
-
-        if (payload.excerpt) {
-            setData("excerpt", payload.excerpt);
-        }
-
-        if (payload.body) {
-            setData("body", payload.body);
-        }
-
-        if (payload.meta_title) {
-            setData("meta_title", payload.meta_title);
-        }
-
-        if (payload.meta_description) {
-            setData("meta_description", payload.meta_description);
-        }
-
-        if (payload.og_title) {
-            setData("og_title", payload.og_title);
-        }
-
-        if (payload.cta_variants?.length) {
-            setData("cta_variants", payload.cta_variants.join("\n"));
-        }
-
-        setAiMeta({
-            outline: payload.outline ?? [],
-            keywords: payload.keywords ?? [],
-        });
-
-        setAiSuccess("Konten berhasil diisikan dari Gemini. Pastikan untuk meninjaunya sebelum disimpan.");
-    }, [setData]);
-
-    const pollGeminiRequest = useCallback((requestId: string) => {
-        const poll = async () => {
-            try {
-                const response = await fetch(route("admin.gemini-requests.show", requestId), {
-                    headers: {
-                        Accept: "application/json",
-                    },
-                    credentials: "same-origin",
-                });
-
-                const payload = (await response.json()) as {
-                    status: string;
-                    result?: GenerationPayload;
-                    error_message?: string;
-                };
-
-                if (payload.status === "completed" && payload.result) {
-                    applyGeneration(payload.result);
-                    setAiLoading(false);
-                    setPollingId(null);
-                } else if (payload.status === "failed") {
-                    setAiError(payload.error_message ?? "Permintaan Gemini gagal diproses.");
-                    setAiLoading(false);
-                    setPollingId(null);
-                } else {
-                    setTimeout(poll, 1500);
-                }
-            } catch (error) {
-                console.error(error);
-                setAiError("Gagal memeriksa status permintaan Gemini.");
-                setAiLoading(false);
-                setPollingId(null);
+            if (payload.slug) {
+                setData('slug', payload.slug);
             }
-        };
 
-        poll();
-    }, [applyGeneration]);
+            if (payload.excerpt) {
+                setData('excerpt', payload.excerpt);
+            }
+
+            if (payload.body) {
+                setData('body', payload.body);
+            }
+
+            if (payload.meta_title) {
+                setData('meta_title', payload.meta_title);
+            }
+
+            if (payload.meta_description) {
+                setData('meta_description', payload.meta_description);
+            }
+
+            if (payload.og_title) {
+                setData('og_title', payload.og_title);
+            }
+
+            if (payload.cta_variants?.length) {
+                setData('cta_variants', payload.cta_variants.join('\n'));
+            }
+
+            setAiMeta({
+                outline: payload.outline ?? [],
+                keywords: payload.keywords ?? [],
+            });
+
+            setAiSuccess('Konten berhasil diisikan dari Gemini. Pastikan untuk meninjaunya sebelum disimpan.');
+        },
+        [setData],
+    );
 
     const handleGenerate = async () => {
         if (!aiForm.topic.trim()) {
-            setAiError("Topik wajib diisi sebelum meminta Gemini.");
+            setAiError('Topik wajib diisi sebelum meminta Gemini.');
             return;
         }
 
@@ -265,33 +206,41 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
         setAiSuccess(null);
 
         try {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") ?? "";
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
             const requestBody = {
                 ...aiForm,
                 word_count: aiForm.word_count ? Number(aiForm.word_count) : undefined,
             };
-            const response = await fetch(route("admin.blog-posts.generate"), {
-                method: "POST",
+            const response = await fetch(route('admin.blog-posts.generate'), {
+                method: 'POST',
                 headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                    "X-CSRF-TOKEN": csrfToken,
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
                 },
-                credentials: "same-origin",
+                credentials: 'same-origin',
                 body: JSON.stringify(requestBody),
             });
 
-            const payload = (await response.json()) as { request_id?: string; message?: string };
+            const payload = (await response.json()) as {
+                status?: string;
+                result?: GenerationPayload;
+                message?: string;
+            };
 
-            if (!response.ok || !payload?.request_id) {
-                throw new Error(payload?.message ?? "Gagal mengantrekan permintaan ke Gemini.");
+            if (!response.ok || payload.status === 'failed') {
+                throw new Error(payload?.message ?? 'Gagal menggenerate konten dari Gemini.');
             }
 
-            setPollingId(payload.request_id);
-            pollGeminiRequest(payload.request_id);
+            if (payload.status === 'completed' && payload.result) {
+                applyGeneration(payload.result);
+            } else {
+                throw new Error('Response tidak valid dari server.');
+            }
         } catch (error) {
             console.error(error);
-            setAiError(error instanceof Error ? error.message : "Terjadi kesalahan saat menghubungi Gemini.");
+            setAiError(error instanceof Error ? error.message : 'Terjadi kesalahan saat menghubungi Gemini.');
+        } finally {
             setAiLoading(false);
         }
     };
@@ -302,7 +251,6 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
         setAiMeta({ outline: [], keywords: [] });
         setAiError(null);
         setAiSuccess(null);
-        setPollingId(null);
         setAiLoading(false);
     };
 
@@ -332,28 +280,28 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                 cover_image_file: formData.cover_image_file ?? undefined,
             };
 
-            return post ? { ...transformed, _method: "put" } : transformed;
+            return post ? { ...transformed, _method: 'put' } : transformed;
         });
 
         form.post(action, {
             forceFormData: true,
             preserveScroll: true,
             onFinish: () => {
-                setData("cover_image_file", undefined);
+                setData('cover_image_file', undefined);
                 form.transform((data) => data);
             },
         });
     };
 
     const presetInfo = blogPresets.find((preset) => preset.id === selectedPreset);
-    const requestButtonLabel = aiLoading ? (pollingId ? "Memproses..." : "Meminta Gemini...") : "Generate via Gemini";
+    const requestButtonLabel = aiLoading ? 'Memproses...' : 'Generate via Gemini';
 
     return (
         <AppLayout>
             <Head title={title} />
             <div className="space-y-6 p-4">
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-                    <Link href={route("admin.blog-posts.index")} className="text-sm text-muted-foreground hover:text-foreground">
+                    <Link href={route('admin.blog-posts.index')} className="text-sm text-muted-foreground hover:text-foreground">
                         &larr; Kembali ke daftar artikel
                     </Link>
                     <Button type="button" variant="outline" onClick={() => setPreviewOpen(true)}>
@@ -368,15 +316,6 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                         </p>
                     </CardHeader>
                     <CardContent className="grid gap-4 md:grid-cols-2">
-                        {geminiStatus?.status === "error" && (
-                            <div className="md:col-span-2">
-                                <Alert variant="destructive">
-                                    <AlertDescription>
-                                        Gemini tidak dapat diakses saat ini. {geminiStatus.message ?? "Periksa API key atau kuota terlebih dahulu."}
-                                    </AlertDescription>
-                                </Alert>
-                            </div>
-                        )}
                         <div className="grid gap-2">
                             <Label>Preset Nada & Audiens</Label>
                             <Select value={selectedPreset} onValueChange={handlePresetChange}>
@@ -391,14 +330,16 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                                     ))}
                                 </SelectContent>
                             </Select>
-                            <p className="text-xs text-muted-foreground">{presetInfo?.description ?? "Sesuaikan nada secara manual jika diperlukan."}</p>
+                            <p className="text-xs text-muted-foreground">
+                                {presetInfo?.description ?? 'Sesuaikan nada secara manual jika diperlukan.'}
+                            </p>
                         </div>
-                        <div className="md:col-span-2 grid gap-2">
+                        <div className="grid gap-2 md:col-span-2">
                             <Label htmlFor="ai-topic">Topik Utama</Label>
                             <Input
                                 id="ai-topic"
                                 value={aiForm.topic}
-                                onChange={(event) => updateAiForm("topic", event.target.value)}
+                                onChange={(event) => updateAiForm('topic', event.target.value)}
                                 placeholder="Contoh: Strategi transformasi digital untuk UMKM manufaktur"
                             />
                         </div>
@@ -407,7 +348,7 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                             <Input
                                 id="ai-tone"
                                 value={aiForm.tone}
-                                onChange={(event) => updateAiForm("tone", event.target.value)}
+                                onChange={(event) => updateAiForm('tone', event.target.value)}
                                 placeholder="Profesional, meyakinkan, dan bersahabat"
                             />
                         </div>
@@ -416,7 +357,7 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                             <Input
                                 id="ai-audience"
                                 value={aiForm.audience}
-                                onChange={(event) => updateAiForm("audience", event.target.value)}
+                                onChange={(event) => updateAiForm('audience', event.target.value)}
                                 placeholder="CXO perusahaan teknologi, pemilik bisnis, dsb."
                             />
                         </div>
@@ -425,7 +366,7 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                             <Input
                                 id="ai-call-to-action"
                                 value={aiForm.call_to_action}
-                                onChange={(event) => updateAiForm("call_to_action", event.target.value)}
+                                onChange={(event) => updateAiForm('call_to_action', event.target.value)}
                                 placeholder="Hubungi tim kami untuk konsultasi"
                             />
                         </div>
@@ -437,21 +378,21 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                                 min={300}
                                 max={1500}
                                 value={aiForm.word_count}
-                                onChange={(event) => updateAiForm("word_count", event.target.value)}
+                                onChange={(event) => updateAiForm('word_count', event.target.value)}
                             />
                         </div>
-                        <div className="md:col-span-2 grid gap-2">
+                        <div className="grid gap-2 md:col-span-2">
                             <Label htmlFor="ai-keywords">Keyword Utama</Label>
                             <Textarea
                                 id="ai-keywords"
                                 value={aiForm.keywords}
-                                onChange={(event) => updateAiForm("keywords", event.target.value)}
+                                onChange={(event) => updateAiForm('keywords', event.target.value)}
                                 placeholder="Pisahkan dengan koma (contoh: transformasi digital, software house, konsultasi IT)"
                             />
                             <p className="text-xs text-muted-foreground">Opsional, membantu Gemini memahami fokus SEO Anda.</p>
                         </div>
                         {(aiMeta.outline.length > 0 || aiMeta.keywords.length > 0) && (
-                            <div className="md:col-span-2 rounded-lg border border-dashed border-muted p-4">
+                            <div className="rounded-lg border border-dashed border-muted p-4 md:col-span-2">
                                 {aiMeta.outline.length > 0 && (
                                     <div className="mb-3">
                                         <p className="text-sm font-medium text-foreground">Outline yang diusulkan</p>
@@ -484,10 +425,7 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                         <div className="space-y-1 text-sm">
                             {aiError && <p className="text-rose-500">{aiError}</p>}
                             {!aiError && aiSuccess && <p className="text-emerald-600 dark:text-emerald-400">{aiSuccess}</p>}
-                            {!aiError && !aiSuccess && pollingId && (
-                                <p className="text-xs text-muted-foreground">Permintaan sedang diproses di antrean Gemini...</p>
-                            )}
-                            {!aiError && !aiSuccess && !pollingId && (
+                            {!aiError && !aiSuccess && (
                                 <p className="text-xs text-muted-foreground">Hasil Gemini akan langsung mengisi form artikel di bawah ini.</p>
                             )}
                         </div>
@@ -514,31 +452,21 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                             )}
                             <div className="grid gap-2">
                                 <Label htmlFor="title">Judul</Label>
-                                <Input
-                                    id="title"
-                                    value={data.title}
-                                    onChange={(event) => setData("title", event.target.value)}
-                                    required
-                                />
+                                <Input id="title" value={data.title} onChange={(event) => setData('title', event.target.value)} required />
                                 {errors.title && <p className="text-xs text-rose-500">{errors.title}</p>}
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="slug">Slug</Label>
-                                <Input
-                                    id="slug"
-                                    value={data.slug}
-                                    onChange={(event) => setData("slug", event.target.value)}
-                                    required
-                                />
+                                <Input id="slug" value={data.slug} onChange={(event) => setData('slug', event.target.value)} required />
                                 {errors.slug && <p className="text-xs text-rose-500">{errors.slug}</p>}
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="author_id">Penulis</Label>
                                 <select
                                     id="author_id"
-                                    className="h-10 rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                    value={data.author_id ?? ""}
-                                    onChange={(event) => setData("author_id", event.target.value)}
+                                    className="h-10 rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                                    value={data.author_id ?? ''}
+                                    onChange={(event) => setData('author_id', event.target.value)}
                                 >
                                     <option value="">Pilih penulis</option>
                                     {users.map((user) => (
@@ -553,9 +481,9 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                                 <Label htmlFor="category_id">Kategori</Label>
                                 <select
                                     id="category_id"
-                                    className="h-10 rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                    value={data.category_id ?? ""}
-                                    onChange={(event) => setData("category_id", event.target.value)}
+                                    className="h-10 rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                                    value={data.category_id ?? ''}
+                                    onChange={(event) => setData('category_id', event.target.value)}
                                 >
                                     <option value="">Pilih kategori</option>
                                     {categories.map((cat) => (
@@ -571,8 +499,8 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                                 <Textarea
                                     id="excerpt"
                                     className="min-h-[100px]"
-                                    value={data.excerpt ?? ""}
-                                    onChange={(event) => setData("excerpt", event.target.value)}
+                                    value={data.excerpt ?? ''}
+                                    onChange={(event) => setData('excerpt', event.target.value)}
                                 />
                                 {errors.excerpt && <p className="text-xs text-rose-500">{errors.excerpt}</p>}
                             </div>
@@ -580,7 +508,7 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                                 <Label htmlFor="body">Konten</Label>
                                 <RichTextEditor
                                     value={data.body ?? ''}
-                                    onChange={(value) => setData("body", value)}
+                                    onChange={(value) => setData('body', value)}
                                     placeholder="Tulis artikel dengan heading, list, dan paragraf kaya."
                                 />
                                 {errors.body && <p className="text-xs text-rose-500">{errors.body}</p>}
@@ -588,14 +516,16 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                             <div className="space-y-4 rounded-lg border border-dashed border-muted p-4">
                                 <div>
                                     <p className="text-sm font-medium text-foreground">SEO & CTA Otomatis</p>
-                                    <p className="text-xs text-muted-foreground">Gemini mengisi bagian ini, namun Anda tetap dapat menyesuaikannya.</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Gemini mengisi bagian ini, namun Anda tetap dapat menyesuaikannya.
+                                    </p>
                                 </div>
                                 <div className="grid gap-2">
                                     <Label htmlFor="meta_title">Meta Title</Label>
                                     <Input
                                         id="meta_title"
-                                        value={data.meta_title ?? ""}
-                                        onChange={(event) => setData("meta_title", event.target.value)}
+                                        value={data.meta_title ?? ''}
+                                        onChange={(event) => setData('meta_title', event.target.value)}
                                     />
                                     {errors.meta_title && <p className="text-xs text-rose-500">{errors.meta_title}</p>}
                                 </div>
@@ -604,18 +534,14 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                                     <Textarea
                                         id="meta_description"
                                         className="min-h-[100px]"
-                                        value={data.meta_description ?? ""}
-                                        onChange={(event) => setData("meta_description", event.target.value)}
+                                        value={data.meta_description ?? ''}
+                                        onChange={(event) => setData('meta_description', event.target.value)}
                                     />
                                     {errors.meta_description && <p className="text-xs text-rose-500">{errors.meta_description}</p>}
                                 </div>
                                 <div className="grid gap-2">
                                     <Label htmlFor="og_title">OG Title</Label>
-                                    <Input
-                                        id="og_title"
-                                        value={data.og_title ?? ""}
-                                        onChange={(event) => setData("og_title", event.target.value)}
-                                    />
+                                    <Input id="og_title" value={data.og_title ?? ''} onChange={(event) => setData('og_title', event.target.value)} />
                                     {errors.og_title && <p className="text-xs text-rose-500">{errors.og_title}</p>}
                                 </div>
                                 <div className="grid gap-2">
@@ -623,8 +549,8 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                                     <Textarea
                                         id="cta_variants"
                                         className="min-h-[80px]"
-                                        value={data.cta_variants ?? ""}
-                                        onChange={(event) => setData("cta_variants", event.target.value)}
+                                        value={data.cta_variants ?? ''}
+                                        onChange={(event) => setData('cta_variants', event.target.value)}
                                     />
                                     {errors.cta_variants && <p className="text-xs text-rose-500">{errors.cta_variants}</p>}
                                 </div>
@@ -635,23 +561,19 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                                     id="cover_image_file"
                                     type="file"
                                     accept="image/*"
-                                    onChange={(event) => setData("cover_image_file", event.target.files?.[0])}
+                                    onChange={(event) => setData('cover_image_file', event.target.files?.[0])}
                                 />
                                 {errors.cover_image_file && <p className="text-xs text-rose-500">{errors.cover_image_file}</p>}
-                                {post?.cover_image_url && data.cover_image !== "" && (
+                                {post?.cover_image_url && data.cover_image !== '' && (
                                     <div className="flex items-center gap-4">
-                                        <img
-                                            src={post.cover_image_url}
-                                            alt={post.title}
-                                            className="h-16 w-16 rounded object-cover"
-                                        />
+                                        <img src={post.cover_image_url} alt={post.title} className="h-16 w-16 rounded object-cover" />
                                         <Button
                                             type="button"
                                             variant="outline"
                                             size="sm"
                                             onClick={() => {
-                                                setData("cover_image", "");
-                                                setData("cover_image_file", undefined);
+                                                setData('cover_image', '');
+                                                setData('cover_image_file', undefined);
                                             }}
                                         >
                                             Hapus Cover
@@ -662,10 +584,7 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                             </div>
                             <div className="grid gap-2 md:grid-cols-2">
                                 <div className="flex items-center gap-2">
-                                    <Checkbox
-                                        checked={data.is_published}
-                                        onCheckedChange={(checked) => setData("is_published", Boolean(checked))}
-                                    />
+                                    <Checkbox checked={data.is_published} onCheckedChange={(checked) => setData('is_published', Boolean(checked))} />
                                     <span>Terbitkan</span>
                                 </div>
                                 <div className="grid gap-2">
@@ -673,8 +592,8 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                                     <Input
                                         id="published_at"
                                         type="datetime-local"
-                                        value={data.published_at ?? ""}
-                                        onChange={(event) => setData("published_at", event.target.value)}
+                                        value={data.published_at ?? ''}
+                                        onChange={(event) => setData('published_at', event.target.value)}
                                     />
                                     {errors.published_at && <p className="text-xs text-rose-500">{errors.published_at}</p>}
                                 </div>
@@ -682,7 +601,7 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                         </CardContent>
                         <CardFooter className="flex justify-end gap-2">
                             <Button type="submit" disabled={processing}>
-                                {post ? "Simpan Perubahan" : "Simpan"}
+                                {post ? 'Simpan Perubahan' : 'Simpan'}
                             </Button>
                         </CardFooter>
                     </Card>
@@ -693,20 +612,20 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                     <DialogHeader>
                         <DialogTitle>Preview Artikel</DialogTitle>
                     </DialogHeader>
-                    <div className="max-h-[70vh] overflow-y-auto space-y-4">
+                    <div className="max-h-[70vh] space-y-4 overflow-y-auto">
                         <div>
                             <p className="text-sm text-muted-foreground">
                                 Pratinjau ini menggunakan data yang belum disimpan untuk membantu proses kurasi.
                             </p>
                         </div>
                         <div className="space-y-3 rounded-2xl border bg-white/50 p-4 dark:border-white/10 dark:bg-slate-900/40">
-                            <span className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-500">Blog Preview</span>
-                            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">{data.title || "Judul artikel"}</h2>
-                            <p className="text-muted-foreground">{data.excerpt || "Ringkasan artikel akan tampil di sini."}</p>
-                            <div className="prose max-w-none rounded-xl border bg-background/50 p-4 dark:prose-invert dark:border-white/5">
+                            <span className="text-xs font-semibold tracking-[0.3em] text-blue-500 uppercase">Blog Preview</span>
+                            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">{data.title || 'Judul artikel'}</h2>
+                            <p className="text-muted-foreground">{data.excerpt || 'Ringkasan artikel akan tampil di sini.'}</p>
+                            <div className="prose dark:prose-invert max-w-none rounded-xl border bg-background/50 p-4 dark:border-white/5">
                                 <div
                                     dangerouslySetInnerHTML={{
-                                        __html: data.body && data.body.trim().length > 0 ? data.body : "<p>Konten artikel akan muncul di sini.</p>",
+                                        __html: data.body && data.body.trim().length > 0 ? data.body : '<p>Konten artikel akan muncul di sini.</p>',
                                     }}
                                 />
                             </div>
@@ -714,11 +633,17 @@ export default function BlogPostForm({ post, users = [], categories = [] }: Prop
                                 <div>
                                     <p className="text-sm font-medium text-foreground">CTA Variants</p>
                                     <div className="mt-2 flex flex-wrap gap-2">
-                                        {data.cta_variants.split(/\r?\n/).filter(Boolean).map((cta) => (
-                                            <span key={cta} className="rounded-full border border-blue-200 px-3 py-1 text-xs text-blue-600 dark:border-blue-500/40 dark:text-blue-200">
-                                                {cta}
-                                            </span>
-                                        ))}
+                                        {data.cta_variants
+                                            .split(/\r?\n/)
+                                            .filter(Boolean)
+                                            .map((cta) => (
+                                                <span
+                                                    key={cta}
+                                                    className="rounded-full border border-blue-200 px-3 py-1 text-xs text-blue-600 dark:border-blue-500/40 dark:text-blue-200"
+                                                >
+                                                    {cta}
+                                                </span>
+                                            ))}
                                     </div>
                                 </div>
                             )}

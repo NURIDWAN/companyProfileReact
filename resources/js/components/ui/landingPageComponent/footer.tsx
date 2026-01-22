@@ -5,6 +5,7 @@ import type {
     BrandingInfo,
     CompanyAddress,
     CompanyContactsInfo,
+    FooterColumn,
     FooterContent,
     NavigationLink,
     SharedData,
@@ -18,7 +19,7 @@ const socialIcons: Record<string, React.ComponentType<{ className?: string }>> =
 
 export function Footer() {
     const currentYear = new Date().getFullYear();
-    const { footer, navigation, branding, companyContacts, companyAddress } = usePage<SharedData>().props;
+    const { footer, footerNavigation, navigation, branding, companyContacts, companyAddress } = usePage<SharedData>().props;
 
     const brandingInfo = branding as BrandingInfo | undefined;
     const defaultCompanyName = brandingInfo?.name ?? 'Harmony Strategic Group';
@@ -65,7 +66,9 @@ export function Footer() {
         return labels.id ?? labels.en ?? Object.values(labels)[0] ?? item.key;
     };
 
-    const companyLinks = footerContent.columns?.length
+    const companyLinks: FooterColumn[] = footerNavigation?.length
+        ? footerNavigation
+        : footerContent.columns?.length
         ? footerContent.columns
         : [
             {

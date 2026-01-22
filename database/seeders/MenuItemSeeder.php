@@ -3,14 +3,23 @@
 namespace Database\Seeders;
 
 use App\Models\MenuItem;
-use Illuminate\Database\Seeder;
 use App\Models\Page;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class MenuItemSeeder extends Seeder
 {
     public function run(): void
     {
-        // Hanya buat menu untuk halaman yang benar-benar ada.
+        $this->seedMainMenu();
+        $this->seedFooterMenu();
+    }
+
+    /**
+     * Seed menu utama (navbar)
+     */
+    private function seedMainMenu(): void
+    {
         $structure = [
             [
                 'title' => 'Beranda',
@@ -100,31 +109,158 @@ class MenuItemSeeder extends Seeder
         ];
 
         foreach ($structure as $order => $item) {
-            $parentId = $this->createFromPage($item, null, $order);
+            $this->createMenuItem($item, 'main', null, $order);
         }
     }
 
-    private function createFromPage(array $item, ?int $parentId, int $order): int
+    /**
+     * Seed menu footer
+     */
+    private function seedFooterMenu(): void
+    {
+        // Struktur footer dengan grup/kolom
+        $footerGroups = [
+            [
+                'title' => 'Perusahaan',
+                'children' => [
+                    ['title' => 'Tentang Kami', 'path' => '/about'],
+                    ['title' => 'Visi & Misi', 'path' => '/about#visi-misi'],
+                    ['title' => 'Tim Kami', 'path' => '/about#tim'],
+                    ['title' => 'Karier', 'path' => '/career'],
+                ],
+            ],
+            [
+                'title' => 'Layanan',
+                'children' => [
+                    ['title' => 'Layanan Kami', 'path' => '/service'],
+                    ['title' => 'Produk', 'path' => '/product'],
+                    ['title' => 'Proyek', 'path' => '/project'],
+                ],
+            ],
+            [
+                'title' => 'Sumber Daya',
+                'children' => [
+                    ['title' => 'Blog', 'path' => '/blog'],
+                    ['title' => 'FAQ', 'path' => '/faq'],
+                    ['title' => 'Dokumentasi', 'path' => '/docs'],
+                ],
+            ],
+            [
+                'title' => 'Hubungi Kami',
+                'children' => [
+                    ['title' => 'Kontak', 'path' => '/contact'],
+                    ['title' => 'Lokasi', 'path' => '/contact#lokasi'],
+                    ['title' => 'Dukungan', 'path' => '/contact#dukungan'],
+                ],
+            ],
+        ];
+
+        foreach ($footerGroups as $groupOrder => $group) {
+            // Buat parent menu (grup/kolom)
+            $parentMenu = MenuItem::firstOrCreate(
+                [
+                    'title' => $group['title'],
+                    'position' => 'footer',
+                    'parent_id' => null,
+                ],
+                [
+                    'type' => 'internal',
+                    'target' => null,
+                    'page_id' => null,
+                    'display_order' => $groupOrder,
+                    'is_active' => true,
+                ]
+            );
+
+            // Buat child menu items
+            if (! empty($group['children'])) {
+                foreach ($group['children'] as $childOrder => $child) {
+                    $page = $this->findPageByPath($child['path']);
+
+                    MenuItem::firstOrCreate(
+                        [
+                            'title' => $child['title'],
+                            'position' => 'footer',
+                            'parent_id' => $parentMenu->id,
+                        ],
+                        [
+                            'type' => $page ? 'page' : 'internal',
+                            'target' => $child['path'],
+                            'page_id' => $page?->id,
+                            'display_order' => $childOrder,
+                            'is_active' => true,
+                        ]
+                    );
+                }
+            }
+        }
+
+        // Tambahkan juga menu footer standalone (tanpa grup) untuk legal links
+        $legalLinks = [
+            ['title' => 'Kebijakan Privasi', 'path' => '/privacy-policy'],
+            ['title' => 'Syarat & Ketentuan', 'path' => '/terms-of-service'],
+        ];
+
+        // Buat grup Legal
+        $legalGroup = MenuItem::firstOrCreate(
+            [
+                'title' => 'Legal',
+                'position' => 'footer',
+                'parent_id' => null,
+            ],
+            [
+                'type' => 'internal',
+                'target' => null,
+                'page_id' => null,
+                'display_order' => 99,
+                'is_active' => true,
+            ]
+        );
+
+        foreach ($legalLinks as $order => $link) {
+            $page = $this->findPageByPath($link['path']);
+
+            MenuItem::firstOrCreate(
+                [
+                    'title' => $link['title'],
+                    'position' => 'footer',
+                    'parent_id' => $legalGroup->id,
+                ],
+                [
+                    'type' => $page ? 'page' : 'internal',
+                    'target' => $link['path'],
+                    'page_id' => $page?->id,
+                    'display_order' => $order,
+                    'is_active' => true,
+                ]
+            );
+        }
+    }
+
+    /**
+     * Buat menu item dengan children
+     */
+    private function createMenuItem(array $item, string $position, ?int $parentId, int $order): int
     {
         $page = isset($item['slug']) ? Page::where('slug', $item['slug'])->first() : null;
         $target = null;
 
         if ($page) {
-            $target = '/' . ltrim($page->slug, '/');
+            $target = '/'.ltrim($page->slug, '/');
         } elseif (isset($item['path'])) {
             $target = $item['path'];
         } elseif (isset($item['slug'])) {
-            $target = '/' . ltrim($item['slug'], '/');
+            $target = '/'.ltrim($item['slug'], '/');
         }
 
-        if (!$target) {
-            return 0; // tidak ada target, jangan buat
+        if (! $target) {
+            return 0;
         }
 
         $menu = MenuItem::firstOrCreate(
             [
                 'title' => $item['title'],
-                'position' => 'main',
+                'position' => $position,
                 'parent_id' => $parentId,
             ],
             [
@@ -137,15 +273,15 @@ class MenuItemSeeder extends Seeder
         );
 
         // Buat anak sebagai section (anchor) jika ada
-        if (!empty($item['children'])) {
+        if (! empty($item['children'])) {
             foreach ($item['children'] as $childOrder => $child) {
-                $anchor = $child['anchor'] ?? \Str::slug($child['title']);
-                $childTarget = $target . '#' . $anchor;
+                $anchor = $child['anchor'] ?? Str::slug($child['title']);
+                $childTarget = $target.'#'.$anchor;
 
                 MenuItem::firstOrCreate(
                     [
                         'title' => $child['title'],
-                        'position' => 'main',
+                        'position' => $position,
                         'parent_id' => $menu->id,
                     ],
                     [
@@ -160,5 +296,21 @@ class MenuItemSeeder extends Seeder
         }
 
         return $menu->id;
+    }
+
+    /**
+     * Cari halaman berdasarkan path
+     */
+    private function findPageByPath(string $path): ?Page
+    {
+        // Hapus anchor jika ada
+        $cleanPath = explode('#', $path)[0];
+        $slug = ltrim($cleanPath, '/');
+
+        if (empty($slug)) {
+            return null;
+        }
+
+        return Page::where('slug', $slug)->first();
     }
 }

@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
-import { usePage } from '@inertiajs/react';
 import type { PageProps } from '@inertiajs/core';
+import { usePage } from '@inertiajs/react';
+import { useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,15 +30,21 @@ type SectionCopy = {
     description?: string | null;
 };
 
+type SectionKey = 'hero' | 'cta' | 'stats';
+type SectionVisibility = Partial<Record<SectionKey, boolean>>;
+
 type ProductPageProps = PageProps & {
     products?: Product[];
     categories?: Category[];
     productCta?: ProductCtaData;
     productHero?: SectionCopy;
+    sections?: SectionVisibility;
 };
 
 export default function ProductPage() {
-    const { products = [], categories = [], productCta, productHero } = usePage<ProductPageProps>().props;
+    const { products = [], categories = [], productCta, productHero, sections } = usePage<ProductPageProps>().props;
+    const visibility = sections ?? {};
+    const isEnabled = (key: SectionKey) => visibility[key] ?? true;
 
     const [search, setSearch] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<Category | 'All'>('All');
@@ -117,61 +123,57 @@ export default function ProductPage() {
         setSearch('');
     };
 
-    const heroImage =
-        'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=80';
+    const heroImage = 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=80';
 
     const heroBadge = productHero?.badge ?? 'Produk lintas industri';
-    const heroHeading =
-        productHero?.heading ?? 'Lihat produk terbaik kami untuk mendorong transformasi bisnis Anda';
+    const heroHeading = productHero?.heading ?? 'Lihat produk terbaik kami untuk mendorong transformasi bisnis Anda';
     const heroDescription =
         productHero?.description ??
         'Pilih solusi siap pakai yang dirancang untuk mempercepat digitalisasi, menyempurnakan proses operasional, dan menghadirkan pengalaman pelanggan yang konsisten di berbagai sektor.';
 
     return (
         <LandingPageLayout>
-            <div className="mx-auto max-w-7xl space-y-12 px-4 pb-16 pt-6 font-sans sm:px-6 lg:px-8">
-                <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900 text-white shadow-2xl">
-                    <img
-                        src={heroImage}
-                        alt="Produk unggulan Harmony"
-                        className="absolute inset-0 h-full w-full object-cover opacity-40"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/70 to-slate-900/30" />
-                    <div className="relative z-10 flex flex-col gap-8 p-8 sm:p-12 lg:flex-row lg:items-end lg:justify-between">
-                        <div className="max-w-2xl space-y-4">
-                            <span className="inline-flex items-center rounded-full bg-white/10 px-4 py-1 text-sm font-medium uppercase tracking-wide text-emerald-300">
-                                {heroBadge}
-                            </span>
-                            <h1 className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">{heroHeading}</h1>
-                            <p className="text-base text-slate-200 sm:text-lg">{heroDescription}</p>
+            <div className="mx-auto max-w-7xl space-y-12 px-4 pt-6 pb-16 font-sans sm:px-6 lg:px-8">
+                {isEnabled('hero') && (
+                    <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900 text-white shadow-2xl">
+                        <img src={heroImage} alt="Produk unggulan Harmony" className="absolute inset-0 h-full w-full object-cover opacity-40" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/70 to-slate-900/30" />
+                        <div className="relative z-10 flex flex-col gap-8 p-8 sm:p-12 lg:flex-row lg:items-end lg:justify-between">
+                            <div className="max-w-2xl space-y-4">
+                                <span className="inline-flex items-center rounded-full bg-white/10 px-4 py-1 text-sm font-medium tracking-wide text-emerald-300 uppercase">
+                                    {heroBadge}
+                                </span>
+                                <h1 className="text-3xl leading-tight font-bold sm:text-4xl lg:text-5xl">{heroHeading}</h1>
+                                <p className="text-base text-slate-200 sm:text-lg">{heroDescription}</p>
+                            </div>
+                            {isEnabled('stats') && (
+                                <div className="grid gap-4 rounded-2xl border border-white/20 bg-white/10 p-6 text-left backdrop-blur-lg sm:grid-cols-2 lg:w-[420px]">
+                                    <div>
+                                        <p className="text-sm text-slate-200">Produk aktif</p>
+                                        <p className="text-3xl font-semibold">{formatNumber(products.length)}+</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-slate-200">Kategori</p>
+                                        <p className="text-3xl font-semibold">{formatNumber(categoryStats.length)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-slate-200">Klien aktif</p>
+                                        <p className="text-3xl font-semibold">{formatNumber(totalClients)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-slate-200">Rating rata-rata</p>
+                                        <p className="text-3xl font-semibold">{averageRating}</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                        <div className="grid gap-4 rounded-2xl border border-white/20 bg-white/10 p-6 text-left backdrop-blur-lg sm:grid-cols-2 lg:w-[420px]">
-                            <div>
-                                <p className="text-sm text-slate-200">Produk aktif</p>
-                                <p className="text-3xl font-semibold">{formatNumber(products.length)}+</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-slate-200">Kategori</p>
-                                <p className="text-3xl font-semibold">{formatNumber(categoryStats.length)}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-slate-200">Klien aktif</p>
-                                <p className="text-3xl font-semibold">{formatNumber(totalClients)}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-slate-200">Rating rata-rata</p>
-                                <p className="text-3xl font-semibold">{averageRating}</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                    </section>
+                )}
 
                 <section className="rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-xl ring-1 ring-slate-200/60 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/80 dark:ring-slate-800/70">
                     <form onSubmit={(event) => event.preventDefault()} className="grid gap-5 lg:grid-cols-6">
                         <div className="lg:col-span-2">
-                            <label className="mb-2 block text-sm font-semibold text-slate-600 dark:text-slate-200">
-                                Cari Produk
-                            </label>
+                            <label className="mb-2 block text-sm font-semibold text-slate-600 dark:text-slate-200">Cari Produk</label>
                             <Input
                                 type="text"
                                 placeholder="Nama produk atau brand..."
@@ -182,13 +184,11 @@ export default function ProductPage() {
                         </div>
 
                         <div>
-                            <label className="mb-2 block text-sm font-semibold text-slate-600 dark:text-slate-200">
-                                Kategori
-                            </label>
+                            <label className="mb-2 block text-sm font-semibold text-slate-600 dark:text-slate-200">Kategori</label>
                             <select
                                 value={selectedCategory}
                                 onChange={(event) => setSelectedCategory(event.target.value as Category | 'All')}
-                                className="h-11 w-full rounded-xl border border-slate-200 bg-white/70 px-3 text-sm text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-100"
+                                className="h-11 w-full rounded-xl border border-slate-200 bg-white/70 px-3 text-sm text-slate-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-100"
                             >
                                 <option value="All">Semua Kategori</option>
                                 {categories.map((category) => (
@@ -201,9 +201,7 @@ export default function ProductPage() {
 
                         <div className="grid gap-3 sm:grid-cols-2 lg:col-span-2">
                             <div>
-                                <label className="mb-2 block text-sm font-semibold text-slate-600 dark:text-slate-200">
-                                    Harga Minimum
-                                </label>
+                                <label className="mb-2 block text-sm font-semibold text-slate-600 dark:text-slate-200">Harga Minimum</label>
                                 <Input
                                     type="number"
                                     min={0}
@@ -214,9 +212,7 @@ export default function ProductPage() {
                                 />
                             </div>
                             <div>
-                                <label className="mb-2 block text-sm font-semibold text-slate-600 dark:text-slate-200">
-                                    Harga Maksimum
-                                </label>
+                                <label className="mb-2 block text-sm font-semibold text-slate-600 dark:text-slate-200">Harga Maksimum</label>
                                 <Input
                                     type="number"
                                     min={0}
@@ -229,13 +225,11 @@ export default function ProductPage() {
                         </div>
 
                         <div>
-                            <label className="mb-2 block text-sm font-semibold text-slate-600 dark:text-slate-200">
-                                Urutkan
-                            </label>
+                            <label className="mb-2 block text-sm font-semibold text-slate-600 dark:text-slate-200">Urutkan</label>
                             <select
                                 value={sort}
                                 onChange={(event) => setSort(event.target.value)}
-                                className="h-11 w-full rounded-xl border border-slate-200 bg-white/70 px-3 text-sm text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-100"
+                                className="h-11 w-full rounded-xl border border-slate-200 bg-white/70 px-3 text-sm text-slate-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-100"
                             >
                                 <option value="latest">Terbaru</option>
                                 <option value="oldest">Terlama</option>
@@ -247,10 +241,7 @@ export default function ProductPage() {
                         </div>
 
                         <div className="flex items-end gap-3 lg:flex-col lg:items-stretch">
-                            <Button
-                                type="submit"
-                                className="h-11 w-full rounded-xl bg-blue-600 text-sm font-semibold hover:bg-blue-700"
-                            >
+                            <Button type="submit" className="h-11 w-full rounded-xl bg-blue-600 text-sm font-semibold hover:bg-blue-700">
                                 Tampilkan Produk
                             </Button>
                             <Button
@@ -265,7 +256,7 @@ export default function ProductPage() {
                     </form>
                 </section>
 
-                <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white/60 p-6 shadow-sm backdrop-blur-sm dark:border-slate-800 dark:bg-slate-950/60 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white/60 p-6 shadow-sm backdrop-blur-sm lg:flex-row lg:items-center lg:justify-between dark:border-slate-800 dark:bg-slate-950/60">
                     <div>
                         <p className="text-sm font-semibold text-slate-600 dark:text-slate-200">
                             Menampilkan {formatNumber(displayedCount)} dari {formatNumber(totalCount)} produk yang tersedia
@@ -283,9 +274,7 @@ export default function ProductPage() {
 
                 <ProductsGrid products={filteredProducts} />
 
-
-
-                {productCta && (
+                {isEnabled('cta') && productCta && (
                     <CTASection
                         badge={productCta.badge}
                         heading={productCta.heading}

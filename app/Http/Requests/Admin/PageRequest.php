@@ -37,12 +37,12 @@ class PageRequest extends FormRequest
             'display_order' => ['nullable', 'integer', 'min:0'],
             'is_published' => ['nullable'],
             'sections' => ['nullable', 'array'],
-            'sections.*.id' => ['nullable', 'exists:page_sections,id'],
-            'sections.*.title' => ['required_with:sections', 'nullable', 'string', 'max:255'],
+            'sections.*.id' => ['nullable', 'integer'],
+            'sections.*.title' => ['nullable', 'string', 'max:255'],
             'sections.*.slug' => ['nullable', 'string', 'max:160'],
             'sections.*.content' => ['nullable', 'string'],
             'sections.*.display_order' => ['nullable', 'integer', 'min:0'],
-            'sections.*.is_active' => ['nullable', 'boolean'],
+            'sections.*.is_active' => ['nullable'],
         ];
     }
 

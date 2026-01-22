@@ -1,13 +1,13 @@
-import { useForm, Head } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { ChangeEvent, FormEventHandler, useEffect, useState } from 'react';
 
-import AppLayout from '@/layouts/app-layout';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import InputError from '@/components/input-error';
+import AppLayout from '@/layouts/app-layout';
 
 interface CompanyProfile {
     name: string;
@@ -63,6 +63,15 @@ interface AiSettings {
     endpoint: string;
 }
 
+interface BrandingSettings {
+    favicon_ico: string;
+    favicon_ico_url: string | null;
+    favicon_svg: string;
+    favicon_svg_url: string | null;
+    apple_touch_icon: string;
+    apple_touch_icon_url: string | null;
+}
+
 interface SettingsIndexProps {
     company: CompanyProfile;
     address: CompanyAddress;
@@ -72,18 +81,10 @@ interface SettingsIndexProps {
     footerLegal: FooterLegal;
     security: SecuritySettings;
     ai: AiSettings;
+    branding: BrandingSettings;
 }
 
-export default function SettingsIndex({
-    company,
-    address,
-    contacts,
-    socials,
-    footerCta,
-    footerLegal,
-    security,
-    ai,
-}: SettingsIndexProps) {
+export default function SettingsIndex({ company, address, contacts, socials, footerCta, footerLegal, security, ai, branding }: SettingsIndexProps) {
     const companyForm = useForm({
         ...company,
         logo_icon: company.logo_icon ?? '',
@@ -111,9 +112,27 @@ export default function SettingsIndex({
         model: ai.model ?? 'google/gemini-2.0-flash-exp:free',
         endpoint: ai.endpoint ?? 'https://openrouter.ai/api/v1',
     });
+    const brandingForm = useForm({
+        favicon_ico: branding.favicon_ico ?? '',
+        favicon_ico_file: undefined as File | undefined,
+        favicon_svg: branding.favicon_svg ?? '',
+        favicon_svg_file: undefined as File | undefined,
+        apple_touch_icon: branding.apple_touch_icon ?? '',
+        apple_touch_icon_file: undefined as File | undefined,
+    });
     const [showApiKey, setShowApiKey] = useState(false);
     const [logoPreview, setLogoPreview] = useState<string | null>(company.logo_url ?? null);
     const [logoObjectUrl, setLogoObjectUrl] = useState<string | null>(null);
+
+    // Favicon previews
+    const [faviconIcoPreview, setFaviconIcoPreview] = useState<string | null>(branding.favicon_ico_url ?? null);
+    const [faviconSvgPreview, setFaviconSvgPreview] = useState<string | null>(branding.favicon_svg_url ?? null);
+    const [appleTouchIconPreview, setAppleTouchIconPreview] = useState<string | null>(branding.apple_touch_icon_url ?? null);
+    const [faviconObjectUrls, setFaviconObjectUrls] = useState<{ ico: string | null; svg: string | null; apple: string | null }>({
+        ico: null,
+        svg: null,
+        apple: null,
+    });
 
     useEffect(() => {
         return () => {
@@ -122,6 +141,15 @@ export default function SettingsIndex({
             }
         };
     }, [logoObjectUrl]);
+
+    // Cleanup favicon object URLs on unmount
+    useEffect(() => {
+        return () => {
+            if (faviconObjectUrls.ico) URL.revokeObjectURL(faviconObjectUrls.ico);
+            if (faviconObjectUrls.svg) URL.revokeObjectURL(faviconObjectUrls.svg);
+            if (faviconObjectUrls.apple) URL.revokeObjectURL(faviconObjectUrls.apple);
+        };
+    }, [faviconObjectUrls]);
 
     const handleLogoUrlChange = (value: string) => {
         companyForm.setData('logo_image', value);
@@ -170,6 +198,61 @@ export default function SettingsIndex({
         setLogoPreview(null);
         companyForm.setData('logo_image', '');
         companyForm.setData('logo_image_file', undefined);
+    };
+
+    // Favicon file change handlers
+    const handleFaviconIcoFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        brandingForm.setData('favicon_ico_file', file ?? undefined);
+
+        if (faviconObjectUrls.ico) {
+            URL.revokeObjectURL(faviconObjectUrls.ico);
+        }
+
+        if (file) {
+            const url = URL.createObjectURL(file);
+            setFaviconIcoPreview(url);
+            setFaviconObjectUrls((prev) => ({ ...prev, ico: url }));
+        } else {
+            setFaviconIcoPreview(branding.favicon_ico_url ?? null);
+            setFaviconObjectUrls((prev) => ({ ...prev, ico: null }));
+        }
+    };
+
+    const handleFaviconSvgFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        brandingForm.setData('favicon_svg_file', file ?? undefined);
+
+        if (faviconObjectUrls.svg) {
+            URL.revokeObjectURL(faviconObjectUrls.svg);
+        }
+
+        if (file) {
+            const url = URL.createObjectURL(file);
+            setFaviconSvgPreview(url);
+            setFaviconObjectUrls((prev) => ({ ...prev, svg: url }));
+        } else {
+            setFaviconSvgPreview(branding.favicon_svg_url ?? null);
+            setFaviconObjectUrls((prev) => ({ ...prev, svg: null }));
+        }
+    };
+
+    const handleAppleTouchIconFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        brandingForm.setData('apple_touch_icon_file', file ?? undefined);
+
+        if (faviconObjectUrls.apple) {
+            URL.revokeObjectURL(faviconObjectUrls.apple);
+        }
+
+        if (file) {
+            const url = URL.createObjectURL(file);
+            setAppleTouchIconPreview(url);
+            setFaviconObjectUrls((prev) => ({ ...prev, apple: url }));
+        } else {
+            setAppleTouchIconPreview(branding.apple_touch_icon_url ?? null);
+            setFaviconObjectUrls((prev) => ({ ...prev, apple: null }));
+        }
     };
 
     const submitCompany: FormEventHandler<HTMLFormElement> = (event) => {
@@ -237,6 +320,23 @@ export default function SettingsIndex({
         });
     };
 
+    const submitBranding: FormEventHandler<HTMLFormElement> = (event) => {
+        event.preventDefault();
+        brandingForm.transform((formData) => ({
+            ...formData,
+            favicon_ico_file: formData.favicon_ico_file ?? undefined,
+            favicon_svg_file: formData.favicon_svg_file ?? undefined,
+            apple_touch_icon_file: formData.apple_touch_icon_file ?? undefined,
+        }));
+        brandingForm.post(route('admin.settings.branding.update'), {
+            preserveScroll: true,
+            forceFormData: true,
+            onFinish: () => {
+                brandingForm.transform((data) => data);
+            },
+        });
+    };
+
     return (
         <AppLayout>
             <Head title="Setting Konten" />
@@ -245,9 +345,7 @@ export default function SettingsIndex({
                 <section className="space-y-4">
                     <header>
                         <h1 className="text-2xl font-semibold">Setting Konten</h1>
-                        <p className="text-sm text-muted-foreground">
-                            Kelola profil dan informasi perusahaan yang ditampilkan ke publik.
-                        </p>
+                        <p className="text-sm text-muted-foreground">Kelola profil dan informasi perusahaan yang ditampilkan ke publik.</p>
                     </header>
 
                     <form onSubmit={submitCompany} className="space-y-4" encType="multipart/form-data">
@@ -282,7 +380,9 @@ export default function SettingsIndex({
                                         onChange={(event) => companyForm.setData('logo_icon', event.target.value)}
                                         placeholder="Misal: Sparkles, Layers, Stars"
                                     />
-                                    <p className="text-xs text-muted-foreground">Gunakan nama ikon Lucide (CamelCase). Ikon ini tampil di samping judul situs.</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Gunakan nama ikon Lucide (CamelCase). Ikon ini tampil di samping judul situs.
+                                    </p>
                                     <InputError message={companyForm.errors.logo_icon} />
                                 </div>
                                 <div className="grid gap-2">
@@ -298,22 +398,13 @@ export default function SettingsIndex({
                                 </div>
                                 <div className="grid gap-2">
                                     <Label htmlFor="company-logo-file">Upload Logo</Label>
-                                    <Input
-                                        id="company-logo-file"
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleLogoFileChange}
-                                    />
+                                    <Input id="company-logo-file" type="file" accept="image/*" onChange={handleLogoFileChange} />
                                     <p className="text-xs text-muted-foreground">Format PNG, JPG, atau SVG dengan ukuran maks 4MB.</p>
                                     <InputError message={companyForm.errors.logo_image_file} />
                                     {logoPreview ? (
                                         <div className="flex items-center gap-4">
                                             <span className="inline-flex h-16 w-16 overflow-hidden rounded-full border border-dashed border-border bg-card">
-                                                <img
-                                                    src={logoPreview}
-                                                    alt="Logo preview"
-                                                    className="h-full w-full object-cover"
-                                                />
+                                                <img src={logoPreview} alt="Logo preview" className="h-full w-full object-cover" />
                                             </span>
                                             <Button type="button" variant="outline" size="sm" onClick={clearLogo}>
                                                 Hapus Logo
@@ -323,11 +414,7 @@ export default function SettingsIndex({
                                 </div>
                             </CardContent>
                             <CardFooter className="flex items-center justify-between gap-2">
-                                {companyForm.recentlySuccessful ? (
-                                    <p className="text-sm text-muted-foreground">Tersimpan.</p>
-                                ) : (
-                                    <span />
-                                )}
+                                {companyForm.recentlySuccessful ? <p className="text-sm text-muted-foreground">Tersimpan.</p> : <span />}
                                 <Button type="submit" disabled={companyForm.processing}>
                                     {companyForm.processing ? 'Menyimpan...' : 'Simpan profil'}
                                 </Button>
@@ -381,11 +468,7 @@ export default function SettingsIndex({
                                 </div>
                             </CardContent>
                             <CardFooter className="flex items-center justify-between gap-2">
-                                {addressForm.recentlySuccessful ? (
-                                    <p className="text-sm text-muted-foreground">Tersimpan.</p>
-                                ) : (
-                                    <span />
-                                )}
+                                {addressForm.recentlySuccessful ? <p className="text-sm text-muted-foreground">Tersimpan.</p> : <span />}
                                 <Button type="submit" disabled={addressForm.processing}>
                                     {addressForm.processing ? 'Menyimpan...' : 'Simpan alamat'}
                                 </Button>
@@ -453,11 +536,7 @@ export default function SettingsIndex({
                                 </div>
                             </CardContent>
                             <CardFooter className="flex items-center justify-between gap-2">
-                                {contactsForm.recentlySuccessful ? (
-                                    <p className="text-sm text-muted-foreground">Tersimpan.</p>
-                                ) : (
-                                    <span />
-                                )}
+                                {contactsForm.recentlySuccessful ? <p className="text-sm text-muted-foreground">Tersimpan.</p> : <span />}
                                 <Button type="submit" disabled={contactsForm.processing}>
                                     {contactsForm.processing ? 'Menyimpan...' : 'Simpan kontak'}
                                 </Button>
@@ -482,7 +561,8 @@ export default function SettingsIndex({
                                             Aktifkan OTP via Email
                                         </Label>
                                         <p className="text-xs text-muted-foreground">
-                                            Saat aktif, setiap login admin akan dimintai kode OTP yang dikirim ke email. Nonaktifkan bila tidak diperlukan.
+                                            Saat aktif, setiap login admin akan dimintai kode OTP yang dikirim ke email. Nonaktifkan bila tidak
+                                            diperlukan.
                                         </p>
                                     </div>
                                 </div>
@@ -514,11 +594,7 @@ export default function SettingsIndex({
                                 </div>
                             </CardContent>
                             <CardFooter className="flex items-center justify-between gap-2">
-                                {securityForm.recentlySuccessful ? (
-                                    <p className="text-sm text-muted-foreground">Tersimpan.</p>
-                                ) : (
-                                    <span />
-                                )}
+                                {securityForm.recentlySuccessful ? <p className="text-sm text-muted-foreground">Tersimpan.</p> : <span />}
                                 <Button type="submit" disabled={securityForm.processing}>
                                     {securityForm.processing ? 'Menyimpan...' : 'Simpan pengaturan'}
                                 </Button>
@@ -578,11 +654,7 @@ export default function SettingsIndex({
                                 </div>
                             </CardContent>
                             <CardFooter className="flex items-center justify-between gap-2">
-                                {socialsForm.recentlySuccessful ? (
-                                    <p className="text-sm text-muted-foreground">Tersimpan.</p>
-                                ) : (
-                                    <span />
-                                )}
+                                {socialsForm.recentlySuccessful ? <p className="text-sm text-muted-foreground">Tersimpan.</p> : <span />}
                                 <Button type="submit" disabled={socialsForm.processing}>
                                     {socialsForm.processing ? 'Menyimpan...' : 'Simpan sosial media'}
                                 </Button>
@@ -594,7 +666,8 @@ export default function SettingsIndex({
                         <header className="mt-8">
                             <h2 className="text-xl font-semibold">Konten Footer</h2>
                             <p className="text-sm text-muted-foreground">
-                                CTA dan tautan legal footer dapat diatur di sini. Informasi profil dan kontak otomatis mengikuti data perusahaan di atas.
+                                CTA dan tautan legal footer dapat diatur di sini. Informasi profil dan kontak otomatis mengikuti data perusahaan di
+                                atas.
                             </p>
                         </header>
 
@@ -624,11 +697,7 @@ export default function SettingsIndex({
                                     </div>
                                 </CardContent>
                                 <CardFooter className="flex items-center justify-between gap-2">
-                                    {footerCtaForm.recentlySuccessful ? (
-                                        <p className="text-sm text-muted-foreground">Tersimpan.</p>
-                                    ) : (
-                                        <span />
-                                    )}
+                                    {footerCtaForm.recentlySuccessful ? <p className="text-sm text-muted-foreground">Tersimpan.</p> : <span />}
                                     <Button type="submit" disabled={footerCtaForm.processing}>
                                         {footerCtaForm.processing ? 'Menyimpan...' : 'Simpan CTA footer'}
                                     </Button>
@@ -662,11 +731,7 @@ export default function SettingsIndex({
                                     </div>
                                 </CardContent>
                                 <CardFooter className="flex items-center justify-between gap-2">
-                                    {footerLegalForm.recentlySuccessful ? (
-                                        <p className="text-sm text-muted-foreground">Tersimpan.</p>
-                                    ) : (
-                                        <span />
-                                    )}
+                                    {footerLegalForm.recentlySuccessful ? <p className="text-sm text-muted-foreground">Tersimpan.</p> : <span />}
                                     <Button type="submit" disabled={footerLegalForm.processing}>
                                         {footerLegalForm.processing ? 'Menyimpan...' : 'Simpan tautan'}
                                     </Button>
@@ -700,12 +765,7 @@ export default function SettingsIndex({
                                                 placeholder="sk-or-v1-xxxxxxxxxxxx"
                                                 className="flex-1"
                                             />
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => setShowApiKey(!showApiKey)}
-                                            >
+                                            <Button type="button" variant="outline" size="sm" onClick={() => setShowApiKey(!showApiKey)}>
                                                 {showApiKey ? 'Sembunyikan' : 'Tampilkan'}
                                             </Button>
                                         </div>
@@ -731,7 +791,8 @@ export default function SettingsIndex({
                                             placeholder="google/gemini-2.0-flash-exp:free"
                                         />
                                         <p className="text-xs text-muted-foreground">
-                                            Model gratis: <code>google/gemini-2.0-flash-exp:free</code>, <code>meta-llama/llama-3.2-3b-instruct:free</code>
+                                            Model gratis: <code>google/gemini-2.0-flash-exp:free</code>,{' '}
+                                            <code>meta-llama/llama-3.2-3b-instruct:free</code>
                                         </p>
                                         <InputError message={aiForm.errors.model} />
                                     </div>
@@ -748,13 +809,98 @@ export default function SettingsIndex({
                                     </div>
                                 </CardContent>
                                 <CardFooter className="flex items-center justify-between gap-2">
-                                    {aiForm.recentlySuccessful ? (
-                                        <p className="text-sm text-muted-foreground">Tersimpan.</p>
-                                    ) : (
-                                        <span />
-                                    )}
+                                    {aiForm.recentlySuccessful ? <p className="text-sm text-muted-foreground">Tersimpan.</p> : <span />}
                                     <Button type="submit" disabled={aiForm.processing}>
                                         {aiForm.processing ? 'Menyimpan...' : 'Simpan pengaturan AI'}
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        </form>
+                    </div>
+
+                    <div className="space-y-4">
+                        <header className="mt-8">
+                            <h2 className="text-xl font-semibold">Branding</h2>
+                            <p className="text-sm text-muted-foreground">
+                                Kelola favicon dan ikon aplikasi yang ditampilkan di browser dan perangkat.
+                            </p>
+                        </header>
+
+                        <form onSubmit={submitBranding} className="space-y-4" encType="multipart/form-data">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Favicon & Ikon</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-6">
+                                    <div className="grid gap-4">
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="favicon-ico">Favicon ICO</Label>
+                                            <Input id="favicon-ico" type="file" accept=".ico,.png" onChange={handleFaviconIcoFileChange} />
+                                            <p className="text-xs text-muted-foreground">
+                                                Format .ico atau .png (16x16 atau 32x32 px). Ikon utama yang tampil di tab browser.
+                                            </p>
+                                            <InputError message={brandingForm.errors.favicon_ico_file} />
+                                            {faviconIcoPreview && (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded border border-dashed border-border bg-card">
+                                                        <img
+                                                            src={faviconIcoPreview}
+                                                            alt="Favicon ICO preview"
+                                                            className="h-full w-full object-contain"
+                                                        />
+                                                    </span>
+                                                    <span className="text-xs text-muted-foreground">Preview</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="favicon-svg">Favicon SVG</Label>
+                                            <Input id="favicon-svg" type="file" accept=".svg" onChange={handleFaviconSvgFileChange} />
+                                            <p className="text-xs text-muted-foreground">
+                                                Format .svg untuk tampilan yang tajam di semua resolusi. Browser modern akan menggunakan ini.
+                                            </p>
+                                            <InputError message={brandingForm.errors.favicon_svg_file} />
+                                            {faviconSvgPreview && (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded border border-dashed border-border bg-card">
+                                                        <img
+                                                            src={faviconSvgPreview}
+                                                            alt="Favicon SVG preview"
+                                                            className="h-full w-full object-contain"
+                                                        />
+                                                    </span>
+                                                    <span className="text-xs text-muted-foreground">Preview</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="apple-touch-icon">Apple Touch Icon</Label>
+                                            <Input id="apple-touch-icon" type="file" accept="image/png" onChange={handleAppleTouchIconFileChange} />
+                                            <p className="text-xs text-muted-foreground">
+                                                Format .png (180x180 px). Ikon yang tampil saat situs disimpan ke home screen di iOS.
+                                            </p>
+                                            <InputError message={brandingForm.errors.apple_touch_icon_file} />
+                                            {appleTouchIconPreview && (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="inline-flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg border border-dashed border-border bg-card">
+                                                        <img
+                                                            src={appleTouchIconPreview}
+                                                            alt="Apple Touch Icon preview"
+                                                            className="h-full w-full object-cover"
+                                                        />
+                                                    </span>
+                                                    <span className="text-xs text-muted-foreground">Preview</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </CardContent>
+                                <CardFooter className="flex items-center justify-between gap-2">
+                                    {brandingForm.recentlySuccessful ? <p className="text-sm text-muted-foreground">Tersimpan.</p> : <span />}
+                                    <Button type="submit" disabled={brandingForm.processing}>
+                                        {brandingForm.processing ? 'Menyimpan...' : 'Simpan branding'}
                                     </Button>
                                 </CardFooter>
                             </Card>

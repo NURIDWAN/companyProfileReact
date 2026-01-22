@@ -1,11 +1,11 @@
-import LandingPageLayout from '@/layouts/landingPage-layouts';
 import JobList from '@/components/ui/landingPageComponent/career/joblist';
 import type { JobPosition } from '@/components/ui/landingPageComponent/career/types';
+import LandingPageLayout from '@/layouts/landingPage-layouts';
+import { containerVariants, itemVariants } from '@/utils/animations';
 import type { PageProps } from '@inertiajs/core';
 import { usePage } from '@inertiajs/react';
-import type { ReactElement } from 'react';
 import { motion } from 'framer-motion';
-import { containerVariants, itemVariants } from '@/utils/animations';
+import type { ReactElement } from 'react';
 
 type SectionCopy = {
     badge?: string | null;
@@ -13,9 +13,13 @@ type SectionCopy = {
     description?: string | null;
 };
 
+type SectionKey = 'hero';
+type SectionVisibility = Partial<Record<SectionKey, boolean>>;
+
 type CareerPageProps = PageProps & {
     positions?: JobPosition[];
     careerHero?: SectionCopy;
+    sections?: SectionVisibility;
 };
 
 const metrics = [
@@ -47,7 +51,7 @@ function HeroSection({ copy }: { copy?: SectionCopy }) {
                     <span className="inline-flex items-center rounded-full bg-blue-100 px-4 py-1 text-xs tracking-[0.3em] text-blue-700 dark:bg-white/10 dark:text-white/70">
                         {heroBadge}
                     </span>
-                    <h1 className="text-4xl font-bold leading-tight text-slate-900 sm:text-5xl dark:text-white">{heroHeading}</h1>
+                    <h1 className="text-4xl leading-tight font-bold text-slate-900 sm:text-5xl dark:text-white">{heroHeading}</h1>
                     <p className="mx-auto max-w-3xl text-lg text-slate-600 dark:text-white/70">{heroDescription}</p>
                 </div>
                 <motion.div
@@ -68,13 +72,15 @@ function HeroSection({ copy }: { copy?: SectionCopy }) {
 }
 
 export default function CareerPage(): ReactElement {
-    const { positions = [], careerHero } = usePage<CareerPageProps>().props;
+    const { positions = [], careerHero, sections } = usePage<CareerPageProps>().props;
+    const visibility = sections ?? {};
+    const isEnabled = (key: SectionKey) => visibility[key] ?? true;
 
     return (
         <LandingPageLayout>
             <div className="bg-[#F5F7FB] py-16 text-slate-900 dark:bg-[#050A1A] dark:text-white">
                 <div className="container mx-auto flex max-w-6xl flex-col gap-12 px-4 md:px-6">
-                    <HeroSection copy={careerHero} />
+                    {isEnabled('hero') && <HeroSection copy={careerHero} />}
 
                     {positions.length ? (
                         <JobList jobs={positions} />

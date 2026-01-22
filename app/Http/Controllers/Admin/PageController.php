@@ -7,12 +7,10 @@ use App\Http\Requests\Admin\PageRequest;
 use App\Models\MenuItem;
 use App\Models\Page;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use App\Models\PageSection;
 use Inertia\Inertia;
 use Inertia\Response;
 use Throwable;
@@ -61,7 +59,11 @@ class PageController extends Controller
 
             return redirect()->route('admin.pages.index')->with('success', 'Halaman berhasil dibuat.');
         } catch (Throwable $e) {
-            Log::error('Gagal menyimpan halaman', ['message' => $e->getMessage()]);
+            Log::error('Gagal menyimpan halaman', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'sections_input' => $request->input('sections', []),
+            ]);
 
             return back()
                 ->withErrors(['general' => 'Gagal menyimpan halaman. Silakan coba lagi.'])
@@ -93,6 +95,8 @@ class PageController extends Controller
             Log::error('Gagal memperbarui halaman', [
                 'page_id' => $page->id,
                 'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'sections_input' => $request->input('sections', []),
             ]);
 
             return back()
@@ -148,18 +152,46 @@ class PageController extends Controller
     private function syncSections(Page $page, array $sections): void
     {
         $ids = [];
+        $usedSlugs = [];
+
         foreach ($sections as $order => $section) {
-            if (!isset($section['title']) || trim((string) $section['title']) === '') {
-                continue;
-            }
+            // Provide default title if empty
+            $title = isset($section['title']) && trim((string) $section['title']) !== ''
+                ? trim((string) $section['title'])
+                : 'Section '.($order + 1);
 
             $sectionId = $section['id'] ?? null;
-            $slug = isset($section['slug']) && trim((string) $section['slug']) !== ''
+
+            // Generate base slug
+            $baseSlug = isset($section['slug']) && trim((string) $section['slug']) !== ''
                 ? Str::slug($section['slug'])
-                : Str::slug($section['title']);
+                : Str::slug($title);
+
+            // Handle duplicate slugs within this batch
+            $slug = $baseSlug;
+            $counter = 1;
+            while (in_array($slug, $usedSlugs, true)) {
+                $slug = $baseSlug.'-'.$counter;
+                $counter++;
+            }
+            $usedSlugs[] = $slug;
+
+            // Also check against existing sections (excluding current one if updating)
+            $existingQuery = $page->sections()->where('slug', $slug);
+            if ($sectionId) {
+                $existingQuery->where('id', '!=', $sectionId);
+            }
+            while ($existingQuery->exists()) {
+                $slug = $baseSlug.'-'.$counter;
+                $counter++;
+                $existingQuery = $page->sections()->where('slug', $slug);
+                if ($sectionId) {
+                    $existingQuery->where('id', '!=', $sectionId);
+                }
+            }
 
             $payload = [
-                'title' => $section['title'],
+                'title' => $title,
                 'slug' => $slug,
                 'content' => $section['content'] ?? null,
                 'display_order' => $section['display_order'] ?? $order,
@@ -171,6 +203,7 @@ class PageController extends Controller
                 if ($existing) {
                     $existing->update($payload);
                     $ids[] = $existing->id;
+
                     continue;
                 }
             }
@@ -227,7 +260,7 @@ class PageController extends Controller
             'position' => $position,
             'type' => 'page',
             'page_id' => $page->id,
-            'target' => '/' . ltrim($page->full_path, '/'),
+            'target' => '/'.ltrim($page->full_path, '/'),
             'parent_id' => $parentId,
             'display_order' => $maxOrder + 1,
             'is_active' => true,
