@@ -226,7 +226,33 @@ class HandleInertiaRequests extends Middleware
         $defaults = config('landing.footer', []);
         $stored = CompanySetting::query()->where('key', 'footer.content')->value('value') ?? [];
 
-        return array_replace_recursive($defaults, $stored);
+        $merged = array_replace_recursive($defaults, $stored);
+
+        // Ensure contacts are populated from company settings if not set in footer config
+        $contacts = $this->companyContacts();
+        $address = $this->companyAddress();
+
+        $addressString = collect([
+            $address['line1'] ?? null,
+            $address['city'] ?? null,
+            $address['province'] ?? null,
+            $address['postal_code'] ?? null,
+        ])->filter()->join(', ');
+
+        if (empty($merged['contacts']['email']) && !empty($contacts['email'])) {
+            $merged['contacts']['email'] = $contacts['email'];
+        }
+        if (empty($merged['contacts']['phone']) && !empty($contacts['phone'])) {
+            $merged['contacts']['phone'] = $contacts['phone'];
+        }
+        if (empty($merged['contacts']['phone']) && !empty($contacts['whatsapp'])) {
+            $merged['contacts']['phone'] = $contacts['whatsapp'];
+        }
+        if (empty($merged['contacts']['address']) && !empty($addressString)) {
+            $merged['contacts']['address'] = $addressString;
+        }
+
+        return $merged;
     }
 
     /**

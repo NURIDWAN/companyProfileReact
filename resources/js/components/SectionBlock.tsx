@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp, GripVertical, PlusCircle, Trash2 } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, GripVertical, PlusCircle, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 
 export type SectionFormData = {
@@ -167,19 +167,19 @@ export function SectionBlock({
                                 >
                                     {sectionTypeGroups
                                         ? Object.entries(sectionTypeGroups).map(([key, group]) => (
-                                              <optgroup key={key} label={group.label}>
-                                                  {group.items.map((opt) => (
-                                                      <option key={opt.value} value={opt.value}>
-                                                          {opt.label}
-                                                      </option>
-                                                  ))}
-                                              </optgroup>
-                                          ))
+                                            <optgroup key={key} label={group.label}>
+                                                {group.items.map((opt) => (
+                                                    <option key={opt.value} value={opt.value}>
+                                                        {opt.label}
+                                                    </option>
+                                                ))}
+                                            </optgroup>
+                                        ))
                                         : sectionTypes.map((opt) => (
-                                              <option key={opt.value} value={opt.value}>
-                                                  {opt.label}
-                                              </option>
-                                          ))}
+                                            <option key={opt.value} value={opt.value}>
+                                                {opt.label}
+                                            </option>
+                                        ))}
                                 </select>
                             </div>
                         </div>
@@ -225,7 +225,7 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
                     </div>
                     <div className="space-y-2">
                         <Label className="text-xs font-medium">Deskripsi</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
+                        <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                     </div>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
@@ -264,7 +264,7 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
                     </div>
                     <div className="space-y-2">
                         <Label className="text-xs font-medium">Deskripsi</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
+                        <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                     </div>
                 </div>
                 <HighlightsField highlights={data.highlights ?? []} onUpdate={(highlights) => onUpdate({ highlights })} />
@@ -284,7 +284,7 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
                     </div>
                     <div className="space-y-2">
                         <Label className="text-xs font-medium">Deskripsi</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
+                        <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                     </div>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
@@ -430,7 +430,7 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
                     </div>
                     <div className="space-y-2">
                         <Label className="text-xs font-medium">Teks Visi</Label>
-                        <Textarea value={data.vision_text ?? ''} onChange={(e) => onUpdate({ vision_text: e.target.value })} />
+                        <RichTextEditor value={data.vision_text ?? ''} onChange={(value) => onUpdate({ vision_text: value })} />
                     </div>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
@@ -440,7 +440,7 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
                     </div>
                     <div className="space-y-2">
                         <Label className="text-xs font-medium">Teks Misi</Label>
-                        <Textarea value={data.mission_text ?? ''} onChange={(e) => onUpdate({ mission_text: e.target.value })} />
+                        <RichTextEditor value={data.mission_text ?? ''} onChange={(value) => onUpdate({ mission_text: value })} />
                     </div>
                 </div>
                 <ImageUpload value={data.image ?? null} onChange={(url) => onUpdate({ image: url })} label="Gambar Vision/Mission" />
@@ -468,7 +468,7 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
                     </div>
                     <div className="space-y-2">
                         <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
+                        <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                     </div>
                 </div>
                 <StatsField stats={data.primary ?? []} onUpdate={(primary) => onUpdate({ primary })} label="Primary Stats" />
@@ -492,7 +492,7 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
                     </div>
                     <div className="space-y-2">
                         <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
+                        <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                     </div>
                 </div>
                 <TeamMembersField members={data.members ?? []} onUpdate={(members) => onUpdate({ members })} />
@@ -511,7 +511,7 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
                     </div>
                     <div className="space-y-2">
                         <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
+                        <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                     </div>
                 </div>
                 <ImageUpload value={data.image ?? null} onChange={(url) => onUpdate({ image: url })} label="Background Image" />
@@ -530,7 +530,7 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
                     </div>
                     <div className="space-y-2">
                         <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
+                        <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                     </div>
                 </div>
             </div>
@@ -548,7 +548,7 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
                     </div>
                     <div className="space-y-2">
                         <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
+                        <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                     </div>
                 </div>
                 <ItemsWithIconField
@@ -564,15 +564,13 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'service_tech_stack') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <TechStackField items={data.items ?? []} onUpdate={(items) => onUpdate({ items })} />
             </div>
@@ -583,15 +581,13 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'service_faqs') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <FaqsField items={data.items ?? []} onUpdate={(items) => onUpdate({ items })} />
             </div>
@@ -604,15 +600,13 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'product_hero') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
@@ -643,15 +637,13 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'product_features') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <ItemsWithIconField items={data.items ?? []} onUpdate={(items) => onUpdate({ items })} itemLabel="Feature" />
             </div>
@@ -662,15 +654,13 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'product_gallery') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <div className="space-y-2">
                     <Label className="text-xs font-medium">Columns</Label>
@@ -687,15 +677,13 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'career_hero') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
@@ -716,15 +704,13 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'career_benefits') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <ItemsWithIconField items={data.items ?? []} onUpdate={(items) => onUpdate({ items })} itemLabel="Benefit" />
             </div>
@@ -735,15 +721,13 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'career_positions') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <PositionsField positions={data.positions ?? []} onUpdate={(positions) => onUpdate({ positions })} />
             </div>
@@ -756,15 +740,13 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'contact_info') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
@@ -832,15 +814,13 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'gallery') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
@@ -875,15 +855,13 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'accordion') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <AccordionItemsField items={data.items ?? []} onUpdate={(items) => onUpdate({ items })} />
             </div>
@@ -894,15 +872,13 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'tabs') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <TabItemsField items={data.items ?? []} onUpdate={(items) => onUpdate({ items })} />
             </div>
@@ -913,15 +889,13 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'timeline') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <TimelineItemsField items={data.items ?? []} onUpdate={(items) => onUpdate({ items })} />
             </div>
@@ -934,15 +908,13 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'slider') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading (Opsional)</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description (Opsional)</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading (Opsional)</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description (Opsional)</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <div className="grid gap-4 md:grid-cols-4">
                     <div className="flex items-center gap-2">
@@ -987,15 +959,13 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'video_embed') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading (Opsional)</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description (Opsional)</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading (Opsional)</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description (Opsional)</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
@@ -1028,15 +998,13 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'pricing_table') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <PricingPlansField plans={data.plans ?? []} onUpdate={(plans) => onUpdate({ plans })} />
             </div>
@@ -1047,15 +1015,13 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'partners') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <div className="space-y-2">
                     <Label className="text-xs font-medium">Columns</Label>
@@ -1070,15 +1036,13 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'counter') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading (Opsional)</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description (Opsional)</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading (Opsional)</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description (Opsional)</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <CounterItemsField items={data.items ?? []} onUpdate={(items) => onUpdate({ items })} />
             </div>
@@ -1089,21 +1053,19 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
     if (type === 'feature_cards') {
         return (
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Heading</Label>
-                        <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium">Description</Label>
-                        <Textarea value={data.description ?? ''} onChange={(e) => onUpdate({ description: e.target.value })} />
-                    </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Heading</Label>
+                    <Input value={data.heading ?? ''} onChange={(e) => onUpdate({ heading: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium">Description</Label>
+                    <RichTextEditor value={data.description ?? ''} onChange={(value) => onUpdate({ description: value })} />
                 </div>
                 <div className="space-y-2">
                     <Label className="text-xs font-medium">Columns</Label>
                     <Input type="number" min={2} max={4} value={data.columns ?? 3} onChange={(e) => onUpdate({ columns: Number(e.target.value) })} />
                 </div>
-                <ItemsWithIconField items={data.items ?? []} onUpdate={(items) => onUpdate({ items })} itemLabel="Feature Card" />
+                <FeatureCardsField items={data.items ?? []} onUpdate={(items) => onUpdate({ items })} />
             </div>
         );
     }
@@ -1139,7 +1101,7 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
                 </div>
                 <div className="space-y-2">
                     <Label className="text-xs font-medium">Konten</Label>
-                    <Textarea value={data.content ?? ''} onChange={(e) => onUpdate({ content: e.target.value })} />
+                    <RichTextEditor value={data.content ?? ''} onChange={(value) => onUpdate({ content: value })} />
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
@@ -1378,14 +1340,13 @@ function TestimonialsField({
                         </div>
                         <div className="space-y-1">
                             <Label className="text-xs text-muted-foreground">Testimonial</Label>
-                            <Textarea
+                            <RichTextEditor
                                 value={item.testimonial ?? ''}
-                                onChange={(e) => {
+                                onChange={(value) => {
                                     const updated = [...items];
-                                    updated[idx] = { ...item, testimonial: e.target.value };
+                                    updated[idx] = { ...item, testimonial: value };
                                     onUpdate(updated);
                                 }}
-                                placeholder="Tulis testimonial..."
                             />
                         </div>
                     </div>
@@ -1609,14 +1570,13 @@ function FaqsField({
                         </div>
                         <div className="space-y-1">
                             <Label className="text-xs text-muted-foreground">Answer</Label>
-                            <Textarea
+                            <RichTextEditor
                                 value={item.answer ?? ''}
-                                onChange={(e) => {
+                                onChange={(value) => {
                                     const updated = [...items];
-                                    updated[idx] = { ...item, answer: e.target.value };
+                                    updated[idx] = { ...item, answer: value };
                                     onUpdate(updated);
                                 }}
-                                placeholder="Jawaban"
                             />
                         </div>
                     </div>
@@ -1815,14 +1775,13 @@ function AccordionItemsField({
                         </div>
                         <div className="space-y-1">
                             <Label className="text-xs text-muted-foreground">Content</Label>
-                            <Textarea
+                            <RichTextEditor
                                 value={item.content ?? ''}
-                                onChange={(e) => {
+                                onChange={(value) => {
                                     const updated = [...items];
-                                    updated[idx] = { ...item, content: e.target.value };
+                                    updated[idx] = { ...item, content: value };
                                     onUpdate(updated);
                                 }}
-                                placeholder="Konten accordion"
                             />
                         </div>
                     </div>
@@ -1874,15 +1833,13 @@ function TabItemsField({
                         </div>
                         <div className="space-y-1">
                             <Label className="text-xs text-muted-foreground">Content (HTML)</Label>
-                            <Textarea
+                            <RichTextEditor
                                 value={item.content ?? ''}
-                                onChange={(e) => {
+                                onChange={(value) => {
                                     const updated = [...items];
-                                    updated[idx] = { ...item, content: e.target.value };
+                                    updated[idx] = { ...item, content: value };
                                     onUpdate(updated);
                                 }}
-                                placeholder="Konten tab (mendukung HTML)"
-                                rows={4}
                             />
                         </div>
                     </div>
@@ -1954,14 +1911,13 @@ function TimelineItemsField({
                         </div>
                         <div className="space-y-1">
                             <Label className="text-xs text-muted-foreground">Description</Label>
-                            <Textarea
+                            <RichTextEditor
                                 value={item.description ?? ''}
-                                onChange={(e) => {
+                                onChange={(value) => {
                                     const updated = [...items];
-                                    updated[idx] = { ...item, description: e.target.value };
+                                    updated[idx] = { ...item, description: value };
                                     onUpdate(updated);
                                 }}
-                                placeholder="Deskripsi milestone"
                             />
                         </div>
                     </div>
@@ -2044,14 +2000,13 @@ function SliderSlidesField({
                         </div>
                         <div className="space-y-1">
                             <Label className="text-xs text-muted-foreground">Description (Opsional)</Label>
-                            <Textarea
+                            <RichTextEditor
                                 value={slide.description ?? ''}
-                                onChange={(e) => {
+                                onChange={(value) => {
                                     const updated = [...slides];
-                                    updated[idx] = { ...slide, description: e.target.value };
+                                    updated[idx] = { ...slide, description: value };
                                     onUpdate(updated);
                                 }}
-                                placeholder="Deskripsi slide"
                             />
                         </div>
                     </div>
@@ -2082,19 +2037,69 @@ function PricingPlansField({
         cta_label?: string;
         cta_link?: string;
         is_popular?: boolean;
+        description?: string;
     }>;
     onUpdate: (plans: Array<any>) => void;
 }) {
+    const addFeature = (planIdx: number) => {
+        const updated = [...plans];
+        const currentFeatures = updated[planIdx].features ?? [];
+        updated[planIdx] = { ...updated[planIdx], features: [...currentFeatures, ''] };
+        onUpdate(updated);
+    };
+
+    const updateFeature = (planIdx: number, featureIdx: number, value: string) => {
+        const updated = [...plans];
+        const currentFeatures = [...(updated[planIdx].features ?? [])];
+        currentFeatures[featureIdx] = value;
+        updated[planIdx] = { ...updated[planIdx], features: currentFeatures };
+        onUpdate(updated);
+    };
+
+    const removeFeature = (planIdx: number, featureIdx: number) => {
+        const updated = [...plans];
+        const currentFeatures = (updated[planIdx].features ?? []).filter((_, i) => i !== featureIdx);
+        updated[planIdx] = { ...updated[planIdx], features: currentFeatures };
+        onUpdate(updated);
+    };
+
     return (
-        <div className="space-y-3">
-            <Label className="text-sm font-semibold">Pricing Plans</Label>
-            <div className="space-y-3">
+        <div className="space-y-4">
+            <div className="flex items-center justify-between">
+                <Label className="text-sm font-semibold">Pricing Plans</Label>
+                <span className="text-xs text-muted-foreground">{plans.length} plan(s)</span>
+            </div>
+            <div className="space-y-4">
                 {plans.map((plan, idx) => (
-                    <div key={idx} className="space-y-3 rounded-lg border bg-background p-4">
-                        <div className="flex items-start justify-between">
+                    <div
+                        key={idx}
+                        className={`relative space-y-4 rounded-xl border-2 p-5 transition-all ${plan.is_popular
+                            ? 'border-primary bg-primary/5 shadow-md'
+                            : 'border-border bg-background hover:border-muted-foreground/30'
+                            }`}
+                    >
+                        {/* Popular Badge */}
+                        {plan.is_popular && (
+                            <div className="absolute -top-3 left-4 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
+                                ⭐ Popular
+                            </div>
+                        )}
+
+                        {/* Header */}
+                        <div className="flex items-start justify-between pt-1">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-lg font-bold">
+                                    {idx + 1}
+                                </div>
+                                <div>
+                                    <span className="text-sm font-semibold">{plan.name || `Plan ${idx + 1}`}</span>
+                                    <p className="text-xs text-muted-foreground">
+                                        {plan.price || 'Set harga'} {plan.period || ''}
+                                    </p>
+                                </div>
+                            </div>
                             <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium">Plan {idx + 1}</span>
-                                <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-1.5 rounded-md bg-muted px-2 py-1">
                                     <Checkbox
                                         id={`popular-${idx}`}
                                         checked={plan.is_popular ?? false}
@@ -2104,24 +2109,26 @@ function PricingPlansField({
                                             onUpdate(updated);
                                         }}
                                     />
-                                    <Label htmlFor={`popular-${idx}`} className="text-xs">
-                                        Popular
+                                    <Label htmlFor={`popular-${idx}`} className="cursor-pointer text-xs font-medium">
+                                        Tandai Popular
                                     </Label>
                                 </div>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                    onClick={() => onUpdate(plans.filter((_, i) => i !== idx))}
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
                             </div>
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={() => onUpdate(plans.filter((_, i) => i !== idx))}
-                            >
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
                         </div>
+
+                        {/* Main Info */}
                         <div className="grid gap-4 md:grid-cols-3">
-                            <div className="space-y-1">
-                                <Label className="text-xs text-muted-foreground">Nama Plan</Label>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium">Nama Plan</Label>
                                 <Input
                                     value={plan.name ?? ''}
                                     onChange={(e) => {
@@ -2129,11 +2136,12 @@ function PricingPlansField({
                                         updated[idx] = { ...plan, name: e.target.value };
                                         onUpdate(updated);
                                     }}
-                                    placeholder="Basic"
+                                    placeholder="Basic / Pro / Enterprise"
+                                    className="font-medium"
                                 />
                             </div>
-                            <div className="space-y-1">
-                                <Label className="text-xs text-muted-foreground">Harga</Label>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium">Harga</Label>
                                 <Input
                                     value={plan.price ?? ''}
                                     onChange={(e) => {
@@ -2144,35 +2152,90 @@ function PricingPlansField({
                                     placeholder="Rp 99.000"
                                 />
                             </div>
-                            <div className="space-y-1">
-                                <Label className="text-xs text-muted-foreground">Period</Label>
-                                <Input
-                                    value={plan.period ?? ''}
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium">Periode</Label>
+                                <select
+                                    className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                                    value={plan.period ?? '/bulan'}
                                     onChange={(e) => {
                                         const updated = [...plans];
                                         updated[idx] = { ...plan, period: e.target.value };
                                         onUpdate(updated);
                                     }}
-                                    placeholder="/bulan"
-                                />
+                                >
+                                    <option value="/bulan">/bulan</option>
+                                    <option value="/tahun">/tahun</option>
+                                    <option value="/minggu">/minggu</option>
+                                    <option value="/hari">/hari</option>
+                                    <option value="">Sekali Bayar</option>
+                                </select>
                             </div>
                         </div>
-                        <div className="space-y-1">
-                            <Label className="text-xs text-muted-foreground">Features (satu per baris)</Label>
-                            <Textarea
-                                value={(plan.features ?? []).join('\n')}
+
+                        {/* Description */}
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-medium">Deskripsi Singkat (Opsional)</Label>
+                            <Input
+                                value={plan.description ?? ''}
                                 onChange={(e) => {
                                     const updated = [...plans];
-                                    updated[idx] = { ...plan, features: e.target.value.split('\n').filter((f) => f.trim()) };
+                                    updated[idx] = { ...plan, description: e.target.value };
                                     onUpdate(updated);
                                 }}
-                                placeholder="10 GB Storage&#10;Email Support&#10;Free Updates"
-                                rows={4}
+                                placeholder="Cocok untuk bisnis kecil yang baru memulai"
                             />
                         </div>
+
+                        {/* Features */}
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-xs font-medium">Fitur ({(plan.features ?? []).length})</Label>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-7 text-xs"
+                                    onClick={() => addFeature(idx)}
+                                >
+                                    <PlusCircle className="mr-1 h-3 w-3" /> Tambah Fitur
+                                </Button>
+                            </div>
+                            <div className="space-y-2 rounded-lg border bg-muted/30 p-3">
+                                {(plan.features ?? []).length === 0 ? (
+                                    <p className="py-4 text-center text-xs text-muted-foreground">
+                                        Belum ada fitur. Klik "Tambah Fitur" untuk menambahkan.
+                                    </p>
+                                ) : (
+                                    (plan.features ?? []).map((feature, featureIdx) => (
+                                        <div key={featureIdx} className="flex items-center gap-2">
+                                            <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                                <Check className="h-3 w-3" />
+                                            </div>
+                                            <Input
+                                                value={feature}
+                                                onChange={(e) => updateFeature(idx, featureIdx, e.target.value)}
+                                                placeholder={`Fitur ${featureIdx + 1}`}
+                                                className="h-8 flex-1 text-sm"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-7 w-7 shrink-0"
+                                                onClick={() => removeFeature(idx, featureIdx)}
+                                            >
+                                                <X className="h-3 w-3 text-muted-foreground" />
+                                            </Button>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+
+                        {/* CTA */}
                         <div className="grid gap-4 md:grid-cols-2">
-                            <div className="space-y-1">
-                                <Label className="text-xs text-muted-foreground">CTA Label</Label>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium">Teks Tombol</Label>
                                 <Input
                                     value={plan.cta_label ?? ''}
                                     onChange={(e) => {
@@ -2180,11 +2243,11 @@ function PricingPlansField({
                                         updated[idx] = { ...plan, cta_label: e.target.value };
                                         onUpdate(updated);
                                     }}
-                                    placeholder="Pilih Plan"
+                                    placeholder="Pilih Plan / Mulai Sekarang"
                                 />
                             </div>
-                            <div className="space-y-1">
-                                <Label className="text-xs text-muted-foreground">CTA Link</Label>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium">Link Tombol</Label>
                                 <Input
                                     value={plan.cta_link ?? ''}
                                     onChange={(e) => {
@@ -2199,18 +2262,29 @@ function PricingPlansField({
                     </div>
                 ))}
             </div>
+
+            {/* Add Plan Button */}
             <Button
                 type="button"
                 variant="outline"
-                size="sm"
+                className="w-full border-dashed"
                 onClick={() =>
                     onUpdate([
                         ...plans,
-                        { name: '', price: '', period: '/bulan', features: [], cta_label: 'Pilih Plan', cta_link: '', is_popular: false },
+                        {
+                            name: '',
+                            price: '',
+                            period: '/bulan',
+                            description: '',
+                            features: [],
+                            cta_label: 'Pilih Plan',
+                            cta_link: '',
+                            is_popular: false,
+                        },
                     ])
                 }
             >
-                <PlusCircle className="mr-2 h-4 w-4" /> Tambah Plan
+                <PlusCircle className="mr-2 h-4 w-4" /> Tambah Plan Baru
             </Button>
         </div>
     );

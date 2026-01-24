@@ -1,14 +1,85 @@
 import { Link, usePage, router } from "@inertiajs/react";
-import { ComponentType, useMemo } from "react";
+import { ComponentType, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Moon, Sun, type LucideProps } from "lucide-react";
+import { Menu, Moon, Sun, ChevronDown, type LucideProps } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from "@/components/ui/dropdown-menu";
 import * as LucideIcons from "lucide-react";
 import { useAppearance } from "@/hooks/use-appearance";
 import { cn } from "@/lib/utils";
 import { primaryNavLinks } from "@/config/navigation";
 import type { BrandingInfo, NavigationLink, SharedData } from "@/types";
+
+// Mobile Nav Item Component with collapsible children
+function MobileNavItem({
+    navItem,
+    isActive,
+    resolveLabel,
+    handleNavClick,
+}: {
+    navItem: NavigationLink & { children?: NavigationLink[] };
+    isActive: boolean;
+    resolveLabel: (item: NavigationLink) => string;
+    handleNavClick: (e: React.MouseEvent, href: string) => void;
+}) {
+    const [expanded, setExpanded] = useState(false);
+    const hasChildren = Array.isArray(navItem.children) && navItem.children.length > 0;
+
+    if (hasChildren) {
+        return (
+            <div className="w-full">
+                <Button
+                    variant="ghost"
+                    className={cn("w-full justify-between text-base", {
+                        "text-blue-600 font-semibold": isActive,
+                        "text-foreground": !isActive,
+                    })}
+                    onClick={() => setExpanded(!expanded)}
+                >
+                    {resolveLabel(navItem)}
+                    <ChevronDown className={cn("h-4 w-4 transition-transform", expanded && "rotate-180")} />
+                </Button>
+                {expanded && (
+                    <div className="ml-4 mt-1 space-y-1 border-l-2 border-gray-200 pl-3">
+                        {navItem.children!.map((child) => (
+                            <Link
+                                key={child.key}
+                                href={child.href}
+                                className="block"
+                                onClick={(e) => handleNavClick(e, child.href)}
+                            >
+                                <Button
+                                    variant="ghost"
+                                    className="w-full justify-start text-sm text-muted-foreground hover:text-foreground"
+                                >
+                                    {resolveLabel(child)}
+                                </Button>
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    return (
+        <Link
+            href={navItem.href}
+            className="w-full"
+            onClick={(e) => handleNavClick(e, navItem.href)}
+        >
+            <Button
+                variant="ghost"
+                className={cn("w-full justify-start text-base", {
+                    "text-blue-600 font-semibold": isActive,
+                    "text-foreground": !isActive,
+                })}
+            >
+                {resolveLabel(navItem)}
+            </Button>
+        </Link>
+    );
+}
 
 export function CompanyNavbar() {
     const { appearance, updateAppearance } = useAppearance();
@@ -160,11 +231,6 @@ export function CompanyNavbar() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="start">
-                                        <DropdownMenuItem asChild>
-                                            <Link href={navItem.href} onClick={(e) => handleNavClick(e, navItem.href)}>
-                                                {resolveLabel(navItem)}
-                                            </Link>
-                                        </DropdownMenuItem>
                                         {(navItem as any).children.map((child: any) =>
                                             Array.isArray(child.children) && child.children.length ? (
                                                 <DropdownMenuSub key={child.key}>
@@ -172,11 +238,6 @@ export function CompanyNavbar() {
                                                         {resolveLabel(child)}
                                                     </DropdownMenuSubTrigger>
                                                     <DropdownMenuSubContent>
-                                                        <DropdownMenuItem asChild>
-                                                            <Link href={child.href} onClick={(e) => handleNavClick(e, child.href)}>
-                                                                {resolveLabel(child)}
-                                                            </Link>
-                                                        </DropdownMenuItem>
                                                         {child.children.map((grandchild: any) => (
                                                             <DropdownMenuItem key={grandchild.key} asChild>
                                                                 <Link href={grandchild.href} onClick={(e) => handleNavClick(e, grandchild.href)}>
@@ -234,22 +295,13 @@ export function CompanyNavbar() {
                             <SheetContent side="right" className="p-4 pt-10">
                                 <nav className="flex flex-col items-start space-y-2">
                                     {navItems.map((navItem) => (
-                                        <Link
+                                        <MobileNavItem
                                             key={navItem.key}
-                                            href={navItem.href}
-                                            className="w-full"
-                                            onClick={(e) => handleNavClick(e, navItem.href)}
-                                        >
-                                            <Button
-                                                variant="ghost"
-                                                className={cn("w-full justify-start text-base", {
-                                                    "text-blue-600 font-semibold": activeLinkKey === navItem.key,
-                                                    "text-foreground": activeLinkKey !== navItem.key,
-                                                })}
-                                            >
-                                                {resolveLabel(navItem)}
-                                            </Button>
-                                        </Link>
+                                            navItem={navItem as NavigationLink & { children?: NavigationLink[] }}
+                                            isActive={activeLinkKey === navItem.key}
+                                            resolveLabel={resolveLabel}
+                                            handleNavClick={handleNavClick}
+                                        />
                                     ))}
                                 </nav>
                             </SheetContent>

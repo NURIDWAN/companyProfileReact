@@ -17,7 +17,7 @@ class MenuItemRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:120'],
             'position' => ['required', Rule::in(['main', 'header', 'footer'])],
-            'type' => ['required', Rule::in(['page', 'category', 'internal', 'external'])],
+            'type' => ['required', Rule::in(['page', 'category', 'internal', 'external', 'dropdown'])],
             'page_id' => ['nullable', 'exists:pages,id'],
             'target' => ['nullable', 'string', 'max:255'],
             'parent_id' => ['nullable', 'exists:menu_items,id'],

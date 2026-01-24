@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { MountainIcon, Linkedin, Twitter, Instagram, Link2 } from 'lucide-react';
+import { MountainIcon, Linkedin, Twitter, Instagram, Link2, Youtube, Facebook, Globe } from 'lucide-react';
 import { primaryNavLinks } from '@/config/navigation';
 import type {
     BrandingInfo,
@@ -15,11 +15,14 @@ const socialIcons: Record<string, React.ComponentType<{ className?: string }>> =
     linkedin: Linkedin,
     twitter: Twitter,
     instagram: Instagram,
+    youtube: Youtube,
+    facebook: Facebook,
+    website: Globe,
 };
 
 export function Footer() {
     const currentYear = new Date().getFullYear();
-    const { footer, footerNavigation, navigation, branding, companyContacts, companyAddress } = usePage<SharedData>().props;
+    const { footer, footerNavigation, navigation, branding, companyContacts, companyAddress, companySocials } = usePage<SharedData>().props;
 
     const brandingInfo = branding as BrandingInfo | undefined;
     const defaultCompanyName = brandingInfo?.name ?? 'Harmony Strategic Group';
@@ -40,16 +43,20 @@ export function Footer() {
         .filter(Boolean)
         .join(', ') || 'Jakarta, Indonesia';
 
-    const footerContent: FooterContent = footer ?? {
-        company: {
+    const footerContent: FooterContent = {
+        company: footer?.company ?? {
             name: defaultCompanyName,
             description: defaultDescription,
         },
         contacts: {
-            email: defaultContactEmail,
-            phone: defaultContactPhone,
-            address: defaultAddress,
+            email: footer?.contacts?.email ?? defaultContactEmail,
+            phone: footer?.contacts?.phone ?? defaultContactPhone,
+            address: footer?.contacts?.address ?? defaultAddress,
         },
+        columns: footer?.columns,
+        socials: footer?.socials,
+        cta: footer?.cta,
+        legal: footer?.legal,
     };
 
     const navItems: NavigationLink[] = navigation?.primary?.length
@@ -69,18 +76,20 @@ export function Footer() {
     const companyLinks: FooterColumn[] = footerNavigation?.length
         ? footerNavigation
         : footerContent.columns?.length
-        ? footerContent.columns
-        : [
-            {
-                title: 'Perusahaan',
-                links: navItems.slice(0, 4).map((item) => ({
-                    label: resolveNavLabel(item),
-                    href: item.href,
-                })),
-            },
-        ];
+            ? footerContent.columns
+            : [
+                {
+                    title: 'Perusahaan',
+                    links: navItems.slice(0, 4).map((item) => ({
+                        label: resolveNavLabel(item),
+                        href: item.href,
+                    })),
+                },
+            ];
 
-    const socials = Object.entries(footerContent.socials ?? {});
+    // Merge socials from footer config and companySocials, filtering out empty values
+    const socialData = footer?.socials ?? companySocials ?? {};
+    const socials = Object.entries(socialData).filter(([_, url]) => url && url.trim() !== '');
 
     return (
         <footer className="bg-gray-900 text-gray-300">

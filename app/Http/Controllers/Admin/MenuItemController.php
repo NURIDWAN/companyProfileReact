@@ -8,10 +8,10 @@ use App\Models\MenuItem;
 use App\Models\Page;
 use App\Models\PageSection;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Throwable;
@@ -33,9 +33,9 @@ class MenuItemController extends Controller
                                     $sectionQuery->select('id', 'page_id', 'title', 'slug', 'content', 'display_order', 'is_active')
                                         ->orderBy('display_order')
                                         ->orderBy('title');
-                                }
+                                },
                             ]);
-                    }
+                    },
                 ])
                 ->orderBy('parent_id')
                 ->orderBy('display_order')
@@ -82,14 +82,14 @@ class MenuItemController extends Controller
                 ->withCount([
                     'sections as sections_count' => function ($q) {
                         $q->where('is_active', true);
-                    }
+                    },
                 ])
                 ->with([
                     'sections' => function ($sectionQuery) {
                         $sectionQuery->select('id', 'page_id', 'title', 'slug', 'content', 'display_order', 'is_active')
                             ->orderBy('display_order')
                             ->orderBy('title');
-                    }
+                    },
                 ])
                 ->orderBy('title')
                 ->get()
@@ -117,11 +117,11 @@ class MenuItemController extends Controller
                 ->select('id', 'name', 'slug')
                 ->orderBy('name')
                 ->get()
-                ->map(fn($cat) => [
+                ->map(fn ($cat) => [
                     'id' => $cat->id,
                     'name' => $cat->name,
                     'slug' => $cat->slug,
-                    'path' => '/blog/kategori/' . $cat->slug,
+                    'path' => '/blog/kategori/'.$cat->slug,
                 ]),
         ]);
     }
@@ -163,6 +163,7 @@ class MenuItemController extends Controller
             return back()->with('success', 'Menu berhasil ditambahkan.');
         } catch (Throwable $e) {
             Log::error('Gagal membuat menu item', ['message' => $e->getMessage()]);
+
             return back()->withErrors(['general' => 'Gagal menyimpan menu.'])->withInput();
         }
     }
@@ -213,11 +214,12 @@ class MenuItemController extends Controller
                         'is_active' => isset($section['is_active']) ? (bool) $section['is_active'] : true,
                     ];
 
-                    if (!empty($section['id'])) {
+                    if (! empty($section['id'])) {
                         $existing = $page->sections()->where('id', $section['id'])->first();
                         if ($existing) {
                             $existing->update($payload);
                             $ids[] = $existing->id;
+
                             continue;
                         }
                     }
@@ -253,19 +255,24 @@ class MenuItemController extends Controller
         if ($data['type'] === 'page' && isset($data['page_id'])) {
             $page = Page::find($data['page_id']);
             // Use full_path for nested pages (e.g., "tentang-kami/profil")
-            $target = $page ? '/' . ltrim($page->full_path, '/') : null;
+            $target = $page ? '/'.ltrim($page->full_path, '/') : null;
         }
 
         if ($data['type'] === 'internal' && $target) {
-            $target = '/' . ltrim($target, '/');
+            $target = '/'.ltrim($target, '/');
         }
 
         if ($data['type'] === 'category' && $target) {
-            $target = '/' . ltrim($target, '/');
+            $target = '/'.ltrim($target, '/');
         }
 
         if ($data['type'] === 'external' && $target) {
-            $target = Str::startsWith($target, ['http://', 'https://']) ? $target : 'https://' . ltrim($target, '/');
+            $target = Str::startsWith($target, ['http://', 'https://']) ? $target : 'https://'.ltrim($target, '/');
+        }
+
+        // Dropdown type doesn't need a target - it's just a container for children
+        if ($data['type'] === 'dropdown') {
+            $target = null;
         }
 
         return [
@@ -305,6 +312,7 @@ class MenuItemController extends Controller
             return back()->with('success', 'Urutan menu diperbarui.');
         } catch (Throwable $e) {
             Log::error('Gagal mengatur ulang urutan menu', ['message' => $e->getMessage()]);
+
             return back()->withErrors(['general' => 'Gagal mengatur ulang urutan menu.']);
         }
     }
@@ -335,6 +343,7 @@ class MenuItemController extends Controller
                 'page_id' => $page->id,
                 'message' => $e->getMessage(),
             ]);
+
             return back()->withErrors(['general' => 'Gagal mengatur ulang urutan section.']);
         }
     }
@@ -350,15 +359,15 @@ class MenuItemController extends Controller
                 MenuItem::query()->delete();
 
                 // Jalankan seeder untuk membuat ulang menu default
-                $seeder = new \Database\Seeders\MenuItemSeeder();
+                $seeder = new \Database\Seeders\MenuItemSeeder;
                 $seeder->run();
             });
 
             return back()->with('success', 'Menu berhasil direset ke pengaturan awal.');
         } catch (Throwable $e) {
             Log::error('Gagal mereset menu', ['message' => $e->getMessage()]);
-            return back()->withErrors(['general' => 'Gagal mereset menu: ' . $e->getMessage()]);
+
+            return back()->withErrors(['general' => 'Gagal mereset menu: '.$e->getMessage()]);
         }
     }
 }
-

@@ -1,38 +1,31 @@
-import AppLayout from "@/layouts/app-layout";
-import { Head, Link, useForm, router } from "@inertiajs/react";
-import { useEffect, useMemo, useState, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import InputError from "@/components/input-error";
-import { DeleteButton } from "@/components/DeleteButton";
-import { PageOptionsPlain } from "@/components/PageOptionsPlain";
-import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronRight, GripVertical, RotateCcw, Plus } from "lucide-react";
+import { DeleteButton } from '@/components/DeleteButton';
+import InputError from '@/components/input-error';
+import { PageOptionsPlain } from '@/components/PageOptionsPlain';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AppLayout from '@/layouts/app-layout';
+import { cn } from '@/lib/utils';
 import {
-    DndContext,
     closestCenter,
-    KeyboardSensor,
-    PointerSensor,
-    useSensor,
-    useSensors,
+    DndContext,
     DragEndEvent,
     DragOverlay,
     DragStartEvent,
+    KeyboardSensor,
+    PointerSensor,
     UniqueIdentifier,
-} from "@dnd-kit/core";
-import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    useSortable,
-    verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { ChevronDown, ChevronRight, GripVertical, Plus, RotateCcw } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 type MenuItem = {
     id: number;
@@ -69,20 +62,20 @@ interface Props {
 type TreeNode = MenuItem & { children: TreeNode[] };
 
 const positions = [
-    { key: "main", label: "Menu Utama" },
-    { key: "header", label: "Header" },
-    { key: "footer", label: "Footer" },
+    { key: 'main', label: 'Menu Utama' },
+    { key: 'header', label: 'Header' },
+    { key: 'footer', label: 'Footer' },
 ];
 
 const internalOptions = [
-    { value: "/", label: "Beranda" },
-    { value: "/about", label: "Tentang Kami" },
-    { value: "/service", label: "Layanan" },
-    { value: "/product", label: "Produk" },
-    { value: "/project", label: "Proyek" },
-    { value: "/career", label: "Karier" },
-    { value: "/blog", label: "Blog" },
-    { value: "/contact", label: "Kontak" },
+    { value: '/', label: 'Beranda' },
+    { value: '/about', label: 'Tentang Kami' },
+    { value: '/service', label: 'Layanan' },
+    { value: '/product', label: 'Produk' },
+    { value: '/project', label: 'Proyek' },
+    { value: '/career', label: 'Karier' },
+    { value: '/blog', label: 'Blog' },
+    { value: '/contact', label: 'Kontak' },
 ];
 
 // Dynamic categories now come from props
@@ -115,10 +108,7 @@ function buildTree(items: MenuItem[]): TreeNode[] {
 }
 
 function flattenOptions(nodes: TreeNode[], depth = 0): { id: number; label: string }[] {
-    return nodes.flatMap((node) => [
-        { id: node.id, label: `${"— ".repeat(depth)}${node.title}` },
-        ...flattenOptions(node.children, depth + 1),
-    ]);
+    return nodes.flatMap((node) => [{ id: node.id, label: `${'— '.repeat(depth)}${node.title}` }, ...flattenOptions(node.children, depth + 1)]);
 }
 
 // Flatten tree to array for drag and drop
@@ -137,32 +127,18 @@ function flattenTree(nodes: TreeNode[]): MenuItem[] {
 }
 
 // Accordion Item Component for Jenis Menu
-function AccordionItem({
-    title,
-    isOpen,
-    onClick,
-    children,
-}: {
-    title: string;
-    isOpen: boolean;
-    onClick: () => void;
-    children: React.ReactNode;
-}) {
+function AccordionItem({ title, isOpen, onClick, children }: { title: string; isOpen: boolean; onClick: () => void; children: React.ReactNode }) {
     return (
-        <div className="border border-gray-200 rounded-md bg-white">
+        <div className="rounded-md border border-gray-200 bg-white">
             <button
                 type="button"
                 onClick={onClick}
                 className="flex w-full items-center justify-between px-3 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
                 {title}
-                {isOpen ? (
-                    <ChevronDown className="h-4 w-4 text-gray-500" />
-                ) : (
-                    <ChevronRight className="h-4 w-4 text-gray-500" />
-                )}
+                {isOpen ? <ChevronDown className="h-4 w-4 text-gray-500" /> : <ChevronRight className="h-4 w-4 text-gray-500" />}
             </button>
-            {isOpen && <div className="border-t border-gray-200 px-3 py-3 bg-gray-50">{children}</div>}
+            {isOpen && <div className="border-t border-gray-200 bg-gray-50 px-3 py-3">{children}</div>}
         </div>
     );
 }
@@ -185,14 +161,7 @@ function SortableMenuItem({
     // Only enable drag for top-level items (depth === 0)
     const isDraggable = depth === 0;
 
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-        isDragging,
-    } = useSortable({ id: node.id, disabled: !isDraggable });
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: node.id, disabled: !isDraggable });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -208,11 +177,7 @@ function SortableMenuItem({
         <div
             ref={setNodeRef}
             style={style}
-            className={cn(
-                "rounded-lg border border-gray-200 bg-white p-3 shadow-sm",
-                depth > 0 ? "ml-6" : "",
-                isDragging && "ring-2 ring-cyan-500"
-            )}
+            className={cn('rounded-lg border border-gray-200 bg-white p-3 shadow-sm', depth > 0 ? 'ml-6' : '', isDragging && 'ring-2 ring-cyan-500')}
         >
             <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-1 items-start gap-2">
@@ -243,27 +208,19 @@ function SortableMenuItem({
                         <span className="mt-1 h-4 w-4" />
                     )}
                     <div className="flex flex-col">
-                        <span className={cn("text-sm font-medium", !node.is_active ? "line-through text-gray-400" : "text-gray-800")}>
+                        <span className={cn('text-sm font-medium', !node.is_active ? 'text-gray-400 line-through' : 'text-gray-800')}>
                             {node.title}
                         </span>
                         <span className="text-xs text-gray-500">
                             {node.type.toUpperCase()}
-                            {node.type === "page" && node.page?.full_path
-                                ? ` · /${node.page.full_path}`
-                                : node.target ? ` · ${node.target}` : ""}
+                            {node.type === 'page' && node.page?.full_path ? ` · /${node.page.full_path}` : node.target ? ` · ${node.target}` : ''}
                         </span>
                     </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-2 justify-end">
-                    {node.type === "page" && (node.page_id ?? node.page?.id) && (
-                        <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="h-8 px-3 text-xs"
-                            asChild
-                        >
-                            <Link href={route("admin.pages.edit", node.page_id ?? node.page?.id ?? 0)}>Edit Halaman</Link>
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                    {node.type === 'page' && (node.page_id ?? node.page?.id) && (
+                        <Button type="button" variant="outline" size="sm" className="h-8 px-3 text-xs" asChild>
+                            <Link href={route('admin.pages.edit', node.page_id ?? node.page?.id ?? 0)}>Edit Halaman</Link>
                         </Button>
                     )}
                     <label className="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-2 py-1 text-xs text-gray-600">
@@ -274,12 +231,12 @@ function SortableMenuItem({
                                 const checked = e.target.checked;
                                 setIsActive(checked);
                                 router.patch(
-                                    route("admin.menus.status", node.id),
+                                    route('admin.menus.status', node.id),
                                     { is_active: checked },
                                     {
                                         preserveScroll: true,
                                         onError: () => setIsActive(!checked),
-                                    }
+                                    },
                                 );
                             }}
                             className="h-4 w-4"
@@ -287,7 +244,7 @@ function SortableMenuItem({
                         Aktif
                     </label>
                     <DeleteButton
-                        url={route("admin.menus.destroy", node.id)}
+                        url={route('admin.menus.destroy', node.id)}
                         confirmMessage={`Hapus menu "${node.title}"?`}
                         size="sm"
                         className="px-3 py-1 text-xs font-semibold"
@@ -299,10 +256,7 @@ function SortableMenuItem({
             {expanded && node.children.length > 0 && (
                 <div className="mt-3 space-y-2 border-l-2 border-gray-200 pl-3">
                     {node.children.map((child) => (
-                        <ChildMenuItem
-                            key={child.id}
-                            node={child}
-                        />
+                        <ChildMenuItem key={child.id} node={child} />
                     ))}
                 </div>
             )}
@@ -320,18 +274,16 @@ function ChildMenuItem({ node }: { node: TreeNode }) {
                 <div className="flex flex-1 items-start gap-2">
                     <span className="mt-1 h-4 w-4" />
                     <div className="flex flex-col">
-                        <span className={cn("text-sm font-medium", !node.is_active ? "line-through text-gray-400" : "text-gray-800")}>
+                        <span className={cn('text-sm font-medium', !node.is_active ? 'text-gray-400 line-through' : 'text-gray-800')}>
                             {node.title}
                         </span>
                         <span className="text-xs text-gray-500">
                             {node.type.toUpperCase()}
-                            {node.type === "page" && node.page?.full_path
-                                ? ` · /${node.page.full_path}`
-                                : node.target ? ` · ${node.target}` : ""}
+                            {node.type === 'page' && node.page?.full_path ? ` · /${node.page.full_path}` : node.target ? ` · ${node.target}` : ''}
                         </span>
                     </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-2 justify-end">
+                <div className="flex flex-wrap items-center justify-end gap-2">
                     <label className="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-2 py-1 text-xs text-gray-600">
                         <input
                             type="checkbox"
@@ -340,12 +292,12 @@ function ChildMenuItem({ node }: { node: TreeNode }) {
                                 const checked = e.target.checked;
                                 setIsActive(checked);
                                 router.patch(
-                                    route("admin.menus.status", node.id),
+                                    route('admin.menus.status', node.id),
                                     { is_active: checked },
                                     {
                                         preserveScroll: true,
                                         onError: () => setIsActive(!checked),
-                                    }
+                                    },
                                 );
                             }}
                             className="h-4 w-4"
@@ -353,7 +305,7 @@ function ChildMenuItem({ node }: { node: TreeNode }) {
                         Aktif
                     </label>
                     <DeleteButton
-                        url={route("admin.menus.destroy", node.id)}
+                        url={route('admin.menus.destroy', node.id)}
                         confirmMessage={`Hapus menu "${node.title}"?`}
                         size="sm"
                         className="px-3 py-1 text-xs font-semibold"
@@ -367,7 +319,7 @@ function ChildMenuItem({ node }: { node: TreeNode }) {
 // Drag Overlay Component
 function MenuItemOverlay({ node }: { node: TreeNode }) {
     return (
-        <div className="rounded-lg border-2 border-cyan-500 bg-white p-3 shadow-lg opacity-90">
+        <div className="rounded-lg border-2 border-cyan-500 bg-white p-3 opacity-90 shadow-lg">
             <div className="flex items-center gap-2">
                 <GripVertical className="h-4 w-4 text-gray-400" />
                 <span className="text-sm font-medium text-gray-800">{node.title}</span>
@@ -377,13 +329,7 @@ function MenuItemOverlay({ node }: { node: TreeNode }) {
 }
 
 // Menu Tree Component with Drag and Drop
-function MenuTree({
-    nodes,
-    position,
-}: {
-    nodes: TreeNode[];
-    position: string;
-}) {
+function MenuTree({ nodes, position }: { nodes: TreeNode[]; position: string }) {
     const [expandAll, setExpandAll] = useState(true);
     const [expandSignal, setExpandSignal] = useState(0);
     const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
@@ -407,7 +353,7 @@ function MenuTree({
         }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
-        })
+        }),
     );
 
     const findNodeById = useCallback((id: UniqueIdentifier, items: TreeNode[]): TreeNode | null => {
@@ -443,10 +389,14 @@ function MenuTree({
                 display_order: index,
             }));
 
-            router.post(route("admin.menus.reorder"), { items }, {
-                preserveScroll: true,
-                preserveState: true,
-            });
+            router.post(
+                route('admin.menus.reorder'),
+                { items },
+                {
+                    preserveScroll: true,
+                    preserveState: true,
+                },
+            );
         }
     };
 
@@ -455,97 +405,68 @@ function MenuTree({
     if (localNodes.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="rounded-full bg-gray-100 p-4 mb-4">
+                <div className="mb-4 rounded-full bg-gray-100 p-4">
                     <GripVertical className="h-8 w-8 text-gray-400" />
                 </div>
                 <p className="text-sm text-gray-500">Belum ada menu pada posisi ini.</p>
-                <p className="text-xs text-gray-400 mt-1">Tambahkan menu baru menggunakan form di sebelah kiri.</p>
+                <p className="mt-1 text-xs text-gray-400">Tambahkan menu baru menggunakan form di sebelah kiri.</p>
             </div>
         );
     }
 
     return (
         <div className="space-y-3 p-4">
-            <div className="flex items-center justify-between gap-2 mb-4">
+            <div className="mb-4 flex items-center justify-between gap-2">
                 <p className="text-xs text-gray-500">
-                    <GripVertical className="h-3 w-3 inline mr-1" />
+                    <GripVertical className="mr-1 inline h-3 w-3" />
                     Drag untuk mengatur urutan
                 </p>
                 <div className="flex gap-2">
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleToggleAll(true)}
-                        className="h-8 px-3 text-xs"
-                    >
+                    <Button size="sm" variant="outline" onClick={() => handleToggleAll(true)} className="h-8 px-3 text-xs">
                         Expand Semua
                     </Button>
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleToggleAll(false)}
-                        className="h-8 px-3 text-xs"
-                    >
+                    <Button size="sm" variant="outline" onClick={() => handleToggleAll(false)} className="h-8 px-3 text-xs">
                         Collapse Semua
                     </Button>
                 </div>
             </div>
 
-            <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-            >
-                <SortableContext
-                    items={localNodes.map((n) => n.id)}
-                    strategy={verticalListSortingStrategy}
-                >
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+                <SortableContext items={localNodes.map((n) => n.id)} strategy={verticalListSortingStrategy}>
                     <div className="space-y-2">
                         {localNodes.map((node) => (
-                            <SortableMenuItem
-                                key={node.id}
-                                node={node}
-                                depth={0}
-                                expandAll={expandAll}
-                                expandSignal={expandSignal}
-                            />
+                            <SortableMenuItem key={node.id} node={node} depth={0} expandAll={expandAll} expandSignal={expandSignal} />
                         ))}
                     </div>
                 </SortableContext>
-                <DragOverlay>
-                    {activeNode && <MenuItemOverlay node={activeNode} />}
-                </DragOverlay>
+                <DragOverlay>{activeNode && <MenuItemOverlay node={activeNode} />}</DragOverlay>
             </DndContext>
         </div>
     );
 }
 
 export default function MenuIndex({ menus, pages, categories = [] }: Props) {
-    const [activeTab, setActiveTab] = useState<string>("main");
-    const [openAccordion, setOpenAccordion] = useState<string>("page");
+    const [activeTab, setActiveTab] = useState<string>('main');
+    const [openAccordion, setOpenAccordion] = useState<string>('page');
     const [resetDialogOpen, setResetDialogOpen] = useState(false);
     const [resetting, setResetting] = useState(false);
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
-    const categoryOptions = useMemo(() =>
-        categories.map(cat => ({ value: cat.path, label: `Kategori ${cat.name}` })),
-        [categories]
-    );
+    const categoryOptions = useMemo(() => categories.map((cat) => ({ value: cat.path, label: `Kategori ${cat.name}` })), [categories]);
 
     const positionItems = useMemo(() => menus[activeTab] ?? [], [menus, activeTab]);
     const tree = useMemo(() => buildTree(positionItems), [positionItems]);
     const parentOptions = useMemo(() => flattenOptions(tree), [tree]);
 
     const form = useForm({
-        title: "",
+        title: '',
         position: activeTab,
         parent_id: null as number | null,
-        type: "page",
+        type: 'page',
         page_id: null as number | null,
-        target: "",
-        internal_choice: internalOptions[0]?.value ?? "/",
-        category_choice: categoryOptions[0]?.value ?? "",
+        target: '',
+        internal_choice: internalOptions[0]?.value ?? '/',
+        category_choice: categoryOptions[0]?.value ?? '',
         display_order: 0,
         is_active: true,
     });
@@ -553,38 +474,42 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
     const { data, setData, processing, errors } = form;
 
     const handleAccordionClick = (type: string) => {
-        setOpenAccordion(openAccordion === type ? "" : type);
+        setOpenAccordion(openAccordion === type ? '' : type);
         if (openAccordion !== type) {
-            setData("type", type);
-            setData("page_id", null);
-            setData("target", "");
+            setData('type', type);
+            setData('page_id', null);
+            setData('target', '');
         }
     };
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        form.post(route("admin.menus.store"), {
+        form.post(route('admin.menus.store'), {
             preserveScroll: true,
             onSuccess: () => {
-                form.reset("title", "parent_id", "page_id", "target", "display_order");
+                form.reset('title', 'parent_id', 'page_id', 'target', 'display_order');
                 setCreateDialogOpen(false);
-                router.reload({ only: ["menus"] });
+                router.reload({ only: ['menus'] });
             },
         });
     };
 
     const handleReset = () => {
         setResetting(true);
-        router.post(route("admin.menus.reset"), {}, {
-            preserveScroll: true,
-            onSuccess: () => {
-                setResetDialogOpen(false);
-                setResetting(false);
+        router.post(
+            route('admin.menus.reset'),
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setResetDialogOpen(false);
+                    setResetting(false);
+                },
+                onError: () => {
+                    setResetting(false);
+                },
             },
-            onError: () => {
-                setResetting(false);
-            },
-        });
+        );
     };
 
     return (
@@ -601,7 +526,7 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
                             onClick={() => setCreateDialogOpen(true)}
                             className="bg-cyan-500 text-white hover:bg-cyan-600"
                         >
-                            <Plus className="h-4 w-4 mr-2" />
+                            <Plus className="mr-2 h-4 w-4" />
                             Tambah Menu
                         </Button>
                         <Button
@@ -609,9 +534,9 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
                             variant="outline"
                             size="sm"
                             onClick={() => setResetDialogOpen(true)}
-                            className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                            className="border-orange-300 text-orange-600 hover:bg-orange-50"
                         >
-                            <RotateCcw className="h-4 w-4 mr-2" />
+                            <RotateCcw className="mr-2 h-4 w-4" />
                             Reset Menu
                         </Button>
                     </div>
@@ -622,7 +547,7 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
                     value={activeTab}
                     onValueChange={(val) => {
                         setActiveTab(val);
-                        setData("position", val);
+                        setData('position', val);
                     }}
                 >
                     <TabsList className="mb-6 h-auto gap-0 rounded-none border-b border-gray-200 bg-transparent p-0">
@@ -631,8 +556,8 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
                                 key={pos.key}
                                 value={pos.key}
                                 className={cn(
-                                    "rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-gray-500",
-                                    "data-[state=active]:border-cyan-500 data-[state=active]:bg-transparent data-[state=active]:text-cyan-600 data-[state=active]:shadow-none"
+                                    'rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-gray-500',
+                                    'data-[state=active]:border-cyan-500 data-[state=active]:bg-transparent data-[state=active]:text-cyan-600 data-[state=active]:shadow-none',
                                 )}
                             >
                                 {pos.label}
@@ -644,7 +569,7 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
                         <TabsContent key={pos.key} value={pos.key} className="mt-0">
                             {/* Full Width - Menu Tree with Drag & Drop */}
                             <div className="rounded-md border border-gray-200 bg-white">
-                                <div className="border-b border-gray-200 px-4 py-3 bg-gray-50">
+                                <div className="border-b border-gray-200 bg-gray-50 px-4 py-3">
                                     <h3 className="text-sm font-medium text-gray-700">Struktur Menu</h3>
                                 </div>
                                 <MenuTree nodes={tree} position={activeTab} />
@@ -660,7 +585,7 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
                     <DialogHeader>
                         <DialogTitle>Tambah Menu Baru</DialogTitle>
                         <DialogDescription>
-                            Buat menu baru untuk posisi <strong className="text-cyan-600">{positions.find(p => p.key === activeTab)?.label}</strong>
+                            Buat menu baru untuk posisi <strong className="text-cyan-600">{positions.find((p) => p.key === activeTab)?.label}</strong>
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -669,7 +594,7 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
                             <Label className="text-sm font-medium text-gray-700">Nama Menu</Label>
                             <Input
                                 value={data.title}
-                                onChange={(e) => setData("title", e.target.value)}
+                                onChange={(e) => setData('title', e.target.value)}
                                 placeholder="Contoh: Tentang Kami"
                                 className="border-gray-300 focus:border-cyan-500 focus:ring-cyan-500"
                             />
@@ -680,8 +605,8 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
                         <div className="space-y-2">
                             <Label className="text-sm font-medium text-gray-700">Parent (opsional)</Label>
                             <Select
-                                value={data.parent_id !== null ? String(data.parent_id) : "none"}
-                                onValueChange={(val) => setData("parent_id", val === "none" ? null : Number(val))}
+                                value={data.parent_id !== null ? String(data.parent_id) : 'none'}
+                                onValueChange={(val) => setData('parent_id', val === 'none' ? null : Number(val))}
                             >
                                 <SelectTrigger className="border-gray-300">
                                     <SelectValue placeholder="Pilih parent" />
@@ -703,15 +628,11 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
                             <Label className="text-sm font-medium text-gray-700">Jenis Menu</Label>
                             <div className="space-y-2">
                                 {/* Halaman */}
-                                <AccordionItem
-                                    title="Halaman"
-                                    isOpen={openAccordion === "page"}
-                                    onClick={() => handleAccordionClick("page")}
-                                >
+                                <AccordionItem title="Halaman" isOpen={openAccordion === 'page'} onClick={() => handleAccordionClick('page')}>
                                     <div className="px-1">
                                         <Select
-                                            value={data.page_id !== null ? String(data.page_id) : "none"}
-                                            onValueChange={(val) => setData("page_id", val === "none" ? null : Number(val))}
+                                            value={data.page_id !== null ? String(data.page_id) : 'none'}
+                                            onValueChange={(val) => setData('page_id', val === 'none' ? null : Number(val))}
                                         >
                                             <SelectTrigger className="border-gray-300">
                                                 <SelectValue placeholder="Pilih halaman" />
@@ -727,15 +648,15 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
                                 {/* Kategori */}
                                 <AccordionItem
                                     title="Kategori"
-                                    isOpen={openAccordion === "category"}
-                                    onClick={() => handleAccordionClick("category")}
+                                    isOpen={openAccordion === 'category'}
+                                    onClick={() => handleAccordionClick('category')}
                                 >
                                     <div className="px-1">
                                         <Select
                                             value={data.category_choice}
                                             onValueChange={(val) => {
-                                                setData("category_choice", val);
-                                                setData("target", val === "/custom" ? "" : val);
+                                                setData('category_choice', val);
+                                                setData('target', val === '/custom' ? '' : val);
                                             }}
                                         >
                                             <SelectTrigger className="border-gray-300">
@@ -750,11 +671,11 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
                                                 <SelectItem value="/custom">Custom...</SelectItem>
                                             </SelectContent>
                                         </Select>
-                                        {data.category_choice === "/custom" && (
+                                        {data.category_choice === '/custom' && (
                                             <Input
                                                 className="mt-2 border-gray-300"
                                                 value={data.target}
-                                                onChange={(e) => setData("target", e.target.value)}
+                                                onChange={(e) => setData('target', e.target.value)}
                                                 placeholder="/blog/kategori/slug-kategori"
                                             />
                                         )}
@@ -765,15 +686,15 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
                                 {/* Link Internal */}
                                 <AccordionItem
                                     title="Link Internal"
-                                    isOpen={openAccordion === "internal"}
-                                    onClick={() => handleAccordionClick("internal")}
+                                    isOpen={openAccordion === 'internal'}
+                                    onClick={() => handleAccordionClick('internal')}
                                 >
                                     <div className="px-1">
                                         <Select
                                             value={data.internal_choice}
                                             onValueChange={(val) => {
-                                                setData("internal_choice", val);
-                                                setData("target", val);
+                                                setData('internal_choice', val);
+                                                setData('target', val);
                                             }}
                                         >
                                             <SelectTrigger className="border-gray-300">
@@ -788,11 +709,11 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
                                                 <SelectItem value="/custom">Custom...</SelectItem>
                                             </SelectContent>
                                         </Select>
-                                        {data.internal_choice === "/custom" && (
+                                        {data.internal_choice === '/custom' && (
                                             <Input
                                                 className="mt-2 border-gray-300"
                                                 value={data.target}
-                                                onChange={(e) => setData("target", e.target.value)}
+                                                onChange={(e) => setData('target', e.target.value)}
                                                 placeholder="/path-kustom"
                                             />
                                         )}
@@ -803,17 +724,32 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
                                 {/* Link External */}
                                 <AccordionItem
                                     title="Link External"
-                                    isOpen={openAccordion === "external"}
-                                    onClick={() => handleAccordionClick("external")}
+                                    isOpen={openAccordion === 'external'}
+                                    onClick={() => handleAccordionClick('external')}
                                 >
                                     <div className="px-1">
                                         <Input
                                             value={data.target}
-                                            onChange={(e) => setData("target", e.target.value)}
+                                            onChange={(e) => setData('target', e.target.value)}
                                             placeholder="https://example.com"
                                             className="border-gray-300"
                                         />
                                         <InputError message={errors.target} />
+                                    </div>
+                                </AccordionItem>
+
+                                {/* Dropdown (Parent Container) */}
+                                <AccordionItem
+                                    title="Dropdown"
+                                    isOpen={openAccordion === 'dropdown'}
+                                    onClick={() => handleAccordionClick('dropdown')}
+                                >
+                                    <div className="px-1">
+                                        <p className="text-xs text-gray-500">
+                                            Menu dropdown berfungsi sebagai container untuk sub-menu.
+                                            <br />
+                                            Setelah dibuat, tambahkan menu lain dengan parent mengarah ke dropdown ini.
+                                        </p>
                                     </div>
                                 </AccordionItem>
                             </div>
@@ -822,20 +758,11 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
                         <InputError message={(errors as typeof errors & { general?: string }).general} />
 
                         <DialogFooter className="gap-2 sm:gap-0">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => setCreateDialogOpen(false)}
-                                disabled={processing}
-                            >
+                            <Button type="button" variant="outline" onClick={() => setCreateDialogOpen(false)} disabled={processing}>
                                 Batal
                             </Button>
-                            <Button
-                                type="submit"
-                                disabled={processing}
-                                className="bg-cyan-500 text-white hover:bg-cyan-600"
-                            >
-                                {processing ? "Menyimpan..." : "Tambahkan Menu"}
+                            <Button type="submit" disabled={processing} className="bg-cyan-500 text-white hover:bg-cyan-600">
+                                {processing ? 'Menyimpan...' : 'Tambahkan Menu'}
                             </Button>
                         </DialogFooter>
                     </form>
@@ -849,26 +776,18 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
                         <DialogTitle>Reset Menu ke Pengaturan Awal?</DialogTitle>
                         <DialogDescription>
                             Tindakan ini akan menghapus semua menu yang sudah dibuat dan mengembalikan menu ke pengaturan awal dari seeder.
-                            <br /><br />
-                            <strong className="text-red-600">Peringatan:</strong> Semua perubahan menu yang sudah Anda buat akan hilang dan tidak dapat dikembalikan.
+                            <br />
+                            <br />
+                            <strong className="text-red-600">Peringatan:</strong> Semua perubahan menu yang sudah Anda buat akan hilang dan tidak
+                            dapat dikembalikan.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="gap-2 sm:gap-0">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setResetDialogOpen(false)}
-                            disabled={resetting}
-                        >
+                        <Button type="button" variant="outline" onClick={() => setResetDialogOpen(false)} disabled={resetting}>
                             Batal
                         </Button>
-                        <Button
-                            type="button"
-                            variant="destructive"
-                            onClick={handleReset}
-                            disabled={resetting}
-                        >
-                            {resetting ? "Mereset..." : "Ya, Reset Menu"}
+                        <Button type="button" variant="destructive" onClick={handleReset} disabled={resetting}>
+                            {resetting ? 'Mereset...' : 'Ya, Reset Menu'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -876,4 +795,3 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
         </AppLayout>
     );
 }
-
