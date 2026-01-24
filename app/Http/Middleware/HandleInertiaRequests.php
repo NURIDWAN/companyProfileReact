@@ -183,7 +183,7 @@ class HandleInertiaRequests extends Middleware
                     'children' => $allChildren,
                 ];
             })
-            ->filter(fn ($item) => $item['href'])
+            ->filter(fn ($item) => $item['href'] || !empty($item['children']))
             ->sortBy('order')
             ->values()
             ->all();

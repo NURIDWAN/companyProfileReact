@@ -101,12 +101,13 @@ export function CompanyNavbar() {
         }));
     }, [navigation]);
 
-    const normalizePath = (href: string) => href.split("#")[0].replace(/\/+$/, "") || "/";
+    const normalizePath = (href: string | null | undefined) => href?.split("#")[0].replace(/\/+$/, "") || "/";
     const currentPath = normalizePath(url);
     const currentHash = typeof window !== "undefined" ? window.location.hash : "";
 
     const activeLinkKey = useMemo(() => {
         return navItems.find((item) => {
+            if (!item.href) return false;
             const href = normalizePath(item.href);
             if (href === "/") {
                 return currentPath === "/";
@@ -124,8 +125,8 @@ export function CompanyNavbar() {
         updateAppearance(appearance === "dark" ? "light" : "dark");
     };
 
-    const handleNavClick = (event: React.MouseEvent, href: string) => {
-        if (typeof window === "undefined") return;
+    const handleNavClick = (event: React.MouseEvent, href: string | null | undefined) => {
+        if (typeof window === "undefined" || !href) return;
         const [path, hash] = href.split("#");
         const targetPath = normalizePath(path || "");
         const currentPagePath = normalizePath(window.location.pathname);
