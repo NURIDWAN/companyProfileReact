@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { Layers, PlusCircle, Settings2 } from 'lucide-react';
 import { FormEventHandler, useMemo, useState } from 'react';
 
@@ -276,6 +276,8 @@ export default function PageForm({ page, parents = [], menuItems }: Props) {
             is_active: section.is_active,
         }));
 
+        // Use router.post directly with the transformed payload
+        // because form.post with custom data option doesn't work properly
         const payload = {
             parent_id: data.parent_id,
             title: data.title,
@@ -292,9 +294,14 @@ export default function PageForm({ page, parents = [], menuItems }: Props) {
             ...(page ? { _method: 'put' } : {}),
         };
 
-        form.post(action, {
-            data: payload,
+        router.post(action, payload, {
             preserveScroll: true,
+            onError: (errors) => {
+                // Set errors to form so they can be displayed
+                Object.entries(errors).forEach(([key, value]) => {
+                    form.setError(key as keyof PageFormData, value as string);
+                });
+            },
         });
     };
 
