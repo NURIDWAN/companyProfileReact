@@ -29,36 +29,62 @@ jobs:
         node-version: '20'
         cache: 'npm'
 
-    - name: Install NPM Dependencies
-      run: npm ci
+    - name: Install NPM & Build Assets
+      run: |
+        npm ci
+        npm run build
 
-    - name: Build Frontend Assets
-      run: npm run build
+    # ========== PREPARE FOLDERS ==========
+    - name: Prepare deployment structure
+      run: |
+        mkdir -p deploy/laravel
+        mkdir -p deploy/public_html
 
-    # ========== UPLOAD via SCP ==========
-    - name: Upload Files to Server
+        # Laravel project files → deploy/laravel/
+        cp -r app deploy/laravel/
+        cp -r bootstrap deploy/laravel/
+        cp -r config deploy/laravel/
+        cp -r database deploy/laravel/
+        cp -r resources deploy/laravel/
+        cp -r routes deploy/laravel/
+        cp -r storage deploy/laravel/
+        cp -r vendor deploy/laravel/
+        cp artisan deploy/laravel/
+        cp composer.json deploy/laravel/
+        cp composer.lock deploy/laravel/
+        cp .env.example deploy/laravel/
+
+        # Public files → deploy/public_html/
+        cp -r public/* deploy/public_html/
+        cp public/.htaccess deploy/public_html/ 2>/dev/null || true
+
+        # Replace index.php with production version (points to ../laravel)
+        cp .deploy/index.php deploy/public_html/index.php
+
+    # ========== UPLOAD LARAVEL PROJECT ==========
+    - name: Upload Laravel Project Files
       uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
         password: ${{ secrets.SSH_PASSWORD }}
         port: ${{ secrets.SSH_PORT }}
+        source: "deploy/laravel/*"
         target: ${{ secrets.REMOTE_TARGET_PATH }}
-        source: >-
-          app/,
-          bootstrap/,
-          config/,
-          database/,
-          public/,
-          resources/,
-          routes/,
-          storage/,
-          vendor/,
-          artisan,
-          composer.json,
-          composer.lock,
-          .htaccess,
-          .env.example
+        strip_components: 2
+        overwrite: true
+
+    # ========== UPLOAD PUBLIC FILES ==========
+    - name: Upload Public Files
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        port: ${{ secrets.SSH_PORT }}
+        source: "deploy/public_html/*"
+        target: ${{ secrets.REMOTE_PUBLIC_PATH }}
+        strip_components: 2
         overwrite: true
 
     # ========== POST-DEPLOY via SSH ==========
