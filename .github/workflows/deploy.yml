@@ -20,7 +20,7 @@ jobs:
         script: |
           cd ${{ secrets.REMOTE_TARGET_PATH }}
           
-          # 1. Setup Node.js (Portable)
+          # 1. Setup Node.js (Portable) - Using .tar.gz to avoid xz dependency
           # Check if node is missing, if so download generic linux-x64 binary
           if ! command -v node &> /dev/null; then
               echo "Node.js not found. Installing portable version..."
@@ -30,9 +30,9 @@ jobs:
               # Download to home dir if not already there
               if [ ! -d "$HOME/node-$NODE_VERSION-$NODE_DIST" ]; then
                   cd $HOME
-                  wget -q https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-$NODE_DIST.tar.xz
-                  tar -xJf node-$NODE_VERSION-$NODE_DIST.tar.xz
-                  rm node-$NODE_VERSION-$NODE_DIST.tar.xz
+                  wget -q https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-$NODE_DIST.tar.gz
+                  tar -xzf node-$NODE_VERSION-$NODE_DIST.tar.gz
+                  rm node-$NODE_VERSION-$NODE_DIST.tar.gz
                   cd ${{ secrets.REMOTE_TARGET_PATH }}
               fi
               
@@ -46,9 +46,18 @@ jobs:
           fi
 
           # 2. Update Code
-          # Ensure current directory is a git repo, if not you might need to 'git init' manually first or clone.
-          # We assume the project is already cloned or initialized.
-          git pull origin main
+          # Check if .git exists, if not initialize or clone
+          if [ ! -d ".git" ]; then
+              echo "Git repository not found. Initializing..."
+              git init
+              git remote add origin https://github.com/alvaerasolution-alt/hondaCiledugCompany.git
+              git fetch origin
+              git checkout -f main
+              git branch --set-upstream-to=origin/main main
+          else
+              echo "Git repository found. Pulling changes..."
+              git pull origin main
+          fi
           
           # 3. Maintenance Mode
           php artisan down || true
