@@ -1,4 +1,4 @@
-name: Deploy (Server-Side Build)
+name: Deploy Production
 
 on:
   push:
@@ -6,78 +6,86 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     environment: production
     steps:
-    - name: Execute Remote SSH Commands
+    - uses: actions/checkout@v4
+
+    # ========== BUILD ==========
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, intl, pdo, pdo_mysql, zip, bcmath
+        coverage: none
+
+    - name: Install Composer Dependencies
+      run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install NPM Dependencies
+      run: npm ci
+
+    - name: Build Frontend Assets
+      run: npm run build
+
+    # ========== UPLOAD via SCP ==========
+    - name: Upload Files to Server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        port: ${{ secrets.SSH_PORT }}
+        target: ${{ secrets.REMOTE_TARGET_PATH }}
+        source: >-
+          app/,
+          bootstrap/,
+          config/,
+          database/,
+          public/,
+          resources/,
+          routes/,
+          storage/,
+          vendor/,
+          artisan,
+          composer.json,
+          composer.lock,
+          .htaccess,
+          .env.example
+        overwrite: true
+
+    # ========== POST-DEPLOY via SSH ==========
+    - name: Run Post-Deploy Commands
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
         password: ${{ secrets.SSH_PASSWORD }}
-        port: ${{ secrets.SSH_PORT || '22' }}
+        port: ${{ secrets.SSH_PORT }}
         script: |
           cd ${{ secrets.REMOTE_TARGET_PATH }}
-          
-          # 1. Setup Node.js (Portable) - Using .tar.gz to avoid xz dependency
-          # Check if node is missing, if so download generic linux-x64 binary
-          if ! command -v node &> /dev/null; then
-              echo "Node.js not found. Installing portable version..."
-              export NODE_VERSION=v20.11.0
-              export NODE_DIST=linux-x64
-              
-              # Download to home dir if not already there
-              if [ ! -d "$HOME/node-$NODE_VERSION-$NODE_DIST" ]; then
-                  cd $HOME
-                  wget -q https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-$NODE_DIST.tar.gz
-                  tar -xzf node-$NODE_VERSION-$NODE_DIST.tar.gz
-                  rm node-$NODE_VERSION-$NODE_DIST.tar.gz
-                  cd ${{ secrets.REMOTE_TARGET_PATH }}
-              fi
-              
-              # Add to PATH for this session
-              export PATH="$HOME/node-$NODE_VERSION-$NODE_DIST/bin:$PATH"
-              
-              echo "Node.js installed: $(node -v)"
-              echo "NPM installed: $(npm -v)"
-          else
-              echo "Node.js found: $(node -v)"
-          fi
 
-          # 2. Update Code
-          # Check if .git exists, if not initialize or clone
-          if [ ! -d ".git" ]; then
-              echo "Git repository not found. Initializing..."
-              git init
-              git remote add origin https://github.com/alvaerasolution-alt/hondaCiledugCompany.git
-              git fetch origin
-              git checkout -f main
-              git branch --set-upstream-to=origin/main main
-          else
-              echo "Git repository found. Pulling changes..."
-              git pull origin main
-          fi
-          
-          # 3. Maintenance Mode
+          # Maintenance mode
           php artisan down || true
 
-          # 4. Install/Update Dependencies
-          # PHP
-          export COMPOSER_ALLOW_SUPERUSER=1
-          composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
-          
-          # Node.js
-          npm install
-          npm run build
-
-          # 5. Framework Commands
+          # Optimize
           php artisan optimize:clear
           php artisan config:cache
           php artisan route:cache
           php artisan view:cache
+
+          # Migrate Database
           php artisan migrate --force
-          php artisan storage:link
-          
-          # 5. Bring Back Up
+
+          # Link Storage
+          php artisan storage:link || true
+
+          # Bring Back Up
           php artisan up
