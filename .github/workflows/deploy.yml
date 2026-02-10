@@ -37,28 +37,17 @@ jobs:
     # ========== PREPARE & PACK ==========
     - name: Prepare deployment archives
       run: |
-        # Laravel project archive (everything except public/, node_modules/, .git/)
+        # Laravel project archive
         tar -czf laravel.tar.gz \
-          --exclude='public' \
-          --exclude='node_modules' \
-          --exclude='.git' \
-          --exclude='.github' \
-          --exclude='.deploy' \
-          --exclude='.ddev' \
-          --exclude='tests' \
-          --exclude='*.sql' \
-          --exclude='public/build.zip' \
           app bootstrap config database resources routes storage vendor \
           artisan composer.json composer.lock .env.example
+
+        # Replace index.php with production version before archiving
+        cp .deploy/index.php public/index.php
 
         # Public files archive (contents of public/ folder)
         cd public
         tar -czf ../public_html.tar.gz .
-        cd ..
-
-        # Include production index.php in public archive
-        cd .deploy
-        tar -rzf ../public_html.tar.gz index.php
         cd ..
 
     # ========== UPLOAD ==========
