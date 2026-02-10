@@ -34,61 +34,56 @@ jobs:
         npm ci
         npm run build
 
-    # ========== PREPARE FOLDERS ==========
-    - name: Prepare deployment structure
+    # ========== PREPARE & PACK ==========
+    - name: Prepare deployment archives
       run: |
-        mkdir -p deploy/laravel
-        mkdir -p deploy/public_html
+        # Laravel project archive (everything except public/, node_modules/, .git/)
+        tar -czf laravel.tar.gz \
+          --exclude='public' \
+          --exclude='node_modules' \
+          --exclude='.git' \
+          --exclude='.github' \
+          --exclude='.deploy' \
+          --exclude='.ddev' \
+          --exclude='tests' \
+          --exclude='*.sql' \
+          --exclude='public/build.zip' \
+          app bootstrap config database resources routes storage vendor \
+          artisan composer.json composer.lock .env.example
 
-        # Laravel project files → deploy/laravel/
-        cp -r app deploy/laravel/
-        cp -r bootstrap deploy/laravel/
-        cp -r config deploy/laravel/
-        cp -r database deploy/laravel/
-        cp -r resources deploy/laravel/
-        cp -r routes deploy/laravel/
-        cp -r storage deploy/laravel/
-        cp -r vendor deploy/laravel/
-        cp artisan deploy/laravel/
-        cp composer.json deploy/laravel/
-        cp composer.lock deploy/laravel/
-        cp .env.example deploy/laravel/
+        # Public files archive (contents of public/ folder)
+        cd public
+        tar -czf ../public_html.tar.gz .
+        cd ..
 
-        # Public files → deploy/public_html/
-        cp -r public/* deploy/public_html/
-        cp public/.htaccess deploy/public_html/ 2>/dev/null || true
+        # Include production index.php in public archive
+        cd .deploy
+        tar -rzf ../public_html.tar.gz index.php
+        cd ..
 
-        # Replace index.php with production version (points to ../laravel)
-        cp .deploy/index.php deploy/public_html/index.php
-
-    # ========== UPLOAD LARAVEL PROJECT ==========
-    - name: Upload Laravel Project Files
+    # ========== UPLOAD ==========
+    - name: Upload Laravel archive
       uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
         password: ${{ secrets.SSH_PASSWORD }}
         port: ${{ secrets.SSH_PORT }}
-        source: "deploy/laravel/*"
-        target: ${{ secrets.REMOTE_TARGET_PATH }}
-        strip_components: 2
-        overwrite: true
+        source: "laravel.tar.gz"
+        target: "/tmp"
 
-    # ========== UPLOAD PUBLIC FILES ==========
-    - name: Upload Public Files
+    - name: Upload Public archive
       uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
         password: ${{ secrets.SSH_PASSWORD }}
         port: ${{ secrets.SSH_PORT }}
-        source: "deploy/public_html/*"
-        target: ${{ secrets.REMOTE_PUBLIC_PATH }}
-        strip_components: 2
-        overwrite: true
+        source: "public_html.tar.gz"
+        target: "/tmp"
 
-    # ========== POST-DEPLOY via SSH ==========
-    - name: Run Post-Deploy Commands
+    # ========== EXTRACT & POST-DEPLOY ==========
+    - name: Extract and Run Post-Deploy
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.SSH_HOST }}
@@ -96,7 +91,26 @@ jobs:
         password: ${{ secrets.SSH_PASSWORD }}
         port: ${{ secrets.SSH_PORT }}
         script: |
-          cd ${{ secrets.REMOTE_TARGET_PATH }}
+          # Define paths
+          LARAVEL_PATH="${{ secrets.REMOTE_TARGET_PATH }}"
+          PUBLIC_PATH="${{ secrets.REMOTE_PUBLIC_PATH }}"
+
+          # Create laravel folder if not exists
+          mkdir -p "$LARAVEL_PATH"
+          mkdir -p "$PUBLIC_PATH"
+
+          # Extract Laravel project files into laravel/
+          cd "$LARAVEL_PATH"
+          tar -xzf /tmp/laravel.tar.gz
+          rm /tmp/laravel.tar.gz
+
+          # Extract public files into public_html/
+          cd "$PUBLIC_PATH"
+          tar -xzf /tmp/public_html.tar.gz
+          rm /tmp/public_html.tar.gz
+
+          # Post-deploy commands
+          cd "$LARAVEL_PATH"
 
           # Maintenance mode
           php artisan down || true
@@ -110,8 +124,8 @@ jobs:
           # Migrate Database
           php artisan migrate --force
 
-          # Link Storage
-          php artisan storage:link || true
+          # Storage link (symlink storage/app/public → public_html/storage)
+          ln -sfn "$LARAVEL_PATH/storage/app/public" "$PUBLIC_PATH/storage"
 
           # Bring Back Up
           php artisan up
