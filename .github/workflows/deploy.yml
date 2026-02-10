@@ -1,0 +1,121 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      deploy_method:
+        description: 'Deployment Method'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+        - both
+        - ftp_only
+        - ssh_only
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, intl, pdo, pdo_mysql, zip, bcmath
+        coverage: none
+
+    - name: Install Composer Dependencies
+      run: |
+        composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install NPM Dependencies
+      run: npm ci
+
+    - name: Build Frontend Assets
+      run: npm run build
+
+    - name: Archive Production Artifact
+      run: |
+        tar -czf release.tar.gz ./* .env.example
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-build
+        path: release.tar.gz
+        retention-days: 1
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+    - name: Download Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: release-build
+    
+    - name: Extract Artifact
+      run: tar -xf release.tar.gz
+
+    # FTP Deployment
+    - name: Deploy via FTP
+      if: ${{ (github.event.inputs.deploy_method == 'ftp_only' || github.event.inputs.deploy_method == 'both' || github.event_name == 'push') }}
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        server-dir: /public_html/
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/tests/**
+          **/release.tar.gz
+
+    # SSH Deployment (Remote Commands)
+    - name: Execute Remote SSH Commands
+      if: ${{ (github.event.inputs.deploy_method == 'ssh_only' || github.event.inputs.deploy_method == 'both' || github.event_name == 'push') }}
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.SSH_PORT || '22' }}
+        script: |
+          cd ${{ secrets.REMOTE_TARGET_PATH }}
+          
+          # Maintenance mode
+          php artisan down || true
+
+          # Update .env if needed or copy from example if strictly new
+          # cp .env.example .env
+          
+          # Install/Update Dependencies (if doing full pull, but here we pushed files via FTP mostly, 
+          # so we might just need to verify permissions)
+          
+          # Optimize
+          php artisan optimize:clear
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          
+          # Migrate Database
+          php artisan migrate --force
+
+          # Link Storage
+          php artisan storage:link
+          
+          # Restore
+          php artisan up

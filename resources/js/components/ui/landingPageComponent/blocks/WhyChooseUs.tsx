@@ -30,7 +30,7 @@ export function WhyChooseUs({ content }: { content: WhyChooseUsContent }) {
             <motion.div className="container mx-auto max-w-screen-xl px-4" variants={containerVariants}>
                 <motion.div className="mb-12 text-center" variants={itemVariants}>
                     <h2 className="mb-4 text-3xl font-bold md:text-4xl">{heading}</h2>
-                    <p className="mx-auto max-w-2xl text-lg text-slate-300">{description}</p>
+                    {description && <div className="prose prose-lg mx-auto max-w-2xl prose-invert" dangerouslySetInnerHTML={{ __html: description }} />}
                 </motion.div>
 
                 <motion.div

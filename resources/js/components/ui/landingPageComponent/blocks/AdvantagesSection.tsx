@@ -38,7 +38,7 @@ export function AdvantagesSection({ content }: { content: AdvantagesContent }) {
                         {content.heading ?? 'Keunggulan Kami'}
                     </h2>
                     {content.description && (
-                        <p className="mx-auto max-w-2xl text-gray-600 dark:text-gray-400">{content.description}</p>
+                        <div className="prose prose-slate mx-auto max-w-2xl dark:prose-invert" dangerouslySetInnerHTML={{ __html: content.description }} />
                     )}
                 </motion.div>
 

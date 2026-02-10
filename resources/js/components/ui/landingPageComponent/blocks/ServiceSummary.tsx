@@ -30,12 +30,13 @@ export function ServiceSummary({ content }: { content: ServiceSummaryContent }) 
                 >
                     {content.heading}
                 </motion.h2>
-                <motion.p
-                    className="mx-auto max-w-3xl text-lg text-gray-600 dark:text-gray-400"
-                    variants={itemVariants}
-                >
-                    {content.description}
-                </motion.p>
+                {content.description && (
+                    <motion.div
+                        className="prose prose-lg mx-auto max-w-3xl text-gray-600 dark:text-gray-400 dark:prose-invert"
+                        variants={itemVariants}
+                        dangerouslySetInnerHTML={{ __html: content.description }}
+                    />
+                )}
             </motion.div>
         </motion.section>
     );

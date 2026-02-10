@@ -39,7 +39,7 @@ export function PartnersSection({ content }: PartnersSectionProps) {
                 {(heading || description) && (
                     <div className="mb-10 text-center">
                         {heading && <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50">{heading}</h2>}
-                        {description && <p className="mt-2 text-slate-600 dark:text-slate-400">{description}</p>}
+                        {description && <div className="prose prose-slate mt-2 dark:prose-invert" dangerouslySetInnerHTML={{ __html: description }} />}
                     </div>
                 )}
 

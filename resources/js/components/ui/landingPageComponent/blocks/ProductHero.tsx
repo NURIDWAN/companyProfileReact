@@ -26,9 +26,9 @@ export function ProductHero({ content }: { content: ProductHeroContent }) {
                     <h1 className="mb-6 text-4xl font-bold md:text-5xl lg:text-6xl">
                         {content.heading ?? 'Produk Unggulan Kami'}
                     </h1>
-                    <p className="mb-8 text-lg text-white/90">
-                        {content.description}
-                    </p>
+                    {content.description && (
+                        <div className="prose prose-lg mx-auto mb-8 max-w-2xl prose-invert" dangerouslySetInnerHTML={{ __html: content.description }} />
+                    )}
                     <div className="flex flex-wrap gap-4">
                         {content.primary_label && content.primary_link && (
                             <Button size="lg" className="rounded-full bg-white text-orange-600 hover:bg-white/90" asChild>

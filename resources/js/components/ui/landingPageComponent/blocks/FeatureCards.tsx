@@ -42,7 +42,7 @@ export function FeatureCards({ content }: FeatureCardsProps) {
                 {(heading || description) && (
                     <div className="mb-12 text-center">
                         {heading && <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50">{heading}</h2>}
-                        {description && <p className="mx-auto mt-3 max-w-2xl text-lg text-slate-600 dark:text-slate-400">{description}</p>}
+                        {description && <div className="prose prose-lg prose-slate mx-auto mt-3 max-w-2xl dark:prose-invert" dangerouslySetInnerHTML={{ __html: description }} />}
                     </div>
                 )}
 

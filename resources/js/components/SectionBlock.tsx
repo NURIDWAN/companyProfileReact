@@ -1065,7 +1065,7 @@ function SectionTypeFields({ type, data, onUpdate, section, onSectionUpdate }: S
                     <Label className="text-xs font-medium">Columns</Label>
                     <Input type="number" min={2} max={4} value={data.columns ?? 3} onChange={(e) => onUpdate({ columns: Number(e.target.value) })} />
                 </div>
-                <FeatureCardsField items={data.items ?? []} onUpdate={(items) => onUpdate({ items })} />
+                <ItemsWithIconField items={data.items ?? []} onUpdate={(items) => onUpdate({ items })} itemLabel="Feature Card" />
             </div>
         );
     }
