@@ -19,24 +19,49 @@ jobs:
         script: |
           cd ${{ secrets.REMOTE_TARGET_PATH }}
           
-          # 1. Update Code
+          # 1. Setup Node.js (Portable)
+          # Check if node is missing, if so download generic linux-x64 binary
+          if ! command -v node &> /dev/null; then
+              echo "Node.js not found. Installing portable version..."
+              export NODE_VERSION=v20.11.0
+              export NODE_DIST=linux-x64
+              
+              # Download to home dir if not already there
+              if [ ! -d "$HOME/node-$NODE_VERSION-$NODE_DIST" ]; then
+                  cd $HOME
+                  wget -q https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-$NODE_DIST.tar.xz
+                  tar -xJf node-$NODE_VERSION-$NODE_DIST.tar.xz
+                  rm node-$NODE_VERSION-$NODE_DIST.tar.xz
+                  cd ${{ secrets.REMOTE_TARGET_PATH }}
+              fi
+              
+              # Add to PATH for this session
+              export PATH="$HOME/node-$NODE_VERSION-$NODE_DIST/bin:$PATH"
+              
+              echo "Node.js installed: $(node -v)"
+              echo "NPM installed: $(npm -v)"
+          else
+              echo "Node.js found: $(node -v)"
+          fi
+
+          # 2. Update Code
           # Ensure current directory is a git repo, if not you might need to 'git init' manually first or clone.
           # We assume the project is already cloned or initialized.
           git pull origin main
           
-          # 2. Maintenance Mode
+          # 3. Maintenance Mode
           php artisan down || true
 
-          # 3. Install/Update Dependencies
+          # 4. Install/Update Dependencies
           # PHP
           export COMPOSER_ALLOW_SUPERUSER=1
           composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
           
-          # Node.js (Ensure 'npm' is in path, or use full path if needed)
+          # Node.js
           npm install
           npm run build
 
-          # 4. Framework Commands
+          # 5. Framework Commands
           php artisan optimize:clear
           php artisan config:cache
           php artisan route:cache
