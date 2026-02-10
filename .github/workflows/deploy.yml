@@ -92,7 +92,6 @@ jobs:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
         password: ${{ secrets.SSH_PASSWORD }}
-        key: ${{ secrets.SSH_KEY }}
         port: ${{ secrets.SSH_PORT || '22' }}
         script: |
           cd ${{ secrets.REMOTE_TARGET_PATH }}
