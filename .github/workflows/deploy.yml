@@ -80,13 +80,12 @@ jobs:
         password: ${{ secrets.SSH_PASSWORD }}
         port: ${{ secrets.SSH_PORT }}
         script: |
-          # Define paths
-          LARAVEL_PATH="${{ secrets.REMOTE_TARGET_PATH }}"
-          PUBLIC_PATH="${{ secrets.REMOTE_PUBLIC_PATH }}"
+          # Hardcoded paths (no secrets to avoid newline issues)
+          LARAVEL_PATH="/home/u131862867/domains/honda-ciledug.com/laravel"
+          PUBLIC_PATH="/home/u131862867/domains/honda-ciledug.com/public_html"
 
           # Create laravel folder if not exists
           mkdir -p "$LARAVEL_PATH"
-          mkdir -p "$PUBLIC_PATH"
 
           # Extract Laravel project files into laravel/
           cd "$LARAVEL_PATH"
