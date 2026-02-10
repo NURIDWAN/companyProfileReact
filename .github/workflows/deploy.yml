@@ -36,7 +36,14 @@ jobs:
               git pull origin main
           fi
 
-          # 2. Maintenance mode
+          # 2. Setup .env (only on first deploy)
+          if [ ! -f ".env" ]; then
+              echo "=== Creating .env from production template ==="
+              cp .deploy/.env.production .env
+              echo "WARNING: Please edit .env with your database credentials!"
+          fi
+
+          # 3. Maintenance mode
           php artisan down || true
 
           # 3. Composer install
