@@ -1,8 +1,8 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Support\Facades\Notification;
 use App\Notifications\ContactMessageReceived;
+use Illuminate\Support\Facades\Notification;
 
 it('stores contact messages from landing page', function () {
     Notification::fake();

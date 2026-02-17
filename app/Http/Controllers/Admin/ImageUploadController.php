@@ -23,7 +23,7 @@ class ImageUploadController extends Controller
             $file = $request->file('image');
 
             // Generate unique filename
-            $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+            $filename = time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
 
             // Store in storage/app/public/images/sections/
             $path = $file->storeAs('images/sections', $filename, 'public');
@@ -40,7 +40,7 @@ class ImageUploadController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to upload image: ' . $e->getMessage(),
+                'message' => 'Failed to upload image: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -76,7 +76,7 @@ class ImageUploadController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete image: ' . $e->getMessage(),
+                'message' => 'Failed to delete image: '.$e->getMessage(),
             ], 500);
         }
     }

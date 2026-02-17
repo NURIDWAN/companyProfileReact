@@ -1,8 +1,8 @@
-import AppLayout from "@/layouts/app-layout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Head, Link } from "@inertiajs/react";
-import { DeleteButton } from "@/components/DeleteButton";
+import { DeleteButton } from '@/components/DeleteButton';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
+import { Head, Link } from '@inertiajs/react';
 
 type TeamMember = {
     id: number;
@@ -30,7 +30,7 @@ export default function TeamMemberIndex({ members }: Props) {
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-semibold">Tim Manajemen</h1>
                     <Button asChild>
-                        <Link href={route("admin.team-members.create")}>Tambah Anggota</Link>
+                        <Link href={route('admin.team-members.create')}>Tambah Anggota</Link>
                     </Button>
                 </div>
 
@@ -55,25 +55,25 @@ export default function TeamMemberIndex({ members }: Props) {
                                         <tr key={member.id}>
                                             <td className="px-4 py-2">{member.name}</td>
                                             <td className="px-4 py-2 text-muted-foreground">{member.role}</td>
-                                            <td className="px-4 py-2 text-muted-foreground">{member.email ?? "-"}</td>
+                                            <td className="px-4 py-2 text-muted-foreground">{member.email ?? '-'}</td>
                                             <td className="px-4 py-2">
                                                 <span
                                                     className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                                                         member.is_active
-                                                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                                                            : "bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400"
+                                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+                                                            : 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400'
                                                     }`}
                                                 >
-                                                    {member.is_active ? "Aktif" : "Nonaktif"}
+                                                    {member.is_active ? 'Aktif' : 'Nonaktif'}
                                                 </span>
                                             </td>
                                             <td className="px-4 py-2">
                                                 <div className="flex justify-end gap-2">
                                                     <Button asChild variant="outline" size="sm">
-                                                        <Link href={route("admin.team-members.edit", member.id)}>Edit</Link>
+                                                        <Link href={route('admin.team-members.edit', member.id)}>Edit</Link>
                                                     </Button>
                                                     <DeleteButton
-                                                        url={route("admin.team-members.destroy", member.id)}
+                                                        url={route('admin.team-members.destroy', member.id)}
                                                         confirmMessage={`Hapus anggota "${member.name}"?`}
                                                     />
                                                 </div>
@@ -85,14 +85,8 @@ export default function TeamMemberIndex({ members }: Props) {
                         </div>
                         <div className="flex flex-wrap gap-2">
                             {members.links.map((link) => (
-                                <Button
-                                    key={link.label}
-                                    variant={link.active ? "default" : "outline"}
-                                    disabled={!link.url}
-                                    size="sm"
-                                    asChild
-                                >
-                                    <Link href={link.url ?? "#"} dangerouslySetInnerHTML={{ __html: link.label }} />
+                                <Button key={link.label} variant={link.active ? 'default' : 'outline'} disabled={!link.url} size="sm" asChild>
+                                    <Link href={link.url ?? '#'} dangerouslySetInnerHTML={{ __html: link.label }} />
                                 </Button>
                             ))}
                         </div>

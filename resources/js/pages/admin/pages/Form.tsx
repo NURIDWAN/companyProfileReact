@@ -1,5 +1,6 @@
 import InputError from '@/components/input-error';
 import { SectionBlock, SectionFormData } from '@/components/SectionBlock';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -7,8 +8,22 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
+import { cn } from '@/lib/utils';
+import {
+    DndContext,
+    DragEndEvent,
+    DragOverlay,
+    DragStartEvent,
+    KeyboardSensor,
+    PointerSensor,
+    closestCenter,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core';
+import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { Layers, PlusCircle, Settings2 } from 'lucide-react';
+import { AlertCircle, Layers, PlusCircle, Settings2 } from 'lucide-react';
 import { FormEventHandler, useMemo, useState } from 'react';
 
 type PagePayload = {
@@ -48,7 +63,7 @@ type SectionPayload = {
     display_order?: number;
     is_active?: boolean;
     type?: string | null;
-    data?: Record<string, any>;
+    data?: Record<string, unknown>;
 };
 
 interface Props {
@@ -169,6 +184,51 @@ const sectionTypeGroups: Record<string, { label: string; items: Array<{ value: s
 // Flatten for backward compatibility with SectionBlock
 const sectionTypes = Object.values(sectionTypeGroups).flatMap((group) => group.items);
 
+// Helper to generate unique ID for sections (for drag and drop)
+function getSectionUniqueId(section: SectionFormData, index: number): string {
+    if (section.id) return `section-${section.id}`;
+    return `new-section-${index}`;
+}
+
+// Sortable Section Item wrapper for drag and drop
+function SortableSectionItem({
+    section,
+    index,
+    totalSections,
+    onUpdate,
+    onDelete,
+}: {
+    section: SectionFormData;
+    index: number;
+    totalSections: number;
+    onUpdate: (section: SectionFormData) => void;
+    onDelete: () => void;
+}) {
+    const uniqueId = getSectionUniqueId(section, index);
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: uniqueId });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
+
+    return (
+        <div ref={setNodeRef} style={style} data-section-id={uniqueId} className={cn(isDragging && 'z-50')}>
+            <SectionBlock
+                section={section}
+                index={index}
+                totalSections={totalSections}
+                sectionTypes={sectionTypes}
+                sectionTypeGroups={sectionTypeGroups}
+                onUpdate={onUpdate}
+                onDelete={onDelete}
+                dragHandleProps={{ ...attributes, ...listeners }}
+                isDragging={isDragging}
+            />
+        </div>
+    );
+}
+
 export default function PageForm({ page, parents = [], menuItems }: Props) {
     const title = page ? 'Edit Halaman' : 'Tambah Halaman';
     const isEditing = !!page;
@@ -223,7 +283,7 @@ export default function PageForm({ page, parents = [], menuItems }: Props) {
     const serializeContent = (section: SectionPayload) => {
         if (section.type && section.type !== 'plain') {
             const cleaned = { ...(section.data ?? {}) };
-            delete (cleaned as any).__type;
+            delete (cleaned as Record<string, unknown>).__type;
             return JSON.stringify({ __type: section.type, ...cleaned });
         }
         return section.content ?? '';
@@ -256,53 +316,149 @@ export default function PageForm({ page, parents = [], menuItems }: Props) {
     });
 
     const [slugEdited, setSlugEdited] = useState(!!page?.slug);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const { data, processing, errors } = form;
-    const setData = form.setData as (key: keyof PageFormData, value: any) => void;
+    // isSubmitting is used for async form submission tracking
+    void isSubmitting; // ESLint: acknowledge the value is used
+    const setData = form.setData as <K extends keyof PageFormData>(key: K, value: PageFormData[K]) => void;
 
     const action = useMemo(() => {
         return page ? route('admin.pages.update', page.id) : route('admin.pages.store');
     }, [page]);
 
-    const onSubmit: FormEventHandler<HTMLFormElement> = (event) => {
-        event.preventDefault();
+    // Helper to check if a value is a File object
+    const isFile = (value: unknown): value is File => value instanceof File;
 
-        // Transform sections to serialize their content properly
-        const transformedSections = (data.sections ?? []).map((section) => ({
-            id: section.id,
-            title: section.title,
-            slug: section.slug,
-            content: serializeContent(section),
-            display_order: section.display_order,
-            is_active: section.is_active,
-        }));
+    // Helper to extract File objects from section data and replace with placeholders
+    const extractFilesFromSectionData = (sectionData: Record<string, unknown>, sectionIdx: number, formData: FormData): Record<string, unknown> => {
+        const processedData: Record<string, unknown> = {};
 
-        // Use router.post directly with the transformed payload
-        // because form.post with custom data option doesn't work properly
-        const payload = {
-            parent_id: data.parent_id,
-            title: data.title,
-            slug: data.slug,
-            meta_title: data.meta_title,
-            meta_description: data.meta_description,
-            meta_keywords: data.meta_keywords,
-            is_published: data.is_published,
-            display_order: data.display_order,
-            sections: transformedSections,
-            add_to_menu: data.add_to_menu,
-            menu_position: data.menu_position,
-            menu_parent_id: data.menu_parent_id,
-            ...(page ? { _method: 'put' } : {}),
-        };
-
-        router.post(action, payload, {
-            preserveScroll: true,
-            onError: (errors) => {
-                // Set errors to form so they can be displayed
-                Object.entries(errors).forEach(([key, value]) => {
-                    form.setError(key as keyof PageFormData, value as string);
+        for (const [key, value] of Object.entries(sectionData)) {
+            if (isFile(value)) {
+                // Add file to FormData with unique field name
+                const fieldName = `section_files[${sectionIdx}][${key}]`;
+                formData.append(fieldName, value);
+                // Replace with placeholder that backend will process
+                processedData[key] = `__PENDING_FILE__:${fieldName}`;
+            } else if (Array.isArray(value)) {
+                // Handle arrays (e.g., items, images, etc.)
+                processedData[key] = value.map((item, itemIdx) => {
+                    if (isFile(item)) {
+                        const fieldName = `section_files[${sectionIdx}][${key}][${itemIdx}]`;
+                        formData.append(fieldName, item);
+                        return `__PENDING_FILE__:${fieldName}`;
+                    } else if (typeof item === 'object' && item !== null) {
+                        // Handle objects within arrays (e.g., items with image property)
+                        const processedItem: Record<string, unknown> = {};
+                        for (const [itemKey, itemValue] of Object.entries(item as Record<string, unknown>)) {
+                            if (isFile(itemValue)) {
+                                const fieldName = `section_files[${sectionIdx}][${key}][${itemIdx}][${itemKey}]`;
+                                formData.append(fieldName, itemValue as File);
+                                processedItem[itemKey] = `__PENDING_FILE__:${fieldName}`;
+                            } else {
+                                processedItem[itemKey] = itemValue;
+                            }
+                        }
+                        return processedItem;
+                    }
+                    return item;
                 });
-            },
-        });
+            } else {
+                processedData[key] = value;
+            }
+        }
+
+        return processedData;
+    };
+
+    const onSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
+        event.preventDefault();
+        setIsSubmitting(true);
+
+        try {
+            const formData = new FormData();
+
+            // Process sections and extract files
+            const transformedSections = (data.sections ?? []).map((section, sectionIdx) => {
+                const processedData = extractFilesFromSectionData(section.data ?? {}, sectionIdx, formData);
+
+                return {
+                    id: section.id,
+                    title: section.title,
+                    slug: section.slug,
+                    content: serializeContent({ ...section, data: processedData }),
+                    display_order: section.display_order,
+                    is_active: section.is_active,
+                };
+            });
+
+            // Append all form data as JSON
+            formData.append('parent_id', data.parent_id?.toString() ?? '');
+            formData.append('title', data.title);
+            formData.append('slug', data.slug);
+            formData.append('meta_title', data.meta_title);
+            formData.append('meta_description', data.meta_description);
+            formData.append('meta_keywords', data.meta_keywords);
+            formData.append('is_published', data.is_published ? '1' : '0');
+            formData.append('display_order', data.display_order.toString());
+            formData.append('sections', JSON.stringify(transformedSections));
+            formData.append('add_to_menu', data.add_to_menu ? '1' : '0');
+            formData.append('menu_position', data.menu_position);
+            formData.append('menu_parent_id', data.menu_parent_id?.toString() ?? '');
+
+            if (page) {
+                formData.append('_method', 'PUT');
+            }
+
+            // Get CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+            const response = await fetch(action, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    Accept: 'text/html, application/xhtml+xml',
+                },
+            });
+
+            // Handle redirect (success case from Laravel)
+            if (response.redirected) {
+                router.visit(response.url);
+                return;
+            }
+
+            // Handle successful response - Laravel returns redirect, so we go to index
+            if (response.ok) {
+                router.visit(route('admin.pages.index'));
+                return;
+            }
+
+            // Handle validation errors (422)
+            if (response.status === 422) {
+                const contentType = response.headers.get('Content-Type');
+                if (contentType?.includes('application/json')) {
+                    const result = await response.json();
+                    if (result.errors) {
+                        Object.entries(result.errors).forEach(([key, value]) => {
+                            form.setError(key as keyof PageFormData, Array.isArray(value) ? value[0] : (value as string));
+                        });
+                    } else if (result.message) {
+                        form.setError('title' as keyof PageFormData, result.message);
+                    }
+                }
+                return;
+            }
+
+            // Other error responses
+            form.setError('title' as keyof PageFormData, 'Gagal menyimpan halaman. Silakan coba lagi.');
+        } catch (error) {
+            console.error('Submit error:', error);
+            form.setError('title' as keyof PageFormData, 'Terjadi kesalahan saat menyimpan. Silakan coba lagi.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleTitleChange = (value: string) => {
@@ -313,6 +469,8 @@ export default function PageForm({ page, parents = [], menuItems }: Props) {
     };
 
     const addSection = () => {
+        const newIndex = data.sections?.length ?? 0;
+
         setData('sections', [
             ...(data.sections ?? []),
             {
@@ -320,12 +478,19 @@ export default function PageForm({ page, parents = [], menuItems }: Props) {
                 title: '',
                 slug: '',
                 content: '',
-                display_order: data.sections?.length ?? 0,
+                display_order: newIndex,
                 is_active: true,
                 type: 'plain',
                 data: {},
             },
         ]);
+
+        // Smooth scroll to new section after state update
+        setTimeout(() => {
+            const newSectionId = `new-section-${newIndex}`;
+            const element = document.querySelector(`[data-section-id="${newSectionId}"]`);
+            element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
     };
 
     const updateSection = (index: number, section: SectionFormData) => {
@@ -341,7 +506,8 @@ export default function PageForm({ page, parents = [], menuItems }: Props) {
         setData('sections', normalized);
     };
 
-    const moveSection = (index: number, direction: 'up' | 'down') => {
+    // moveSection reserved for future button-based reorder UI
+    const _moveSection = (index: number, direction: 'up' | 'down') => {
         const updated = [...(data.sections ?? [])];
         const targetIndex = direction === 'up' ? index - 1 : index + 1;
         if (targetIndex < 0 || targetIndex >= updated.length) return;
@@ -349,6 +515,45 @@ export default function PageForm({ page, parents = [], menuItems }: Props) {
         const normalized = updated.map((s, idx) => ({ ...s, display_order: idx }));
         setData('sections', normalized);
     };
+
+    // Drag and drop setup
+    const [activeId, setActiveId] = useState<string | null>(null);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        }),
+    );
+
+    const sectionIds = useMemo(() => (data.sections ?? []).map((section, index) => getSectionUniqueId(section, index)), [data.sections]);
+
+    const handleDragStart = (event: DragStartEvent) => {
+        setActiveId(String(event.active.id));
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        setActiveId(null);
+
+        if (!over || active.id === over.id) return;
+
+        const oldIndex = sectionIds.findIndex((id) => id === String(active.id));
+        const newIndex = sectionIds.findIndex((id) => id === String(over.id));
+
+        if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+            const reordered = arrayMove(data.sections ?? [], oldIndex, newIndex);
+            const normalized = reordered.map((s, idx) => ({ ...s, display_order: idx }));
+            setData('sections', normalized);
+        }
+    };
+
+    const activeSectionIndex = activeId ? sectionIds.findIndex((id) => id === activeId) : -1;
+    const activeSection = activeSectionIndex !== -1 ? data.sections[activeSectionIndex] : null;
 
     return (
         <AppLayout>
@@ -361,6 +566,14 @@ export default function PageForm({ page, parents = [], menuItems }: Props) {
                 </div>
 
                 <form onSubmit={onSubmit}>
+                    {/* General Error Alert */}
+                    {(errors as Record<string, string>).general && (
+                        <Alert variant="destructive" className="mb-6">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription>{(errors as Record<string, string>).general}</AlertDescription>
+                        </Alert>
+                    )}
+
                     <div className="grid gap-6 lg:grid-cols-3">
                         {/* Main Content */}
                         <div className="space-y-6 lg:col-span-2">
@@ -436,22 +649,43 @@ export default function PageForm({ page, parents = [], menuItems }: Props) {
                                             </Button>
                                         </div>
                                     ) : (
-                                        <div className="space-y-4">
-                                            {data.sections.map((section, index) => (
-                                                <SectionBlock
-                                                    key={section.id ?? index}
-                                                    section={section}
-                                                    index={index}
-                                                    totalSections={data.sections.length}
-                                                    sectionTypes={sectionTypes}
-                                                    sectionTypeGroups={sectionTypeGroups}
-                                                    onUpdate={(updated) => updateSection(index, updated)}
-                                                    onDelete={() => deleteSection(index)}
-                                                    onMoveUp={() => moveSection(index, 'up')}
-                                                    onMoveDown={() => moveSection(index, 'down')}
-                                                />
-                                            ))}
-                                        </div>
+                                        <DndContext
+                                            sensors={sensors}
+                                            collisionDetection={closestCenter}
+                                            onDragStart={handleDragStart}
+                                            onDragEnd={handleDragEnd}
+                                        >
+                                            <SortableContext items={sectionIds} strategy={verticalListSortingStrategy}>
+                                                <div className="space-y-4">
+                                                    {data.sections.map((section, index) => (
+                                                        <SortableSectionItem
+                                                            key={getSectionUniqueId(section, index)}
+                                                            section={section}
+                                                            index={index}
+                                                            totalSections={data.sections.length}
+                                                            onUpdate={(updated) => updateSection(index, updated)}
+                                                            onDelete={() => deleteSection(index)}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </SortableContext>
+                                            <DragOverlay>
+                                                {activeSection ? (
+                                                    <div className="opacity-80">
+                                                        <SectionBlock
+                                                            section={activeSection}
+                                                            index={activeSectionIndex}
+                                                            totalSections={data.sections.length}
+                                                            sectionTypes={sectionTypes}
+                                                            sectionTypeGroups={sectionTypeGroups}
+                                                            onUpdate={() => {}}
+                                                            onDelete={() => {}}
+                                                            isDragging
+                                                        />
+                                                    </div>
+                                                ) : null}
+                                            </DragOverlay>
+                                        </DndContext>
                                     )}
                                 </CardContent>
                             </Card>

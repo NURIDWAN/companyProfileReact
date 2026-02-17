@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import type { LucideIcon } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 
 export type FeatureCardsContent = {
@@ -49,7 +50,7 @@ export function FeatureCards({ content }: FeatureCardsProps) {
                 <div className={cn('grid gap-6', gridCols)}>
                     {items.map((item, idx) => {
                         const IconComponent = item.icon
-                            ? (LucideIcons as Record<string, any>)[item.icon] ?? LucideIcons.Zap
+                            ? (LucideIcons as unknown as Record<string, LucideIcon>)[item.icon] ?? LucideIcons.Zap
                             : LucideIcons.Zap;
 
                         const CardContent = (

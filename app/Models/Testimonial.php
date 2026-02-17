@@ -5,8 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Testimonial extends Model
 {
@@ -18,7 +18,7 @@ class Testimonial extends Model
             ->logOnly(['author_name', 'company', 'is_active'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => "Testimonial from '{$this->author_name}' {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName) => "Testimonial from '{$this->author_name}' {$eventName}");
     }
 
     protected $fillable = [
@@ -45,7 +45,7 @@ class Testimonial extends Model
 
     protected function resolveImageUrl(?string $path): ?string
     {
-        if (!$path) {
+        if (! $path) {
             return null;
         }
 

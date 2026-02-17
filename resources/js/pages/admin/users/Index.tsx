@@ -1,14 +1,14 @@
-import { useState } from 'react';
 import { Head, useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 
-import AppLayout from '@/layouts/app-layout';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import InputError from '@/components/input-error';
+import AppLayout from '@/layouts/app-layout';
 import type { PageProps } from '@inertiajs/core';
 
 type Role = {
@@ -57,9 +57,9 @@ export default function UsersIndex({ users, roles }: Props) {
     const toggleRole = (form: typeof createForm | typeof editForm, roleId: number) => {
         const current = form.data.roles;
         if (current.includes(roleId)) {
-            form.setData('roles', current.filter((id) => id !== roleId));
+            form.setData({ ...form.data, roles: current.filter((id) => id !== roleId) });
         } else {
-            form.setData('roles', [...current, roleId]);
+            form.setData({ ...form.data, roles: [...current, roleId] });
         }
     };
 
@@ -161,13 +161,10 @@ export default function UsersIndex({ users, roles }: Props) {
                                             const checked = createForm.data.roles.includes(role.id);
                                             return (
                                                 <label key={role.id} className="flex items-center gap-3 text-sm">
-                                                    <Checkbox
-                                                        checked={checked}
-                                                        onCheckedChange={() => toggleRole(createForm, role.id)}
-                                                    />
+                                                    <Checkbox checked={checked} onCheckedChange={() => toggleRole(createForm, role.id)} />
                                                     <span>
                                                         <span className="font-medium">{role.name}</span>
-                                                        <span className="ml-2 text-xs uppercase text-muted-foreground">{role.slug}</span>
+                                                        <span className="ml-2 text-xs text-muted-foreground uppercase">{role.slug}</span>
                                                     </span>
                                                 </label>
                                             );
@@ -189,9 +186,7 @@ export default function UsersIndex({ users, roles }: Props) {
                 </div>
 
                 {flash.success ? (
-                    <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
-                        {flash.success}
-                    </div>
+                    <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">{flash.success}</div>
                 ) : null}
 
                 <Card>
@@ -201,7 +196,7 @@ export default function UsersIndex({ users, roles }: Props) {
                     <CardContent className="space-y-4">
                         <div className="overflow-x-auto">
                             <table className="min-w-full divide-y divide-border text-sm">
-                                <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+                                <thead className="bg-muted/50 text-xs tracking-wide text-muted-foreground uppercase">
                                     <tr>
                                         <th className="px-4 py-2 text-left">Nama</th>
                                         <th className="px-4 py-2 text-left">Email</th>
@@ -250,9 +245,7 @@ export default function UsersIndex({ users, roles }: Props) {
                             </table>
                         </div>
                     </CardContent>
-                    <CardFooter className="text-xs text-muted-foreground">
-                        Perubahan peran dapat mengubah akses pengguna secara instan.
-                    </CardFooter>
+                    <CardFooter className="text-xs text-muted-foreground">Perubahan peran dapat mengubah akses pengguna secara instan.</CardFooter>
                 </Card>
 
                 <Dialog open={editOpen} onOpenChange={setEditOpen}>
@@ -299,13 +292,10 @@ export default function UsersIndex({ users, roles }: Props) {
                                             const checked = editForm.data.roles.includes(role.id);
                                             return (
                                                 <label key={role.id} className="flex items-center gap-3 text-sm">
-                                                    <Checkbox
-                                                        checked={checked}
-                                                        onCheckedChange={() => toggleRole(editForm, role.id)}
-                                                    />
+                                                    <Checkbox checked={checked} onCheckedChange={() => toggleRole(editForm, role.id)} />
                                                     <span>
                                                         <span className="font-medium">{role.name}</span>
-                                                        <span className="ml-2 text-xs uppercase text-muted-foreground">{role.slug}</span>
+                                                        <span className="ml-2 text-xs text-muted-foreground uppercase">{role.slug}</span>
                                                     </span>
                                                 </label>
                                             );

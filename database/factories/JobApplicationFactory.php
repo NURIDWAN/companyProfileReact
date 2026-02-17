@@ -19,7 +19,7 @@ class JobApplicationFactory extends Factory
             'job_position_id' => JobPosition::factory(),
             'name' => $this->faker->name(),
             'email' => $this->faker->unique()->safeEmail(),
-            'phone' => '+62 ' . $this->faker->numerify('8##########'),
+            'phone' => '+62 '.$this->faker->numerify('8##########'),
             'linkedin_url' => $this->faker->optional()->url(),
             'portfolio_url' => $this->faker->optional()->url(),
             'cover_letter' => $this->faker->paragraph(),

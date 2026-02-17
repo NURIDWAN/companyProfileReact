@@ -1,8 +1,8 @@
-import AppLayout from "@/layouts/app-layout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Head, Link } from "@inertiajs/react";
-import { DeleteButton } from "@/components/DeleteButton";
+import { DeleteButton } from '@/components/DeleteButton';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
+import { Head, Link } from '@inertiajs/react';
 
 type Position = {
     id: number;
@@ -32,7 +32,7 @@ export default function JobPositionIndex({ positions }: Props) {
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-semibold">Karir</h1>
                     <Button asChild>
-                        <Link href={route("admin.job-positions.create")}>Tambah Lowongan</Link>
+                        <Link href={route('admin.job-positions.create')}>Tambah Lowongan</Link>
                     </Button>
                 </div>
 
@@ -57,27 +57,27 @@ export default function JobPositionIndex({ positions }: Props) {
                                     {positions.data.map((position) => (
                                         <tr key={position.id}>
                                             <td className="px-4 py-2">{position.title}</td>
-                                            <td className="px-4 py-2 text-muted-foreground">{position.department ?? "-"}</td>
-                                            <td className="px-4 py-2 text-muted-foreground">{position.location ?? "Remote"}</td>
+                                            <td className="px-4 py-2 text-muted-foreground">{position.department ?? '-'}</td>
+                                            <td className="px-4 py-2 text-muted-foreground">{position.location ?? 'Remote'}</td>
                                             <td className="px-4 py-2 text-muted-foreground">{position.employment_type}</td>
                                             <td className="px-4 py-2">
                                                 <span
                                                     className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                                                         position.is_active
-                                                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                                                            : "bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400"
+                                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+                                                            : 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400'
                                                     }`}
                                                 >
-                                                    {position.is_active ? "Aktif" : "Ditutup"}
+                                                    {position.is_active ? 'Aktif' : 'Ditutup'}
                                                 </span>
                                             </td>
                                             <td className="px-4 py-2">
                                                 <div className="flex justify-end gap-2">
                                                     <Button asChild variant="outline" size="sm">
-                                                        <Link href={route("admin.job-positions.edit", position.id)}>Edit</Link>
+                                                        <Link href={route('admin.job-positions.edit', position.id)}>Edit</Link>
                                                     </Button>
                                                     <DeleteButton
-                                                        url={route("admin.job-positions.destroy", position.id)}
+                                                        url={route('admin.job-positions.destroy', position.id)}
                                                         confirmMessage={`Hapus lowongan "${position.title}"?`}
                                                     />
                                                 </div>
@@ -89,14 +89,8 @@ export default function JobPositionIndex({ positions }: Props) {
                         </div>
                         <div className="flex flex-wrap gap-2">
                             {positions.links.map((link) => (
-                                <Button
-                                    key={link.label}
-                                    variant={link.active ? "default" : "outline"}
-                                    disabled={!link.url}
-                                    size="sm"
-                                    asChild
-                                >
-                                    <Link href={link.url ?? "#"} dangerouslySetInnerHTML={{ __html: link.label }} />
+                                <Button key={link.label} variant={link.active ? 'default' : 'outline'} disabled={!link.url} size="sm" asChild>
+                                    <Link href={link.url ?? '#'} dangerouslySetInnerHTML={{ __html: link.label }} />
                                 </Button>
                             ))}
                         </div>

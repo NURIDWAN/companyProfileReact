@@ -9,13 +9,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 #[ObservedBy([PageObserver::class])]
 class Page extends Model
 {
-    use HasFactory, SoftDeletes, LogsActivity;
+    use HasFactory, LogsActivity, SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -23,7 +23,7 @@ class Page extends Model
             ->logOnly(['title', 'slug', 'status', 'meta_title'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => "Page '{$this->title}' {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName) => "Page '{$this->title}' {$eventName}");
     }
 
     protected $fillable = [
@@ -89,7 +89,7 @@ class Page extends Model
     protected static function booted(): void
     {
         static::creating(function (Page $page) {
-            if (!$page->slug) {
+            if (! $page->slug) {
                 $page->slug = Str::slug($page->title);
             }
         });

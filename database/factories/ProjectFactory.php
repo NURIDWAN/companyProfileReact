@@ -19,7 +19,7 @@ class ProjectFactory extends Factory
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name) . '-' . $this->faker->unique()->numberBetween(100, 999),
+            'slug' => Str::slug($name).'-'.$this->faker->unique()->numberBetween(100, 999),
             'client_name' => $this->faker->company(),
             'summary' => $this->faker->sentence(),
             'description' => $this->faker->paragraph(),

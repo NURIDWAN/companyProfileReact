@@ -36,7 +36,7 @@ class BlogPostController extends Controller
             'preset' => ['nullable', 'string', 'max:120'],
         ]);
 
-        $model = config('services.openrouter.model', 'google/gemini-2.0-flash-exp:free');
+        $model = config('services.openrouter.model', 'google/gemini-2.0-flash-001');
         $startedAt = microtime(true);
 
         $geminiRequest = GeminiRequest::create([

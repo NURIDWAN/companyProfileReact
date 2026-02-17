@@ -1,14 +1,14 @@
-import { useForm, usePage, Link } from '@inertiajs/react';
 import type { PageProps } from '@inertiajs/core';
+import { Link, useForm, usePage } from '@inertiajs/react';
 import { Briefcase, Building, MapPin } from 'lucide-react';
 import { FormEventHandler, useRef } from 'react';
 
-import LandingPageLayout from '@/layouts/landingPage-layouts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { RecaptchaField, type RecaptchaFieldHandle } from '@/components/RecaptchaField';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { RecaptchaField, type RecaptchaFieldHandle } from '@/components/RecaptchaField';
+import LandingPageLayout from '@/layouts/landingPage-layouts';
 
 type JobSummary = {
     id: number;
@@ -67,11 +67,11 @@ export default function CareerApplyPage() {
                 </Link>
 
                 <header className="space-y-3">
-                    <p className="text-xs uppercase tracking-wide text-blue-600">Lamaran</p>
+                    <p className="text-xs tracking-wide text-blue-600 uppercase">Lamaran</p>
                     <h1 className="text-3xl font-bold text-slate-900">Lamar {position.title}</h1>
                     <p className="text-slate-600">
-                        Lengkapi data berikut dan unggah CV terbaik Anda. Tim People kami akan menghubungi Anda maksimal 5 hari kerja setelah
-                        lamaran diterima.
+                        Lengkapi data berikut dan unggah CV terbaik Anda. Tim People kami akan menghubungi Anda maksimal 5 hari kerja setelah lamaran
+                        diterima.
                     </p>
                 </header>
 

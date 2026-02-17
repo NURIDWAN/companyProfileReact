@@ -1,8 +1,8 @@
-import AppLayout from "@/layouts/app-layout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Head, Link } from "@inertiajs/react";
-import { DeleteButton } from "@/components/DeleteButton";
+import { DeleteButton } from '@/components/DeleteButton';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
+import { Head, Link } from '@inertiajs/react';
 
 type BlogPost = {
     id: number;
@@ -29,7 +29,7 @@ export default function BlogPostIndex({ posts }: Props) {
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-semibold">Blog & Artikel</h1>
                     <Button asChild>
-                        <Link href={route("admin.blog-posts.create")}>Tulis Artikel</Link>
+                        <Link href={route('admin.blog-posts.create')}>Tulis Artikel</Link>
                     </Button>
                 </div>
 
@@ -58,25 +58,23 @@ export default function BlogPostIndex({ posts }: Props) {
                                                 <span
                                                     className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                                                         post.is_published
-                                                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                                                            : "bg-slate-200 text-slate-700 dark:bg-slate-500/10 dark:text-slate-300"
+                                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+                                                            : 'bg-slate-200 text-slate-700 dark:bg-slate-500/10 dark:text-slate-300'
                                                     }`}
                                                 >
-                                                    {post.is_published ? "Terbit" : "Draft"}
+                                                    {post.is_published ? 'Terbit' : 'Draft'}
                                                 </span>
                                             </td>
                                             <td className="px-4 py-2 text-muted-foreground">
-                                                {post.published_at
-                                                    ? new Date(post.published_at).toLocaleDateString("id-ID")
-                                                    : "-"}
+                                                {post.published_at ? new Date(post.published_at).toLocaleDateString('id-ID') : '-'}
                                             </td>
                                             <td className="px-4 py-2">
                                                 <div className="flex justify-end gap-2">
                                                     <Button asChild variant="outline" size="sm">
-                                                        <Link href={route("admin.blog-posts.edit", post.id)}>Edit</Link>
+                                                        <Link href={route('admin.blog-posts.edit', post.id)}>Edit</Link>
                                                     </Button>
                                                     <DeleteButton
-                                                        url={route("admin.blog-posts.destroy", post.id)}
+                                                        url={route('admin.blog-posts.destroy', post.id)}
                                                         confirmMessage={`Hapus artikel "${post.title}"?`}
                                                     />
                                                 </div>
@@ -88,14 +86,8 @@ export default function BlogPostIndex({ posts }: Props) {
                         </div>
                         <div className="flex flex-wrap gap-2">
                             {posts.links.map((link) => (
-                                <Button
-                                    key={link.label}
-                                    variant={link.active ? "default" : "outline"}
-                                    disabled={!link.url}
-                                    size="sm"
-                                    asChild
-                                >
-                                    <Link href={link.url ?? "#"} dangerouslySetInnerHTML={{ __html: link.label }} />
+                                <Button key={link.label} variant={link.active ? 'default' : 'outline'} disabled={!link.url} size="sm" asChild>
+                                    <Link href={link.url ?? '#'} dangerouslySetInnerHTML={{ __html: link.label }} />
                                 </Button>
                             ))}
                         </div>

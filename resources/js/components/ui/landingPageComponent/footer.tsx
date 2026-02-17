@@ -89,7 +89,7 @@ export function Footer() {
 
     // Merge socials from footer config and companySocials, filtering out empty values
     const socialData = footer?.socials ?? companySocials ?? {};
-    const socials = Object.entries(socialData).filter(([_, url]) => url && url.trim() !== '');
+    const socials = Object.entries(socialData).filter(([, url]) => url && url.trim() !== '');
 
     return (
         <footer className="bg-gray-900 text-gray-300">
@@ -165,7 +165,7 @@ export function Footer() {
                     </div>
                 </div>
 
-                {footerContent.cta && (
+                {footerContent.cta && footerContent.cta.label && (
                     <div className="mt-10 rounded-xl border border-white/10 bg-white/5 p-6 text-center">
                         <p className="text-lg text-white">{footerContent.cta.label}</p>
                         <Link

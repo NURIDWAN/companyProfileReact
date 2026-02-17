@@ -1,7 +1,7 @@
 import React from 'react';
 import { Phone, Mail, Clock, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { containerVariants, itemVariants, scaleUp } from '@/utils/animations';
+import { containerVariants, itemVariants } from '@/utils/animations';
 
 type ContactInfoProps = {
     icon: React.ReactNode;

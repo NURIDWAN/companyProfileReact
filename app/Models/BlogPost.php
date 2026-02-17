@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class BlogPost extends Model
 {
@@ -19,7 +19,7 @@ class BlogPost extends Model
             ->logOnly(['title', 'slug', 'is_published', 'published_at'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => "BlogPost '{$this->title}' {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName) => "BlogPost '{$this->title}' {$eventName}");
     }
 
     protected $fillable = [
@@ -68,7 +68,7 @@ class BlogPost extends Model
 
     protected function resolveImageUrl(?string $path): ?string
     {
-        if (!$path) {
+        if (! $path) {
             return null;
         }
 

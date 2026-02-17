@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
-import { usePage, Link } from '@inertiajs/react';
 import type { PageProps } from '@inertiajs/core';
-import { Calendar, ArrowLeft, User } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { ArrowLeft, Calendar, User } from 'lucide-react';
+import { useMemo } from 'react';
 
-import LandingPageLayout from '@/layouts/landingPage-layouts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import LandingPageLayout from '@/layouts/landingPage-layouts';
 import { sanitizeRichText } from '@/utils/sanitize-html';
 
 interface ArticleItem {
@@ -46,14 +46,13 @@ export default function BlogDetailPage() {
         return matches;
     }, [article.body]);
 
-    const sanitizedBody =
-        sanitizeRichText(article.body) || sanitizeRichText('<p>Konten akan segera tersedia.</p>');
+    const sanitizedBody = sanitizeRichText(article.body) || sanitizeRichText('<p>Konten akan segera tersedia.</p>');
     const ctaVariants = article.cta_variants ?? [];
 
     return (
         <LandingPageLayout>
             <div className="mx-auto max-w-4xl space-y-10 p-6">
-                <Link href="/blog" className="text-sm text-blue-600 inline-flex items-center">
+                <Link href="/blog" className="inline-flex items-center text-sm text-blue-600">
                     <ArrowLeft className="mr-2 h-4 w-4" /> Kembali ke blog
                 </Link>
 
@@ -76,7 +75,7 @@ export default function BlogDetailPage() {
 
                 <img src={cover} alt={article.title} className="w-full rounded-2xl object-cover shadow-lg" />
 
-                <article className="richtext-view prose prose-lg max-w-none dark:prose-invert prose-img:rounded-2xl prose-img:shadow-lg prose-img:w-full">
+                <article className="richtext-view prose prose-lg dark:prose-invert prose-img:rounded-2xl prose-img:shadow-lg prose-img:w-full max-w-none">
                     <div dangerouslySetInnerHTML={{ __html: sanitizedBody }} />
                 </article>
 
@@ -85,7 +84,10 @@ export default function BlogDetailPage() {
                         <p className="text-sm font-semibold text-slate-900 dark:text-white">CTA Rekomendasi</p>
                         <div className="mt-3 flex flex-wrap gap-2">
                             {ctaVariants.map((cta) => (
-                                <span key={cta} className="rounded-full border border-blue-200 px-3 py-1 text-xs font-semibold text-blue-600 dark:border-blue-500/30 dark:text-blue-200">
+                                <span
+                                    key={cta}
+                                    className="rounded-full border border-blue-200 px-3 py-1 text-xs font-semibold text-blue-600 dark:border-blue-500/30 dark:text-blue-200"
+                                >
                                     {cta}
                                 </span>
                             ))}
@@ -121,7 +123,7 @@ export default function BlogDetailPage() {
                                                 {related.title}
                                             </Link>
                                         </CardTitle>
-                                        <p className="text-sm text-gray-500 line-clamp-2">
+                                        <p className="line-clamp-2 text-sm text-gray-500">
                                             {related.excerpt ?? 'Insight terbaru mengenai strategi dan praktik bisnis lintas industri.'}
                                         </p>
                                     </CardHeader>

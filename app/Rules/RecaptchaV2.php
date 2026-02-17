@@ -8,9 +8,7 @@ use Illuminate\Support\Facades\Http;
 
 class RecaptchaV2 implements ValidationRule
 {
-    public function __construct(protected ?string $ip = null)
-    {
-    }
+    public function __construct(protected ?string $ip = null) {}
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -20,6 +18,7 @@ class RecaptchaV2 implements ValidationRule
 
         if (! is_string($value) || $value === '') {
             $fail(__('Captcha wajib diisi.'));
+
             return;
         }
 
@@ -27,6 +26,7 @@ class RecaptchaV2 implements ValidationRule
 
         if (! $secret) {
             $fail(__('Captcha belum dikonfigurasi. Hubungi administrator.'));
+
             return;
         }
 
@@ -40,6 +40,7 @@ class RecaptchaV2 implements ValidationRule
 
         if ($response->failed()) {
             $fail(__('Validasi captcha gagal. Silakan coba kembali.'));
+
             return;
         }
 

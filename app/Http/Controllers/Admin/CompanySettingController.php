@@ -86,7 +86,7 @@ class CompanySettingController extends Controller
         $aiSettings = (array) data_get($settings, 'ai.settings', []);
         $ai = [
             'api_key' => data_get($aiSettings, 'api_key', ''),
-            'model' => data_get($aiSettings, 'model', config('services.openrouter.model', 'google/gemini-2.0-flash-exp:free')),
+            'model' => data_get($aiSettings, 'model', config('services.openrouter.model', 'google/gemini-2.0-flash-001')),
             'endpoint' => data_get($aiSettings, 'endpoint', config('services.openrouter.endpoint', 'https://openrouter.ai/api/v1')),
         ];
 
@@ -138,8 +138,10 @@ class CompanySettingController extends Controller
     {
         $data = $request->validate([
             'api_key' => ['nullable', 'string', 'max:255'],
-            'model' => ['nullable', 'string', 'max:255'],
+            'model' => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9\-]+\/[a-z0-9\-\.:]+$/i'],
             'endpoint' => ['nullable', 'url', 'max:500'],
+        ], [
+            'model.regex' => 'Format model ID tidak valid. Gunakan format: provider/model-name (contoh: google/gemini-2.0-flash-001)',
         ]);
 
         $config = array_filter([
@@ -151,6 +153,50 @@ class CompanySettingController extends Controller
         $this->saveSetting('ai.settings', $config, 'integration');
 
         return back()->with('success', 'Pengaturan AI berhasil diperbarui.');
+    }
+
+    public function testAi(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $data = $request->validate([
+            'api_key' => ['required', 'string', 'max:255'],
+            'model' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9\-]+\/[a-z0-9\-\.:]+$/i'],
+            'endpoint' => ['required', 'url', 'max:500'],
+        ], [
+            'model.regex' => 'Format model ID tidak valid. Gunakan format: provider/model-name (contoh: google/gemini-2.0-flash-001)',
+        ]);
+
+        try {
+            $service = new \App\Services\OpenRouterService(
+                apiKey: $data['api_key'],
+                model: $data['model'],
+                endpoint: $data['endpoint'],
+            );
+
+            $startedAt = microtime(true);
+
+            $response = $service->chat([
+                ['role' => 'user', 'content' => 'Hai, balas dengan satu kalimat singkat untuk mengkonfirmasi koneksi berhasil.'],
+            ], [
+                'max_tokens' => 60,
+                'timeout' => 15,
+            ]);
+
+            $latencyMs = round((microtime(true) - $startedAt) * 1000);
+            $content = $service->extractContent($response) ?? '(tidak ada respons)';
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Koneksi berhasil!',
+                'model' => $data['model'],
+                'reply' => $content,
+                'latency_ms' => $latencyMs,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 
     public function downloadBackup(): StreamedResponse

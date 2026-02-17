@@ -1,15 +1,15 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import AppLayout from "@/layouts/app-layout";
-import { Head, Link, useForm } from "@inertiajs/react";
-import { FormEventHandler, useEffect } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { serviceIconOptions } from "@/lib/service-icons";
-import { RichTextEditor } from "@/components/RichTextEditor";
+import { RichTextEditor } from '@/components/RichTextEditor';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import AppLayout from '@/layouts/app-layout';
+import { serviceIconOptions } from '@/lib/service-icons';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { FormEventHandler, useEffect } from 'react';
 
 type Service = {
     id: number;
@@ -27,14 +27,14 @@ interface Props {
 }
 
 export default function ServiceForm({ service }: Props) {
-    const title = service ? "Edit Layanan" : "Tambah Layanan";
+    const title = service ? 'Edit Layanan' : 'Tambah Layanan';
 
     const { data, setData, post, put, processing, errors } = useForm({
-        name: service?.name ?? "",
-        slug: service?.slug ?? "",
-        icon: service?.icon ?? "",
-        excerpt: service?.excerpt ?? "",
-        description: service?.description ?? "",
+        name: service?.name ?? '',
+        slug: service?.slug ?? '',
+        icon: service?.icon ?? '',
+        excerpt: service?.excerpt ?? '',
+        description: service?.description ?? '',
         display_order: service?.display_order ?? 0,
         is_active: service?.is_active ?? true,
     });
@@ -48,11 +48,11 @@ export default function ServiceForm({ service }: Props) {
             const slug = trimmed
                 ? trimmed
                       .toLowerCase()
-                      .replace(/[^a-z0-9\s-]/g, "")
-                      .replace(/\s+/g, "-")
-                      .replace(/-+/g, "-")
-                : "";
-            setData("slug", slug);
+                      .replace(/[^a-z0-9\s-]/g, '')
+                      .replace(/\s+/g, '-')
+                      .replace(/-+/g, '-')
+                : '';
+            setData('slug', slug);
         }
     }, [data.name, service, setData]);
 
@@ -60,11 +60,11 @@ export default function ServiceForm({ service }: Props) {
         event.preventDefault();
 
         if (service) {
-            put(route("admin.services.update", service.id), {
+            put(route('admin.services.update', service.id), {
                 preserveScroll: true,
             });
         } else {
-            post(route("admin.services.store"), {
+            post(route('admin.services.store'), {
                 preserveScroll: true,
             });
         }
@@ -76,7 +76,7 @@ export default function ServiceForm({ service }: Props) {
 
             <div className="p-4">
                 <div className="mb-4">
-                    <Link href={route("admin.services.index")} className="text-sm text-muted-foreground hover:text-foreground">
+                    <Link href={route('admin.services.index')} className="text-sm text-muted-foreground hover:text-foreground">
                         &larr; Kembali ke daftar layanan
                     </Link>
                 </div>
@@ -93,35 +93,25 @@ export default function ServiceForm({ service }: Props) {
                             )}
                             <div className="grid gap-2">
                                 <Label htmlFor="name">Nama</Label>
-                                <Input
-                                    id="name"
-                                    value={data.name}
-                                    onChange={(event) => setData("name", event.target.value)}
-                                    required
-                                />
+                                <Input id="name" value={data.name} onChange={(event) => setData('name', event.target.value)} required />
                                 {errors.name && <p className="text-xs text-rose-500">{errors.name}</p>}
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="slug">Slug</Label>
-                                <Input
-                                    id="slug"
-                                    value={data.slug}
-                                    onChange={(event) => setData("slug", event.target.value)}
-                                    required
-                                />
+                                <Input id="slug" value={data.slug} onChange={(event) => setData('slug', event.target.value)} required />
                                 {errors.slug && <p className="text-xs text-rose-500">{errors.slug}</p>}
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="icon">Ikon</Label>
                                 <Select
-                                    value={data.icon && data.icon !== "" ? data.icon : "none"}
-                                    onValueChange={(value) => setData("icon", value === "none" ? "" : value)}
+                                    value={data.icon && data.icon !== '' ? data.icon : 'none'}
+                                    onValueChange={(value) => setData('icon', value === 'none' ? '' : value)}
                                 >
                                     <SelectTrigger id="icon">
                                         <SelectValue placeholder="Pilih ikon" />
                                     </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="none">Tanpa ikon</SelectItem>
+                                    <SelectContent>
+                                        <SelectItem value="none">Tanpa ikon</SelectItem>
                                         {serviceIconOptions.map((option) => (
                                             <SelectItem key={option.value} value={option.value}>
                                                 {option.label}
@@ -135,26 +125,20 @@ export default function ServiceForm({ service }: Props) {
                                         <span>{selectedIconOption.label}</span>
                                     </div>
                                 ) : (
-                                    <p className="text-xs text-muted-foreground">
-                                        Ikon akan tampil di kartu layanan pada landing page.
-                                    </p>
+                                    <p className="text-xs text-muted-foreground">Ikon akan tampil di kartu layanan pada landing page.</p>
                                 )}
                                 {errors.icon && <p className="text-xs text-rose-500">{errors.icon}</p>}
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="excerpt">Ringkasan</Label>
-                                <Input
-                                    id="excerpt"
-                                    value={data.excerpt ?? ""}
-                                    onChange={(event) => setData("excerpt", event.target.value)}
-                                />
+                                <Input id="excerpt" value={data.excerpt ?? ''} onChange={(event) => setData('excerpt', event.target.value)} />
                                 {errors.excerpt && <p className="text-xs text-rose-500">{errors.excerpt}</p>}
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="description">Deskripsi</Label>
                                 <RichTextEditor
                                     value={data.description ?? ''}
-                                    onChange={(value) => setData("description", value)}
+                                    onChange={(value) => setData('description', value)}
                                     placeholder="Jelaskan lingkup layanan, manfaat, dan hasil yang ditawarkan."
                                 />
                                 {errors.description && <p className="text-xs text-rose-500">{errors.description}</p>}
@@ -166,22 +150,19 @@ export default function ServiceForm({ service }: Props) {
                                     type="number"
                                     min={0}
                                     value={data.display_order}
-                                    onChange={(event) => setData("display_order", Number(event.target.value))}
+                                    onChange={(event) => setData('display_order', Number(event.target.value))}
                                 />
                                 {errors.display_order && <p className="text-xs text-rose-500">{errors.display_order}</p>}
                             </div>
                             <label className="flex items-center gap-2">
-                                <Checkbox
-                                    checked={data.is_active}
-                                    onCheckedChange={(checked) => setData("is_active", Boolean(checked))}
-                                />
+                                <Checkbox checked={data.is_active} onCheckedChange={(checked) => setData('is_active', Boolean(checked))} />
                                 <span>Aktif</span>
                             </label>
                             {errors.is_active && <p className="text-xs text-rose-500">{errors.is_active}</p>}
                         </CardContent>
                         <CardFooter className="flex justify-end gap-2">
                             <Button type="submit" disabled={processing}>
-                                {service ? "Simpan Perubahan" : "Simpan"}
+                                {service ? 'Simpan Perubahan' : 'Simpan'}
                             </Button>
                         </CardFooter>
                     </Card>

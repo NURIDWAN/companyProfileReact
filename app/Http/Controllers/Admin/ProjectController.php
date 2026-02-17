@@ -12,9 +12,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use Throwable;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class ProjectController extends Controller
 {

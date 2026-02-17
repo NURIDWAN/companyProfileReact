@@ -1,12 +1,12 @@
 <?php
 
-use App\Models\User;
-use App\Models\Service;
+use App\Models\JobPosition;
 use App\Models\Product;
 use App\Models\Project;
-use App\Models\Testimonial;
+use App\Models\Service;
 use App\Models\TeamMember;
-use App\Models\JobPosition;
+use App\Models\Testimonial;
+use App\Models\User;
 
 test('guests are redirected to the login page', function () {
     $this->get('/dashboard')->assertRedirect('/login');

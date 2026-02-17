@@ -56,6 +56,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'navigation' => $this->navigation(),
+            'siteConfigured' => $this->isSiteConfigured(),
             'footerNavigation' => $this->footerNavigation(),
             'footer' => $this->footerContent(),
             'branding' => $this->branding(),
@@ -183,7 +184,7 @@ class HandleInertiaRequests extends Middleware
                     'children' => $allChildren,
                 ];
             })
-            ->filter(fn ($item) => $item['href'] || !empty($item['children']))
+            ->filter(fn ($item) => $item['href'] || ! empty($item['children']))
             ->sortBy('order')
             ->values()
             ->all();
@@ -191,6 +192,17 @@ class HandleInertiaRequests extends Middleware
         return [
             'primary' => $primary,
         ];
+    }
+
+    /**
+     * Check if the website has been configured (has at least one active menu item in main navigation).
+     */
+    protected function isSiteConfigured(): bool
+    {
+        return MenuItem::query()
+            ->active()
+            ->where('position', 'main')
+            ->exists();
     }
 
     /**
@@ -239,16 +251,16 @@ class HandleInertiaRequests extends Middleware
             $address['postal_code'] ?? null,
         ])->filter()->join(', ');
 
-        if (empty($merged['contacts']['email']) && !empty($contacts['email'])) {
+        if (empty($merged['contacts']['email']) && ! empty($contacts['email'])) {
             $merged['contacts']['email'] = $contacts['email'];
         }
-        if (empty($merged['contacts']['phone']) && !empty($contacts['phone'])) {
+        if (empty($merged['contacts']['phone']) && ! empty($contacts['phone'])) {
             $merged['contacts']['phone'] = $contacts['phone'];
         }
-        if (empty($merged['contacts']['phone']) && !empty($contacts['whatsapp'])) {
+        if (empty($merged['contacts']['phone']) && ! empty($contacts['whatsapp'])) {
             $merged['contacts']['phone'] = $contacts['whatsapp'];
         }
-        if (empty($merged['contacts']['address']) && !empty($addressString)) {
+        if (empty($merged['contacts']['address']) && ! empty($addressString)) {
             $merged['contacts']['address'] = $addressString;
         }
 

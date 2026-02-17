@@ -1,8 +1,8 @@
-import AppLayout from "@/layouts/app-layout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Head, Link } from "@inertiajs/react";
-import { DeleteButton } from "@/components/DeleteButton";
+import { DeleteButton } from '@/components/DeleteButton';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
+import { Head, Link } from '@inertiajs/react';
 
 type Service = {
     id: number;
@@ -32,7 +32,7 @@ export default function ServiceIndex({ services }: Props) {
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-semibold">Layanan</h1>
                     <Button asChild>
-                        <Link href={route("admin.services.create")}>Tambah Layanan</Link>
+                        <Link href={route('admin.services.create')}>Tambah Layanan</Link>
                     </Button>
                 </div>
 
@@ -61,23 +61,23 @@ export default function ServiceIndex({ services }: Props) {
                                                 <span
                                                     className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                                                         service.is_active
-                                                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                                                            : "bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400"
+                                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+                                                            : 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400'
                                                     }`}
                                                 >
-                                                    {service.is_active ? "Aktif" : "Nonaktif"}
+                                                    {service.is_active ? 'Aktif' : 'Nonaktif'}
                                                 </span>
                                             </td>
                                             <td className="px-4 py-2 text-muted-foreground">
-                                                {new Date(service.updated_at).toLocaleDateString("id-ID")}
+                                                {new Date(service.updated_at).toLocaleDateString('id-ID')}
                                             </td>
                                             <td className="px-4 py-2">
                                                 <div className="flex justify-end gap-2">
                                                     <Button asChild variant="outline" size="sm">
-                                                        <Link href={route("admin.services.edit", service.id)}>Edit</Link>
+                                                        <Link href={route('admin.services.edit', service.id)}>Edit</Link>
                                                     </Button>
                                                     <DeleteButton
-                                                        url={route("admin.services.destroy", service.id)}
+                                                        url={route('admin.services.destroy', service.id)}
                                                         confirmMessage={`Hapus layanan "${service.name}"?`}
                                                     />
                                                 </div>
@@ -89,14 +89,8 @@ export default function ServiceIndex({ services }: Props) {
                         </div>
                         <div className="flex flex-wrap gap-2">
                             {services.links.map((link) => (
-                                <Button
-                                    key={link.label}
-                                    variant={link.active ? "default" : "outline"}
-                                    disabled={!link.url}
-                                    size="sm"
-                                    asChild
-                                >
-                                    <Link href={link.url ?? "#"} dangerouslySetInnerHTML={{ __html: link.label }} />
+                                <Button key={link.label} variant={link.active ? 'default' : 'outline'} disabled={!link.url} size="sm" asChild>
+                                    <Link href={link.url ?? '#'} dangerouslySetInnerHTML={{ __html: link.label }} />
                                 </Button>
                             ))}
                         </div>

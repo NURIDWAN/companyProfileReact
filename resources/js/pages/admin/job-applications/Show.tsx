@@ -1,14 +1,12 @@
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import type { PageProps } from '@inertiajs/core';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useMemo } from 'react';
 
-import AppLayout from '@/layouts/app-layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import AppLayout from '@/layouts/app-layout';
 import type { JobApplication } from '@/types';
 
 const statusColor: Record<string, string> = {
@@ -35,9 +33,7 @@ export default function JobApplicationShow() {
     const form = useForm({ status: application.status });
 
     const statusLabel = useMemo(() => {
-        return (
-            availableStatuses.find((status) => status.value === application.status)?.label ?? application.status
-        );
+        return availableStatuses.find((status) => status.value === application.status)?.label ?? application.status;
     }, [availableStatuses, application.status]);
 
     const submitStatus = (event: React.FormEvent<HTMLFormElement>) => {
@@ -85,11 +81,11 @@ export default function JobApplicationShow() {
                         <CardContent className="space-y-4">
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div>
-                                    <Label className="text-xs uppercase text-slate-500">Nama</Label>
+                                    <Label className="text-xs text-slate-500 uppercase">Nama</Label>
                                     <p className="text-base font-medium text-slate-900">{application.name}</p>
                                 </div>
                                 <div>
-                                    <Label className="text-xs uppercase text-slate-500">Email</Label>
+                                    <Label className="text-xs text-slate-500 uppercase">Email</Label>
                                     <p className="text-base text-slate-700">
                                         <a href={`mailto:${application.email}`} className="text-blue-600">
                                             {application.email}
@@ -97,11 +93,11 @@ export default function JobApplicationShow() {
                                     </p>
                                 </div>
                                 <div>
-                                    <Label className="text-xs uppercase text-slate-500">Telepon</Label>
+                                    <Label className="text-xs text-slate-500 uppercase">Telepon</Label>
                                     <p className="text-base text-slate-700">{application.phone ?? '-'}</p>
                                 </div>
                                 <div>
-                                    <Label className="text-xs uppercase text-slate-500">LinkedIn</Label>
+                                    <Label className="text-xs text-slate-500 uppercase">LinkedIn</Label>
                                     {application.linkedin_url ? (
                                         <a href={application.linkedin_url} className="text-blue-600" target="_blank" rel="noreferrer">
                                             {application.linkedin_url}
@@ -113,7 +109,7 @@ export default function JobApplicationShow() {
                             </div>
 
                             <div>
-                                <Label className="text-xs uppercase text-slate-500">Portofolio</Label>
+                                <Label className="text-xs text-slate-500 uppercase">Portofolio</Label>
                                 {application.portfolio_url ? (
                                     <a href={application.portfolio_url} className="text-blue-600" target="_blank" rel="noreferrer">
                                         {application.portfolio_url}
@@ -124,7 +120,7 @@ export default function JobApplicationShow() {
                             </div>
 
                             <div>
-                                <Label className="text-xs uppercase text-slate-500">Cover Letter</Label>
+                                <Label className="text-xs text-slate-500 uppercase">Cover Letter</Label>
                                 <div className="rounded-lg border bg-slate-50 p-4 text-sm leading-relaxed text-slate-700">
                                     {application.cover_letter ?? 'Kandidat tidak menyertakan cover letter.'}
                                 </div>
@@ -132,7 +128,7 @@ export default function JobApplicationShow() {
 
                             {application.resume_url && (
                                 <div>
-                                    <Label className="text-xs uppercase text-slate-500">Lampiran</Label>
+                                    <Label className="text-xs text-slate-500 uppercase">Lampiran</Label>
                                     <div className="mt-2 flex flex-wrap gap-3">
                                         <Button asChild variant="outline">
                                             <a
@@ -173,7 +169,7 @@ export default function JobApplicationShow() {
                                 <p className="text-sm font-semibold text-slate-700">Pembaruan Status</p>
                                 <form onSubmit={submitStatus} className="mt-2 space-y-3">
                                     <div>
-                                        <Label className="text-xs uppercase text-slate-500">Status proses</Label>
+                                        <Label className="text-xs text-slate-500 uppercase">Status proses</Label>
                                         <select
                                             value={form.data.status}
                                             onChange={(event) => form.setData('status', event.target.value)}

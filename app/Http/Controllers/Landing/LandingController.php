@@ -814,7 +814,9 @@ class LandingController extends Controller
 
     private function transformAboutValues(array $values): array
     {
-        return collect($values)
+        $items = $values['items'] ?? [];
+
+        return collect($items)
             ->map(function ($value) {
                 return [
                     'icon' => $value['icon'] ?? 'zap',

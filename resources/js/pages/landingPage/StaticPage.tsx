@@ -71,15 +71,18 @@ export default function StaticPage() {
     const { page } = usePage<Props>().props;
 
     const safeBody = useMemo(() => sanitizeRichText(page.body ?? ''), [page.body]);
-    const sections = page.sections ?? [];
+
+    // Sort sections by display_order as safety net (backend should already provide sorted data)
+    const sections = useMemo(() => [...(page.sections ?? [])].sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)), [page.sections]);
 
     const renderSection = (section: SectionItem) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let parsed: any = null;
         if (section.content) {
             try {
                 const json = JSON.parse(section.content);
                 parsed = json && typeof json === 'object' ? json : null;
-            } catch (e) {
+            } catch {
                 parsed = null;
             }
         }

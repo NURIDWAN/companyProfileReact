@@ -7,9 +7,11 @@ use App\Http\Requests\Admin\PageRequest;
 use App\Models\MenuItem;
 use App\Models\Page;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -49,7 +51,12 @@ class PageController extends Controller
                 $data['updated_by'] = $request->user()?->id;
 
                 $page = Page::create($data);
-                $this->syncSections($page, $request->input('sections', []));
+
+                // Process sections with file uploads
+                $sections = $request->input('sections', []);
+                $sections = $this->processSectionFiles($request, $sections);
+
+                $this->syncSections($page, $sections);
 
                 // Auto-create menu item if requested
                 if ($request->boolean('add_to_menu') && $request->filled('menu_position')) {
@@ -76,6 +83,7 @@ class PageController extends Controller
         return Inertia::render('admin/pages/Form', [
             'page' => $page->load('sections'),
             'parents' => $this->parentOptions($page->id),
+            'menuItems' => $this->menuItemOptions(),
         ]);
     }
 
@@ -87,7 +95,12 @@ class PageController extends Controller
                 $data['updated_by'] = $request->user()?->id;
 
                 $page->update($data);
-                $this->syncSections($page, $request->input('sections', []));
+
+                // Process sections with file uploads
+                $sections = $request->input('sections', []);
+                $sections = $this->processSectionFiles($request, $sections);
+
+                $this->syncSections($page, $sections);
             });
 
             return redirect()->route('admin.pages.index')->with('success', 'Halaman berhasil diperbarui.');
@@ -177,17 +190,18 @@ class PageController extends Controller
             $usedSlugs[] = $slug;
 
             // Also check against existing sections (excluding current one if updating)
-            $existingQuery = $page->sections()->where('slug', $slug);
-            if ($sectionId) {
-                $existingQuery->where('id', '!=', $sectionId);
-            }
-            while ($existingQuery->exists()) {
+            $existsInDb = function ($checkSlug) use ($page, $sectionId): bool {
+                $query = $page->sections()->where('slug', $checkSlug);
+                if ($sectionId) {
+                    $query->where('id', '!=', $sectionId);
+                }
+
+                return $query->exists();
+            };
+
+            while ($existsInDb($slug)) {
                 $slug = $baseSlug.'-'.$counter;
                 $counter++;
-                $existingQuery = $page->sections()->where('slug', $slug);
-                if ($sectionId) {
-                    $existingQuery->where('id', '!=', $sectionId);
-                }
             }
 
             $payload = [
@@ -217,6 +231,137 @@ class PageController extends Controller
         } else {
             $page->sections()->delete();
         }
+    }
+
+    /**
+     * Process sections and replace __PENDING_FILE__ placeholders with uploaded file URLs.
+     */
+    private function processSectionFiles(PageRequest $request, array $sections): array
+    {
+        $sectionFiles = $request->file('section_files', []);
+
+        if (empty($sectionFiles)) {
+            return $sections;
+        }
+
+        foreach ($sections as $sectionIdx => &$section) {
+            if (! isset($section['content'])) {
+                continue;
+            }
+
+            // Parse content JSON to find and replace placeholders
+            $content = $section['content'];
+            $contentData = null;
+
+            try {
+                $contentData = json_decode($content, true);
+            } catch (\Exception $e) {
+                // Not JSON content, skip
+                continue;
+            }
+
+            if (! is_array($contentData)) {
+                continue;
+            }
+
+            // Process the content data recursively to replace placeholders
+            $filesForSection = $sectionFiles[$sectionIdx] ?? [];
+            if (! is_array($filesForSection)) {
+                $filesForSection = [];
+            }
+
+            $contentData = $this->replacePlaceholdersInData(
+                $contentData,
+                $filesForSection,
+                $sectionIdx
+            );
+
+            $section['content'] = json_encode($contentData);
+        }
+
+        return $sections;
+    }
+
+    /**
+     * Recursively replace __PENDING_FILE__ placeholders with uploaded file URLs.
+     */
+    private function replacePlaceholdersInData(mixed $data, array $files, int $sectionIdx): mixed
+    {
+        if (is_string($data) && str_starts_with($data, '__PENDING_FILE__:')) {
+            // Extract the field path from placeholder
+            $fieldPath = substr($data, strlen('__PENDING_FILE__:'));
+
+            // Find the corresponding file
+            $file = $this->findFileByPath($files, $fieldPath, $sectionIdx);
+
+            if ($file instanceof UploadedFile) {
+                return $this->uploadFile($file);
+            }
+
+            // If file not found, return empty string or keep placeholder for debugging
+            Log::warning('File not found for placeholder', [
+                'placeholder' => $data,
+                'field_path' => $fieldPath,
+            ]);
+
+            return '';
+        }
+
+        if (is_array($data)) {
+            foreach ($data as $key => $value) {
+                $data[$key] = $this->replacePlaceholdersInData($value, $files, $sectionIdx);
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Find uploaded file by field path.
+     * Field path format: section_files[{sectionIdx}][{key}] or section_files[{sectionIdx}][{key}][{itemIdx}][{prop}]
+     */
+    private function findFileByPath(array $files, string $fieldPath, int $sectionIdx): ?UploadedFile
+    {
+        // Parse the field path to extract keys
+        // Example: "section_files[0][image]" => ['image']
+        // Example: "section_files[0][items][0][image]" => ['items', '0', 'image']
+
+        $pattern = '/section_files\['.$sectionIdx.'\](.+)/';
+        if (! preg_match($pattern, $fieldPath, $matches)) {
+            return null;
+        }
+
+        $remaining = $matches[1];
+
+        // Extract all bracketed keys
+        preg_match_all('/\[([^\]]+)\]/', $remaining, $keyMatches);
+        $keys = $keyMatches[1] ?? [];
+
+        if (empty($keys)) {
+            return null;
+        }
+
+        // Navigate through the files array
+        $current = $files;
+        foreach ($keys as $key) {
+            if (! is_array($current) || ! array_key_exists($key, $current)) {
+                return null;
+            }
+            $current = $current[$key];
+        }
+
+        return $current instanceof UploadedFile ? $current : null;
+    }
+
+    /**
+     * Upload a file and return its public URL.
+     */
+    private function uploadFile(UploadedFile $file): string
+    {
+        $filename = time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
+        $path = $file->storeAs('images/sections', $filename, 'public');
+
+        return Storage::url($path);
     }
 
     private function parentOptions(?int $excludeId = null): Collection

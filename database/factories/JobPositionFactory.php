@@ -19,11 +19,11 @@ class JobPositionFactory extends Factory
 
         return [
             'title' => $title,
-            'slug' => Str::slug($title) . '-' . $this->faker->unique()->numberBetween(100, 999),
+            'slug' => Str::slug($title).'-'.$this->faker->unique()->numberBetween(100, 999),
             'department' => $this->faker->randomElement(['Technology', 'Product', 'Design']),
             'location' => $this->faker->city(),
             'employment_type' => $this->faker->randomElement(['full_time', 'contract', 'part_time']),
-            'salary_range' => 'Rp ' . $this->faker->numberBetween(5, 20) . ' - ' . $this->faker->numberBetween(21, 30) . ' juta',
+            'salary_range' => 'Rp '.$this->faker->numberBetween(5, 20).' - '.$this->faker->numberBetween(21, 30).' juta',
             'description' => $this->faker->paragraph(),
             'requirements' => $this->faker->paragraph(),
             'is_active' => true,

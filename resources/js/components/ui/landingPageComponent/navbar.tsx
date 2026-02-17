@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 import { primaryNavLinks } from "@/config/navigation";
 import type { BrandingInfo, NavigationLink, SharedData } from "@/types";
 
+type NavItemWithChildren = NavigationLink & { children?: NavItemWithChildren[] };
+
 // Mobile Nav Item Component with collapsible children
 function MobileNavItem({
     navItem,
@@ -17,7 +19,7 @@ function MobileNavItem({
     resolveLabel,
     handleNavClick,
 }: {
-    navItem: NavigationLink & { children?: NavigationLink[] };
+    navItem: NavItemWithChildren;
     isActive: boolean;
     resolveLabel: (item: NavigationLink) => string;
     handleNavClick: (e: React.MouseEvent, href: string) => void;
@@ -103,7 +105,8 @@ export function CompanyNavbar() {
 
     const normalizePath = (href: string | null | undefined) => href?.split("#")[0].replace(/\/+$/, "") || "/";
     const currentPath = normalizePath(url);
-    const currentHash = typeof window !== "undefined" ? window.location.hash : "";
+    // currentHash reserved for future anchor tracking
+    const _currentHash = typeof window !== "undefined" ? window.location.hash : "";
 
     const activeLinkKey = useMemo(() => {
         return navItems.find((item) => {
@@ -216,9 +219,13 @@ export function CompanyNavbar() {
 
                 {/* Desktop Navigation */}
                 <nav className="hidden items-center space-x-2 lg:flex">
-                    {navItems.map((navItem) => (
+                    {navItems.map((navItem) => {
+                        const navItemWithChildren = navItem as NavItemWithChildren;
+                        const hasChildren = Array.isArray(navItemWithChildren.children) && navItemWithChildren.children.length > 0;
+                        
+                        return (
                         <div key={navItem.key} className="relative">
-                            {Array.isArray((navItem as any).children) && (navItem as any).children.length ? (
+                            {hasChildren ? (
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button
@@ -232,14 +239,15 @@ export function CompanyNavbar() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="start">
-                                        {(navItem as any).children.map((child: any) =>
-                                            Array.isArray(child.children) && child.children.length ? (
+                                        {navItemWithChildren.children!.map((child) => {
+                                            const hasGrandchildren = Array.isArray(child.children) && child.children.length > 0;
+                                            return hasGrandchildren ? (
                                                 <DropdownMenuSub key={child.key}>
                                                     <DropdownMenuSubTrigger>
                                                         {resolveLabel(child)}
                                                     </DropdownMenuSubTrigger>
                                                     <DropdownMenuSubContent>
-                                                        {child.children.map((grandchild: any) => (
+                                                        {child.children!.map((grandchild) => (
                                                             <DropdownMenuItem key={grandchild.key} asChild>
                                                                 <Link href={grandchild.href} onClick={(e) => handleNavClick(e, grandchild.href)}>
                                                                     {resolveLabel(grandchild)}
@@ -254,8 +262,8 @@ export function CompanyNavbar() {
                                                         {resolveLabel(child)}
                                                     </Link>
                                                 </DropdownMenuItem>
-                                            )
-                                        )}
+                                            );
+                                        })}
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             ) : (
@@ -275,7 +283,7 @@ export function CompanyNavbar() {
                                 <div className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-blue-600" />
                             )}
                         </div>
-                    ))}
+                    )})}
                 </nav>
 
                 {/* Right side */}
@@ -298,7 +306,7 @@ export function CompanyNavbar() {
                                     {navItems.map((navItem) => (
                                         <MobileNavItem
                                             key={navItem.key}
-                                            navItem={navItem as NavigationLink & { children?: NavigationLink[] }}
+                                            navItem={navItem as NavItemWithChildren}
                                             isActive={activeLinkKey === navItem.key}
                                             resolveLabel={resolveLabel}
                                             handleNavClick={handleNavClick}

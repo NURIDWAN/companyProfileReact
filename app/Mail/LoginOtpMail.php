@@ -15,8 +15,7 @@ class LoginOtpMail extends Mailable
         public User $user,
         public string $code,
         public int $expiresMinutes = 10,
-    ) {
-    }
+    ) {}
 
     public function build(): self
     {

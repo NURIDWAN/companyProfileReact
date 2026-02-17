@@ -18,7 +18,8 @@ export function Gallery({ content }: { content: GalleryContent }) {
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
     const images = content.images ?? [];
     const columns = content.columns ?? 3;
-    const layout = content.layout ?? 'grid';
+    // layout is defined but reserved for future use (carousel/masonry modes)
+    const _layout = content.layout ?? 'grid';
 
     const openLightbox = (idx: number) => setLightboxIndex(idx);
     const closeLightbox = () => setLightboxIndex(null);

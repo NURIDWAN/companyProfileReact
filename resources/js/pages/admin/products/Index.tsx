@@ -1,8 +1,8 @@
-import AppLayout from "@/layouts/app-layout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Head, Link } from "@inertiajs/react";
-import { DeleteButton } from "@/components/DeleteButton";
+import { DeleteButton } from '@/components/DeleteButton';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
+import { Head, Link } from '@inertiajs/react';
 
 type Product = {
     id: number;
@@ -33,12 +33,12 @@ export default function ProductIndex({ products }: Props) {
         const priceCandidate = numericPrice ?? (variantPrices.length ? Math.min(...variantPrices) : null);
 
         if (priceCandidate === null) {
-            return "-";
+            return '-';
         }
 
-        return new Intl.NumberFormat("id-ID", {
-            style: "currency",
-            currency: "IDR",
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
             minimumFractionDigits: 0,
         }).format(priceCandidate);
     };
@@ -50,7 +50,7 @@ export default function ProductIndex({ products }: Props) {
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-semibold">Produk</h1>
                     <Button asChild>
-                        <Link href={route("admin.products.create")}>Tambah Produk</Link>
+                        <Link href={route('admin.products.create')}>Tambah Produk</Link>
                     </Button>
                 </div>
 
@@ -81,23 +81,23 @@ export default function ProductIndex({ products }: Props) {
                                                 <span
                                                     className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                                                         product.is_active
-                                                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                                                            : "bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400"
+                                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+                                                            : 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400'
                                                     }`}
                                                 >
-                                                    {product.is_active ? "Aktif" : "Nonaktif"}
+                                                    {product.is_active ? 'Aktif' : 'Nonaktif'}
                                                 </span>
                                             </td>
                                             <td className="px-4 py-2 text-muted-foreground">
-                                                {new Date(product.updated_at).toLocaleDateString("id-ID")}
+                                                {new Date(product.updated_at).toLocaleDateString('id-ID')}
                                             </td>
                                             <td className="px-4 py-2">
                                                 <div className="flex justify-end gap-2">
                                                     <Button asChild variant="outline" size="sm">
-                                                        <Link href={route("admin.products.edit", product.id)}>Edit</Link>
+                                                        <Link href={route('admin.products.edit', product.id)}>Edit</Link>
                                                     </Button>
                                                     <DeleteButton
-                                                        url={route("admin.products.destroy", product.id)}
+                                                        url={route('admin.products.destroy', product.id)}
                                                         confirmMessage={`Hapus produk "${product.name}"?`}
                                                     />
                                                 </div>
@@ -109,14 +109,8 @@ export default function ProductIndex({ products }: Props) {
                         </div>
                         <div className="flex flex-wrap gap-2">
                             {products.links.map((link) => (
-                                <Button
-                                    key={link.label}
-                                    variant={link.active ? "default" : "outline"}
-                                    disabled={!link.url}
-                                    size="sm"
-                                    asChild
-                                >
-                                    <Link href={link.url ?? "#"} dangerouslySetInnerHTML={{ __html: link.label }} />
+                                <Button key={link.label} variant={link.active ? 'default' : 'outline'} disabled={!link.url} size="sm" asChild>
+                                    <Link href={link.url ?? '#'} dangerouslySetInnerHTML={{ __html: link.label }} />
                                 </Button>
                             ))}
                         </div>

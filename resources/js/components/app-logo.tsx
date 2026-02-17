@@ -1,10 +1,10 @@
-import { useMemo, ComponentType } from 'react';
-import { usePage } from '@inertiajs/react';
 import type { BrandingInfo, SharedData } from '@/types';
+import { usePage } from '@inertiajs/react';
 import * as LucideIcons from 'lucide-react';
+import { ComponentType, useMemo } from 'react';
 import AppLogoIcon from './app-logo-icon';
 
-const iconLibrary = LucideIcons as Record<string, ComponentType<{ className?: string }>>;
+const iconLibrary = LucideIcons as unknown as Record<string, ComponentType<{ className?: string }>>;
 
 export default function AppLogo() {
     const page = usePage<SharedData>();
@@ -22,12 +22,14 @@ export default function AppLogo() {
     }, [branding?.logo_icon]);
 
     const fallbackInitials = useMemo(() => {
-        return brandName
-            .split(' ')
-            .filter(Boolean)
-            .map((word) => word[0]?.toUpperCase())
-            .slice(0, 2)
-            .join('') || 'LC';
+        return (
+            brandName
+                .split(' ')
+                .filter(Boolean)
+                .map((word) => word[0]?.toUpperCase())
+                .slice(0, 2)
+                .join('') || 'LC'
+        );
     }, [brandName]);
 
     return (
@@ -44,9 +46,7 @@ export default function AppLogo() {
                     </span>
                 )}
             </div>
-            <span className="text-sm font-semibold text-sidebar-primary-foreground/90 dark:text-white">
-                {brandName}
-            </span>
+            <span className="text-sm font-semibold text-sidebar-primary-foreground/90 dark:text-white">{brandName}</span>
         </div>
     );
 }

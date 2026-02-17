@@ -25,14 +25,14 @@ class PageController extends Controller
         foreach ($slugs as $slug) {
             // Normalize slug to lowercase for case-insensitive matching
             $normalizedSlug = strtolower(trim($slug));
-            
+
             $page = Page::query()
                 ->published()
                 ->where('parent_id', $parentId)
                 ->whereRaw('LOWER(slug) = ?', [$normalizedSlug])
                 ->first();
 
-            if (!$page) {
+            if (! $page) {
                 Log::warning('PageController: Page not found', [
                     'slug' => $slug,
                     'normalized_slug' => $normalizedSlug,
@@ -49,7 +49,7 @@ class PageController extends Controller
         $page->load([
             'sections' => function ($q) {
                 $q->where('is_active', true)->orderBy('display_order');
-            }
+            },
         ]);
 
         Log::debug('PageController: Page loaded successfully', ['page_id' => $page->id, 'title' => $page->title]);

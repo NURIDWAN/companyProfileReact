@@ -4,6 +4,9 @@ use App\Models\BlogPost;
 use App\Models\Category;
 use App\Models\CompanySetting;
 use App\Models\JobPosition;
+use App\Models\MenuItem;
+use App\Models\Page;
+use App\Models\PageSection;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\TeamMember;
@@ -15,25 +18,40 @@ use Inertia\Testing\AssertableInertia as Assert;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    CompanySetting::create([
-        'key' => 'landing.hero',
-        'group' => 'landing',
-        'value' => [
-            'heading' => ['id' => 'Hero heading', 'en' => 'Hero heading'],
-            'subheading' => ['id' => 'Subjudul', 'en' => 'Subheading'],
-            'primary_label' => ['id' => 'Hubungi', 'en' => 'Contact'],
-            'primary_link' => ['id' => '/kontak', 'en' => '/contact'],
-        ],
+    // Create home page with sections
+    $homePage = Page::create([
+        'title' => 'Home',
+        'slug' => 'home',
+        'status' => 'published',
     ]);
 
-    CompanySetting::create([
-        'key' => 'landing.about',
-        'group' => 'landing',
-        'value' => [
-            'title' => ['id' => 'Tentang', 'en' => 'About'],
-            'description' => ['id' => 'Deskripsi', 'en' => 'Description'],
-            'highlights' => ['id' => ['Nilai 1'], 'en' => ['Value 1']],
-        ],
+    PageSection::create([
+        'page_id' => $homePage->id,
+        'title' => 'Hero',
+        'slug' => 'hero',
+        'content' => json_encode([
+            '__type' => 'hero_home',
+            'heading' => 'Hero heading',
+            'subheading' => 'Subheading',
+            'primary_label' => 'Contact',
+            'primary_link' => '/contact',
+        ]),
+        'display_order' => 1,
+        'is_active' => true,
+    ]);
+
+    PageSection::create([
+        'page_id' => $homePage->id,
+        'title' => 'About',
+        'slug' => 'about',
+        'content' => json_encode([
+            '__type' => 'about_intro',
+            'heading' => 'About Us',
+            'description' => 'Description',
+            'highlights' => ['Value 1'],
+        ]),
+        'display_order' => 2,
+        'is_active' => true,
     ]);
 
     CompanySetting::create([
@@ -62,15 +80,15 @@ it('renders home page with dynamic data', function () {
     $this->get(route('home'))
         ->assertOk()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('landingPage/Home')
                 ->has(
                     'services',
-                    fn(Assert $services) => $services
+                    fn (Assert $services) => $services
                         ->where('0.title', 'Konsultasi Digital')
                 )
                 ->where('hero.heading', 'Hero heading')
-                ->where('about.title', 'Tentang')
+                ->where('about.title', 'About Us')
         );
 });
 
@@ -80,12 +98,12 @@ it('renders product listing with categories', function () {
     $this->get(route('product'))
         ->assertOk()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('landingPage/Product')
                 ->has('products', 1)
                 ->has(
                     'categories',
-                    fn(Assert $categories) => $categories
+                    fn (Assert $categories) => $categories
                         ->where('0', 'Software')
                 )
                 ->has('productCta')
@@ -103,7 +121,7 @@ it('renders career page with active positions', function () {
     $this->get(route('career'))
         ->assertOk()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('landingPage/Career')
                 ->has('positions', 1)
         );
@@ -112,116 +130,151 @@ it('renders career page with active positions', function () {
 it('renders service page with configured content settings', function () {
     Service::factory()->create(['name' => 'Integrasi Sistem']);
 
-    CompanySetting::create([
-        'key' => 'service.hero',
-        'group' => 'service',
-        'value' => [
-            'heading' => ['id' => 'Solusi Test', 'en' => 'Test Solution'],
-            'highlight' => ['id' => 'Unggul', 'en' => 'Excellent'],
-        ],
+    // Create service page with sections
+    $servicePage = Page::create([
+        'title' => 'Service',
+        'slug' => 'service',
+        'status' => 'published',
     ]);
 
-    CompanySetting::create([
-        'key' => 'service.offerings',
-        'group' => 'service',
-        'value' => [
-            'badge' => ['id' => 'Uji Coba', 'en' => 'Pilot'],
-            'heading' => ['id' => 'Penawaran Unggulan', 'en' => 'Top Offerings'],
-            'description' => ['id' => 'Deskripsi penawaran.', 'en' => 'Offerings description.'],
+    PageSection::create([
+        'page_id' => $servicePage->id,
+        'title' => 'Hero',
+        'slug' => 'hero',
+        'content' => json_encode([
+            '__type' => 'service_hero',
+            'heading' => 'Test Solution',
+            'highlight' => 'Excellent',
+        ]),
+        'display_order' => 1,
+        'is_active' => true,
+    ]);
+
+    PageSection::create([
+        'page_id' => $servicePage->id,
+        'title' => 'Offerings',
+        'slug' => 'offerings',
+        'content' => json_encode([
+            '__type' => 'service_offerings',
+            'badge' => 'Pilot',
+            'heading' => 'Top Offerings',
+            'description' => 'Offerings description.',
             'items' => [
                 [
-                    'title' => ['id' => 'Custom Highlight', 'en' => 'Custom Highlight'],
-                    'description' => ['id' => 'Konten dari pengaturan.', 'en' => 'Content from settings.'],
+                    'title' => 'Custom Highlight',
+                    'description' => 'Content from settings.',
                     'icon' => 'Layers',
                 ],
             ],
-        ],
+        ]),
+        'display_order' => 2,
+        'is_active' => true,
     ]);
 
-    CompanySetting::create([
-        'key' => 'service.summary',
-        'group' => 'service',
-        'value' => [
-            'badge' => ['id' => 'Ringkasan', 'en' => 'Summary'],
-            'heading' => ['id' => 'Judul Ringkas', 'en' => 'Summary Heading'],
-            'description' => ['id' => 'Ikhtisar layanan.', 'en' => 'Service overview.'],
-        ],
+    PageSection::create([
+        'page_id' => $servicePage->id,
+        'title' => 'Summary',
+        'slug' => 'summary',
+        'content' => json_encode([
+            '__type' => 'service_summary',
+            'badge' => 'Summary',
+            'heading' => 'Summary Heading',
+            'description' => 'Service overview.',
+        ]),
+        'display_order' => 3,
+        'is_active' => true,
     ]);
 
-    CompanySetting::create([
-        'key' => 'service.tech_stack',
-        'group' => 'service',
-        'value' => [
-            'badge' => ['id' => 'Teknologi', 'en' => 'Tech'],
-            'heading' => ['id' => 'Teknologi Utama', 'en' => 'Key Technologies'],
-            'items' => [
+    PageSection::create([
+        'page_id' => $servicePage->id,
+        'title' => 'Tech Stack',
+        'slug' => 'tech-stack',
+        'content' => json_encode([
+            '__type' => 'service_tech_stack',
+            'badge' => 'Tech',
+            'heading' => 'Key Technologies',
+            'categories' => [
                 [
-                    'name' => ['id' => 'Laravel', 'en' => 'Laravel'],
-                    'logo' => 'https://example.com/logo.svg',
+                    'name' => 'Laravel',
+                    'items' => ['PHP', 'Eloquent'],
                 ],
             ],
-        ],
+        ]),
+        'display_order' => 4,
+        'is_active' => true,
     ]);
 
-    CompanySetting::create([
-        'key' => 'service.process',
-        'group' => 'service',
-        'value' => [
-            'badge' => ['id' => 'Proses', 'en' => 'Process'],
+    PageSection::create([
+        'page_id' => $servicePage->id,
+        'title' => 'Process',
+        'slug' => 'process',
+        'content' => json_encode([
+            '__type' => 'service_process',
+            'badge' => 'Process',
             'items' => [
                 [
-                    'step' => ['id' => '01', 'en' => '01'],
-                    'title' => ['id' => 'Analisis', 'en' => 'Discovery'],
-                    'description' => ['id' => 'Analisis kebutuhan.', 'en' => 'Needs analysis.'],
+                    'step' => '01',
+                    'title' => 'Discovery',
+                    'description' => 'Needs analysis.',
                     'icon' => 'Search',
                 ],
             ],
-        ],
+        ]),
+        'display_order' => 5,
+        'is_active' => true,
     ]);
 
-    CompanySetting::create([
-        'key' => 'service.advantages',
-        'group' => 'service',
-        'value' => [
-            'badge' => ['id' => 'Keunggulan', 'en' => 'Advantages'],
+    PageSection::create([
+        'page_id' => $servicePage->id,
+        'title' => 'Advantages',
+        'slug' => 'advantages',
+        'content' => json_encode([
+            '__type' => 'service_advantages',
+            'badge' => 'Advantages',
             'items' => [
                 [
-                    'title' => ['id' => 'Tim Berpengalaman', 'en' => 'Experienced Team'],
-                    'description' => ['id' => 'Berpengalaman bertahun-tahun.', 'en' => 'Years of experience.'],
+                    'title' => 'Experienced Team',
+                    'description' => 'Years of experience.',
                     'icon' => 'Users',
                 ],
             ],
-        ],
+        ]),
+        'display_order' => 6,
+        'is_active' => true,
     ]);
 
-    CompanySetting::create([
-        'key' => 'service.faqs',
-        'group' => 'service',
-        'value' => [
-            'badge' => ['id' => 'FAQ', 'en' => 'FAQ'],
+    PageSection::create([
+        'page_id' => $servicePage->id,
+        'title' => 'FAQs',
+        'slug' => 'faqs',
+        'content' => json_encode([
+            '__type' => 'service_faqs',
+            'badge' => 'FAQ',
             'items' => [
                 [
-                    'question' => ['id' => 'Apa itu layanan?', 'en' => 'What is the service?'],
-                    'answer' => ['id' => 'Layanan konsultasi end-to-end.', 'en' => 'End-to-end consulting.'],
+                    'question' => 'What is the service?',
+                    'answer' => 'End-to-end consulting.',
                 ],
             ],
-        ],
+        ]),
+        'display_order' => 7,
+        'is_active' => true,
     ]);
 
     $this->get(route('service'))
         ->assertOk()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('landingPage/Service')
-                ->where('hero.heading', 'Solusi Test')
-                ->where('hero.highlight', 'Unggul')
-                ->where('offeringsSection.badge', 'Uji Coba')
+                ->where('hero.heading', 'Test Solution')
+                ->where('hero.highlight', 'Excellent')
+                ->where('offeringsSection.badge', 'Pilot')
                 ->where('offeringsSection.items.0.title', 'Custom Highlight')
-                ->where('summarySection.badge', 'Ringkasan')
+                ->where('summarySection.badge', 'Summary')
                 ->where('techStackSection.items.0.name', 'Laravel')
-                ->where('processSection.items.0.title', 'Analisis')
-                ->where('advantagesSection.items.0.title', 'Tim Berpengalaman')
-                ->where('faqSection.items.0.question', 'Apa itu layanan?')
+                ->where('processSection.items.0.title', 'Discovery')
+                ->where('advantagesSection.items.0.title', 'Experienced Team')
+                ->where('faqSection.items.0.question', 'What is the service?')
         );
 });
 
@@ -253,7 +306,7 @@ it('renders contact page with company profile data', function () {
     $this->get(route('contact'))
         ->assertOk()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('landingPage/Contact')
                 ->where('branding.name', 'Harmony Strategic Group')
                 ->where('companyContacts.phone', '+62 811 1234 567')
@@ -261,69 +314,102 @@ it('renders contact page with company profile data', function () {
 });
 
 it('renders about page with dynamic sections', function () {
-    CompanySetting::create([
-        'key' => 'about.overview',
-        'group' => 'about',
-        'value' => [
+    // Create about page with sections
+    $aboutPage = Page::create([
+        'title' => 'About',
+        'slug' => 'about',
+        'status' => 'published',
+    ]);
+
+    PageSection::create([
+        'page_id' => $aboutPage->id,
+        'title' => 'Overview',
+        'slug' => 'overview',
+        'content' => json_encode([
+            '__type' => 'about_overview',
             'badge' => 'Tentang Kami',
-            'title' => 'Tentang Contoh Perusahaan',
+            'heading' => 'Tentang Contoh Perusahaan',
             'paragraphs' => ['Paragraf 1'],
             'stats' => [
                 ['value' => '10+', 'label' => 'Tahun Pengalaman'],
             ],
-        ],
+        ]),
+        'display_order' => 1,
+        'is_active' => true,
     ]);
 
-    CompanySetting::create([
-        'key' => 'about.vision',
-        'group' => 'about',
-        'value' => [
+    PageSection::create([
+        'page_id' => $aboutPage->id,
+        'title' => 'Vision',
+        'slug' => 'vision',
+        'content' => json_encode([
+            '__type' => 'about_vision',
             'vision_text' => 'Visi uji coba.',
             'mission_text' => 'Misi uji coba.',
-        ],
+        ]),
+        'display_order' => 2,
+        'is_active' => true,
     ]);
 
-    CompanySetting::create([
-        'key' => 'about.values',
-        'group' => 'about',
-        'value' => [
-            ['icon' => 'zap', 'title' => 'Inovasi', 'description' => 'Selalu inovatif.'],
-        ],
+    PageSection::create([
+        'page_id' => $aboutPage->id,
+        'title' => 'Values',
+        'slug' => 'values',
+        'content' => json_encode([
+            '__type' => 'about_values',
+            'items' => [
+                ['icon' => 'zap', 'title' => 'Inovasi', 'description' => 'Selalu inovatif.'],
+            ],
+        ]),
+        'display_order' => 3,
+        'is_active' => true,
     ]);
 
-    CompanySetting::create([
-        'key' => 'about.statistics',
-        'group' => 'about',
-        'value' => [
+    PageSection::create([
+        'page_id' => $aboutPage->id,
+        'title' => 'Statistics',
+        'slug' => 'statistics',
+        'content' => json_encode([
+            '__type' => 'about_statistics',
             'primary' => [
                 ['value' => '100+', 'label' => 'Proyek'],
             ],
-        ],
+        ]),
+        'display_order' => 4,
+        'is_active' => true,
     ]);
 
-    CompanySetting::create([
-        'key' => 'about.team',
-        'group' => 'about',
-        'value' => [
+    PageSection::create([
+        'page_id' => $aboutPage->id,
+        'title' => 'Team',
+        'slug' => 'team',
+        'content' => json_encode([
+            '__type' => 'about_team',
             'members' => [
                 ['name' => 'Test', 'role' => 'CEO', 'image' => '', 'description' => 'Memimpin perusahaan.'],
             ],
-        ],
+        ]),
+        'display_order' => 5,
+        'is_active' => true,
     ]);
 
-    CompanySetting::create([
-        'key' => 'about.cta',
-        'group' => 'about',
-        'value' => [
+    PageSection::create([
+        'page_id' => $aboutPage->id,
+        'title' => 'CTA',
+        'slug' => 'cta',
+        'content' => json_encode([
+            '__type' => 'about_cta',
             'primary_label' => 'Hubungi',
             'primary_link' => '/contact',
-        ],
+        ]),
+        'display_order' => 6,
+        'is_active' => true,
     ]);
 
     $this->get(route('about'))
         ->assertOk()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('landingPage/About')
                 ->where('overview.paragraphs.0', 'Paragraf 1')
                 ->where('vision.vision_text', 'Visi uji coba.')
@@ -335,6 +421,9 @@ it('renders about page with dynamic sections', function () {
 });
 
 it('only exposes activated navigation links', function () {
+    // Clear all pages to isolate this test from beforeEach
+    Page::query()->forceDelete();
+
     CompanySetting::create([
         'key' => 'navigation.primary',
         'group' => 'navigation',
@@ -348,7 +437,7 @@ it('only exposes activated navigation links', function () {
     $this->get(route('home'))
         ->assertOk()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->has('navigation.primary', 2)
                 ->where('navigation.primary.0.key', 'home')
                 ->where('navigation.primary.1.key', 'contact')
@@ -356,13 +445,23 @@ it('only exposes activated navigation links', function () {
 });
 
 it('returns 404 when a landing page is disabled', function () {
-    CompanySetting::create([
-        'key' => 'navigation.primary',
-        'group' => 'navigation',
-        'value' => [
-            ['key' => 'home', 'order' => 1, 'active' => false],
-            ['key' => 'contact', 'order' => 8, 'active' => true],
-        ],
+    // Create menu items to control page visibility
+    MenuItem::create([
+        'title' => 'Home',
+        'position' => 'main',
+        'type' => 'link',
+        'target' => '/',
+        'is_active' => false,  // Home is disabled
+        'display_order' => 1,
+    ]);
+
+    MenuItem::create([
+        'title' => 'Contact',
+        'position' => 'main',
+        'type' => 'link',
+        'target' => '/contact',
+        'is_active' => true,  // Contact is enabled
+        'display_order' => 2,
     ]);
 
     $this->get(route('home'))->assertNotFound();
@@ -392,7 +491,7 @@ it('renders blog category page with filtered articles', function () {
     $this->get(route('blog.category', $category))
         ->assertOk()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('landingPage/Blog')
                 ->has('articles', 1)
                 ->where('articles.0.title', 'Artikel Berita')

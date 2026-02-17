@@ -1,7 +1,7 @@
 import 'jodit/es2021/jodit.min.css';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-type JoditEditorType = typeof import('jodit-react')['default'];
+type JoditEditorType = (typeof import('jodit-react'))['default'];
 
 type RichTextEditorProps = {
     value?: string | null;
@@ -10,9 +10,18 @@ type RichTextEditorProps = {
     className?: string;
 };
 
+// Helper to get fresh CSRF token
+function getCsrfToken(): string {
+    if (typeof window === 'undefined') {
+        return '';
+    }
+    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+}
+
 export function RichTextEditor({ value = '', onChange, placeholder, className }: RichTextEditorProps) {
     const [JoditEditor, setJoditEditor] = useState<JoditEditorType | null>(null);
     const [uploadError, setUploadError] = useState<string | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const editorRef = useRef<any>(null);
 
     useEffect(() => {
@@ -27,14 +36,6 @@ export function RichTextEditor({ value = '', onChange, placeholder, className }:
                 setUploadError('Editor tidak dapat dimuat. Muat ulang halaman.');
             });
     }, [JoditEditor]);
-
-    const csrfToken = useMemo(() => {
-        if (typeof window === 'undefined') {
-            return '';
-        }
-
-        return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
-    }, []);
 
     const config = useMemo(
         () => ({
@@ -75,37 +76,33 @@ export function RichTextEditor({ value = '', onChange, placeholder, className }:
             ],
             uploader: {
                 url: route('admin.blog-posts.upload-image'),
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                },
                 withCredentials: true,
-                process: (resp: any) => {
+                headers: () => ({
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                }),
+                process: (resp: { url?: string }) => {
                     if (resp?.url) {
                         return { files: [resp.url] };
                     }
                     return resp;
                 },
-                isSuccess: (resp: any) => Boolean(resp?.url),
-                defaultHandlerSuccess: (data: any) => {
+                isSuccess: (resp: { url?: string }) => Boolean(resp?.url),
+                defaultHandlerSuccess: (data: { url?: string }) => {
                     if (data?.url && editorRef.current) {
                         editorRef.current?.s?.insertImage?.(data.url);
                         setUploadError(null);
                     }
                 },
-                defaultHandlerError: (error: any) => {
+                defaultHandlerError: (error: { message?: string }) => {
                     setUploadError(error?.message ?? 'Gagal mengunggah gambar.');
                 },
             },
         }),
-        [csrfToken, placeholder],
+        [placeholder],
     );
 
     if (!JoditEditor || typeof window === 'undefined') {
-        return (
-            <div className="rounded-md border border-input bg-background px-3 py-2 text-sm text-muted-foreground">
-                Memuat editor…
-            </div>
-        );
+        return <div className="rounded-md border border-input bg-background px-3 py-2 text-sm text-muted-foreground">Memuat editor…</div>;
     }
 
     return (
@@ -113,13 +110,7 @@ export function RichTextEditor({ value = '', onChange, placeholder, className }:
             {uploadError ? <p className="text-xs text-rose-500">{uploadError}</p> : null}
             <div className="rounded-md border border-input bg-background">
                 {placeholder ? <div className="px-3 pt-2 text-xs text-muted-foreground">{placeholder}</div> : null}
-                <JoditEditor
-                    ref={editorRef}
-                    value={value || ''}
-                    config={config}
-                    onBlur={(content) => onChange(content)}
-                    onChange={() => { }}
-                />
+                <JoditEditor ref={editorRef} value={value || ''} config={config} onBlur={(content) => onChange(content)} onChange={() => {}} />
             </div>
         </div>
     );

@@ -1,5 +1,5 @@
-import { SelectItem } from "@/components/ui/select";
-import React, { useMemo } from "react";
+import { SelectItem } from '@/components/ui/select';
+import { useMemo } from 'react';
 
 type PageOption = {
     id: number;
@@ -51,18 +51,20 @@ function buildPageTree(pages: PageOption[]): TreeNode[] {
     return flattened;
 }
 
-export function PageOptionsPlain({ pages, includeNone = false, noneValue = "none", noneLabel = "(Tidak ada)" }: Props) {
+export function PageOptionsPlain({ pages, includeNone = false, noneValue = 'none', noneLabel = '(Tidak ada)' }: Props) {
     const flatPages = useMemo(() => buildPageTree(pages), [pages]);
 
     return (
         <>
             {includeNone && <SelectItem value={noneValue}>{noneLabel}</SelectItem>}
             {flatPages.map((page) => {
-                const indent = "— ".repeat(page.depth);
-                const suffix = !page.has_content ? " (konten kosong)" : "";
+                const indent = '— '.repeat(page.depth);
+                const suffix = !page.has_content ? ' (konten kosong)' : '';
                 return (
                     <SelectItem key={page.id} value={String(page.id)}>
-                        {indent}{page.title}{suffix}
+                        {indent}
+                        {page.title}
+                        {suffix}
                     </SelectItem>
                 );
             })}

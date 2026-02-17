@@ -68,11 +68,11 @@ class JobApplicationController extends Controller
 
     public function downloadResume(JobApplication $jobApplication)
     {
-        if (!$jobApplication->resume_path || !Storage::disk('public')->exists($jobApplication->resume_path)) {
+        if (! $jobApplication->resume_path || ! Storage::disk('public')->exists($jobApplication->resume_path)) {
             abort(404);
         }
 
-        return Storage::disk('public')->download($jobApplication->resume_path, 'Resume-' . $jobApplication->name . '.' . pathinfo($jobApplication->resume_path, PATHINFO_EXTENSION));
+        return Storage::disk('public')->download($jobApplication->resume_path, 'Resume-'.$jobApplication->name.'.'.pathinfo($jobApplication->resume_path, PATHINFO_EXTENSION));
     }
 
     private function transformApplication(JobApplication $application): array

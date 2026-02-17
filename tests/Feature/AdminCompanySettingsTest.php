@@ -155,15 +155,15 @@ it('downloads company settings backup as sql', function () {
     $content = $response->streamedContent();
 
     expect($content)->toContain('TRUNCATE TABLE `company_settings`');
-    expect($content)->toContain("INSERT INTO `company_settings` (`id`, `key`, `value`, `group`, `created_at`, `updated_at`)");
-    expect($content)->toContain("Contoh Perusahaan");
+    expect($content)->toContain('INSERT INTO `company_settings` (`id`, `key`, `value`, `group`, `created_at`, `updated_at`)');
+    expect($content)->toContain('Contoh Perusahaan');
 });
 
 it('updates AI settings', function () {
     $this->actingAs(User::factory()->create())
         ->post(route('admin.settings.ai.update'), [
             'api_key' => 'sk-or-v1-test-key-123',
-            'model' => 'google/gemini-2.0-flash-exp:free',
+            'model' => 'google/gemini-2.0-flash-001',
             'endpoint' => 'https://openrouter.ai/api/v1',
         ])
         ->assertRedirect();
@@ -172,7 +172,7 @@ it('updates AI settings', function () {
 
     expect($setting->value)->toMatchArray([
         'api_key' => 'sk-or-v1-test-key-123',
-        'model' => 'google/gemini-2.0-flash-exp:free',
+        'model' => 'google/gemini-2.0-flash-001',
         'endpoint' => 'https://openrouter.ai/api/v1',
     ]);
 });

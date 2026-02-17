@@ -7,7 +7,6 @@ use App\Http\Requests\Landing\JobApplicationRequest;
 use App\Models\JobApplication;
 use App\Models\JobPosition;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 

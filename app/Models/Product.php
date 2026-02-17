@@ -5,8 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Product extends Model
 {
@@ -18,7 +18,7 @@ class Product extends Model
             ->logOnly(['name', 'slug', 'is_active', 'category'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => "Product '{$this->name}' {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName) => "Product '{$this->name}' {$eventName}");
     }
 
     protected $fillable = [
@@ -83,7 +83,7 @@ class Product extends Model
 
     protected function resolveImageUrl(?string $path): ?string
     {
-        if (!$path) {
+        if (! $path) {
             return null;
         }
 
@@ -97,7 +97,7 @@ class Product extends Model
     public function resolveGalleryUrls(): array
     {
         return collect($this->gallery ?? [])
-            ->map(fn($image) => $this->resolveImageUrl(is_array($image) ? ($image['url'] ?? null) : $image))
+            ->map(fn ($image) => $this->resolveImageUrl(is_array($image) ? ($image['url'] ?? null) : $image))
             ->filter()
             ->values()
             ->all();

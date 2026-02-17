@@ -10,8 +10,7 @@ class GeminiProductEnricher
 {
     public function __construct(
         private readonly ?OpenRouterService $openRouterService = null,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<string, mixed>  $payload
@@ -21,7 +20,7 @@ class GeminiProductEnricher
     {
         $service = $this->openRouterService ?? app(OpenRouterService::class);
 
-        if (!$service->isConfigured()) {
+        if (! $service->isConfigured()) {
             throw new RuntimeException('AI API key is not configured. Set it in Settings or .env file.');
         }
 
@@ -42,15 +41,11 @@ class GeminiProductEnricher
             'timeout' => 25,
         ]);
 
-        $textPayload = $service->extractContent($response);
-
-        if (!$textPayload) {
-            throw new RuntimeException('AI response does not contain content.');
-        }
+        $textPayload = $service->extractContentOrFail($response);
 
         $decoded = $this->decodeJsonPayload($textPayload);
 
-        if (!is_array($decoded)) {
+        if (! is_array($decoded)) {
             throw new RuntimeException('AI response is not valid JSON.');
         }
 
@@ -82,7 +77,7 @@ class GeminiProductEnricher
         $preset = trim((string) ($payload['preset'] ?? ''));
 
         $featureDescription = $features
-            ? '- Soroti fitur utama berikut: ' . implode(', ', $features) . '.'
+            ? '- Soroti fitur utama berikut: '.implode(', ', $features).'.'
             : '- Jika fitur belum ada, rekomendasikan keunggulan umum digital agency/software house.';
 
         $priceNote = $price !== null
@@ -94,7 +89,7 @@ class GeminiProductEnricher
             : 'Belum ada deskripsi kaya, bantu buat ringkasan pemasaran yang kuat.';
 
         $featuresBlock = $features
-            ? "Fitur/USP yang perlu disinggung:\n- " . implode("\n- ", $features)
+            ? "Fitur/USP yang perlu disinggung:\n- ".implode("\n- ", $features)
             : 'Pengguna bisa mengisi fitur sendiri setelahnya, jadi beri rekomendasi generik.';
         $presetInstruction = $this->presetInstruction($preset);
 
@@ -132,7 +127,6 @@ PROMPT;
     }
 
     /**
-     * @param  mixed  $value
      * @return array<int, string>
      */
     private function normalizeArray(mixed $value): array
@@ -145,7 +139,6 @@ PROMPT;
     }
 
     /**
-     * @param  mixed  $value
      * @return array<int, array{question: string, answer: string}>
      */
     private function normalizeFaqs(mixed $value): array
@@ -154,7 +147,7 @@ PROMPT;
 
         return collect($items)
             ->map(function ($item) {
-                if (!is_array($item)) {
+                if (! is_array($item)) {
                     return null;
                 }
 

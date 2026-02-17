@@ -55,7 +55,7 @@ class DashboardController extends Controller
             $end = Carbon::now()->subWeeks($weeksAgo);
 
             return [
-                'label' => $start->format('d M') . ' - ' . $end->format('d M'),
+                'label' => $start->format('d M').' - '.$end->format('d M'),
                 'products' => Product::query()->whereBetween('created_at', [$start, $end])->count(),
                 'projects' => Project::query()->whereBetween('created_at', [$start, $end])->count(),
             ];
@@ -63,6 +63,7 @@ class DashboardController extends Controller
 
         $monthlyProducts = collect(range(0, 11))->map(function ($index) {
             $month = Carbon::now()->subMonths($index);
+
             return [
                 'label' => $month->format('M Y'),
                 'value' => Product::query()
@@ -74,6 +75,7 @@ class DashboardController extends Controller
 
         $monthlyServices = collect(range(0, 11))->map(function ($index) {
             $month = Carbon::now()->subMonths($index);
+
             return [
                 'label' => $month->format('M Y'),
                 'value' => Service::query()
@@ -85,6 +87,7 @@ class DashboardController extends Controller
 
         $monthlyProjects = collect(range(0, 11))->map(function ($index) {
             $month = Carbon::now()->subMonths($index);
+
             return [
                 'label' => $month->format('M Y'),
                 'value' => Project::query()

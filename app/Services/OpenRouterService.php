@@ -11,7 +11,9 @@ use RuntimeException;
 class OpenRouterService
 {
     private string $apiKey;
+
     private string $model;
+
     private string $endpoint;
 
     public function __construct(
@@ -20,7 +22,7 @@ class OpenRouterService
         ?string $endpoint = null,
     ) {
         $this->apiKey = $apiKey ?? $this->resolveConfig('api_key', 'OPENROUTER_API_KEY');
-        $this->model = $model ?? $this->resolveConfig('model', 'OPENROUTER_MODEL', 'google/gemini-2.0-flash-exp:free');
+        $this->model = $model ?? $this->resolveConfig('model', 'OPENROUTER_MODEL', 'google/gemini-2.0-flash-001');
         $this->endpoint = $endpoint ?? $this->resolveConfig('endpoint', 'OPENROUTER_ENDPOINT', 'https://openrouter.ai/api/v1');
     }
 
@@ -33,7 +35,7 @@ class OpenRouterService
      */
     public function chat(array $messages, array $options = []): array
     {
-        if (!$this->apiKey) {
+        if (! $this->apiKey) {
             throw new RuntimeException('OpenRouter API key is not configured. Set it in Settings or .env file.');
         }
 
@@ -48,14 +50,14 @@ class OpenRouterService
             $payload['response_format'] = $options['response_format'];
         }
 
-        $url = rtrim($this->endpoint, '/') . '/chat/completions';
+        $url = rtrim($this->endpoint, '/').'/chat/completions';
 
         try {
             $response = Http::timeout($options['timeout'] ?? 30)
                 ->retry(2, 500)
                 ->acceptJson()
                 ->withHeaders([
-                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Authorization' => 'Bearer '.$this->apiKey,
                     'Content-Type' => 'application/json',
                     'HTTP-Referer' => config('app.url'),
                     'X-Title' => config('app.name'),
@@ -90,6 +92,36 @@ class OpenRouterService
     }
 
     /**
+     * Extract content with detailed error information if not found.
+     *
+     * @throws RuntimeException
+     */
+    public function extractContentOrFail(array $response): string
+    {
+        $content = $this->extractContent($response);
+
+        if ($content === null || $content === '') {
+            // Build detailed error message for debugging
+            $hasChoices = isset($response['choices']) && is_array($response['choices']);
+            $choicesCount = $hasChoices ? count($response['choices']) : 0;
+            $hasError = isset($response['error']);
+            $errorMessage = $hasError ? ($response['error']['message'] ?? json_encode($response['error'])) : null;
+
+            $debugInfo = sprintf(
+                'choices=%d, has_error=%s%s, response_keys=%s',
+                $choicesCount,
+                $hasError ? 'yes' : 'no',
+                $errorMessage ? " ({$errorMessage})" : '',
+                implode(',', array_keys($response))
+            );
+
+            throw new RuntimeException("AI response does not contain content. Debug: {$debugInfo}");
+        }
+
+        return $content;
+    }
+
+    /**
      * Get current model being used.
      */
     public function getModel(): string
@@ -110,7 +142,7 @@ class OpenRouterService
      */
     public function isConfigured(): bool
     {
-        return !empty($this->apiKey);
+        return ! empty($this->apiKey);
     }
 
     /**

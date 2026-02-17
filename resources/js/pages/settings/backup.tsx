@@ -1,11 +1,11 @@
 import { Head } from '@inertiajs/react';
 
 import HeadingSmall from '@/components/heading-small';
-import AppLayout from '@/layouts/app-layout';
-import SettingsLayout from '@/layouts/settings/layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import AppLayout from '@/layouts/app-layout';
+import SettingsLayout from '@/layouts/settings/layout';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -22,10 +22,7 @@ export default function BackupSettings() {
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall
-                        title="Backup konten"
-                        description="Unduh salinan data pengaturan perusahaan untuk disimpan secara mandiri."
-                    />
+                    <HeadingSmall title="Backup konten" description="Unduh salinan data pengaturan perusahaan untuk disimpan secara mandiri." />
 
                     <Card>
                         <CardHeader>
@@ -33,9 +30,8 @@ export default function BackupSettings() {
                         </CardHeader>
                         <CardContent className="space-y-4 text-sm text-muted-foreground">
                             <p>
-                                Simpan file SQL yang berisi seluruh isi tabel <code>company_settings</code>. Anda dapat
-                                menggunakannya untuk memulihkan konfigurasi jika terjadi perubahan yang tidak diinginkan atau
-                                migrasi server.
+                                Simpan file SQL yang berisi seluruh isi tabel <code>company_settings</code>. Anda dapat menggunakannya untuk
+                                memulihkan konfigurasi jika terjadi perubahan yang tidak diinginkan atau migrasi server.
                             </p>
                             <Separator />
                             <ul className="list-disc space-y-1 pl-4">
@@ -59,14 +55,13 @@ export default function BackupSettings() {
                         </CardHeader>
                         <CardContent className="space-y-4 text-sm text-muted-foreground">
                             <p>
-                                Fitur impor otomatis tidak lagi tersedia. Untuk memulihkan data dari file SQL, hubungi tim teknis
-                                dan jalankan perintah melalui database (misalnya <code>mysql</code> CLI atau tool administrasi
-                                lainnya).
+                                Fitur impor otomatis tidak lagi tersedia. Untuk memulihkan data dari file SQL, hubungi tim teknis dan jalankan
+                                perintah melalui database (misalnya <code>mysql</code> CLI atau tool administrasi lainnya).
                             </p>
                             <Separator />
                             <p>
-                                Pastikan selalu menyimpan file hasil backup di lokasi aman dan lakukan uji restore secara berkala
-                                agar prosedur pemulihan tetap terdokumentasi.
+                                Pastikan selalu menyimpan file hasil backup di lokasi aman dan lakukan uji restore secara berkala agar prosedur
+                                pemulihan tetap terdokumentasi.
                             </p>
                         </CardContent>
                     </Card>

@@ -127,9 +127,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('settings/footer/cta', [CompanySettingController::class, 'updateFooterCta'])->name('settings.footer.cta.update');
         Route::post('settings/footer/legal', [CompanySettingController::class, 'updateFooterLegal'])->name('settings.footer.legal.update');
         Route::post('settings/ai', [CompanySettingController::class, 'updateAiSettings'])->name('settings.ai.update');
+        Route::post('settings/ai/test', [CompanySettingController::class, 'testAi'])->name('settings.ai.test');
         Route::post('settings/branding', [CompanySettingController::class, 'updateBranding'])->name('settings.branding.update');
         Route::resource('pages', AdminPageController::class);
-        Route::resource('menus', MenuItemController::class)->only(['index', 'store', 'destroy']);
+        Route::resource('menus', MenuItemController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::get('menus/page/{page}/sections', [MenuItemController::class, 'sections'])->name('menus.page.sections');
         Route::patch('menus/{menu}/status', [MenuItemController::class, 'updateStatus'])->name('menus.status');
         Route::put('menus/page/{page}/sections', [MenuItemController::class, 'updatePageSections'])->name('menus.page-sections');

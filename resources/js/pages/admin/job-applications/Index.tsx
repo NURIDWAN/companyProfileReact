@@ -1,11 +1,11 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
 import type { PageProps } from '@inertiajs/core';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 
-import AppLayout from '@/layouts/app-layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import AppLayout from '@/layouts/app-layout';
 import type { JobApplication } from '@/types';
 
 type StatusOption = {
@@ -45,11 +45,7 @@ export default function JobApplicationIndex(): React.ReactElement {
     const { applications, filters, availableStatuses } = usePage<JobApplicationIndexProps>().props;
 
     const handleFilterChange = (value: string) => {
-        router.get(
-            route('admin.job-applications.index'),
-            value === 'all' ? {} : { status: value },
-            { preserveState: true, replace: true },
-        );
+        router.get(route('admin.job-applications.index'), value === 'all' ? {} : { status: value }, { preserveState: true, replace: true });
     };
 
     return (
@@ -59,9 +55,7 @@ export default function JobApplicationIndex(): React.ReactElement {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight text-slate-900">Lamaran Karir</h1>
-                        <p className="text-sm text-slate-500">
-                            Kelola lamaran kandidat dan tindak lanjuti proses rekrutmen dari satu tempat.
-                        </p>
+                        <p className="text-sm text-slate-500">Kelola lamaran kandidat dan tindak lanjuti proses rekrutmen dari satu tempat.</p>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -113,9 +107,7 @@ export default function JobApplicationIndex(): React.ReactElement {
                                                     {application.job?.department} • {application.job?.location}
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-slate-600">
-                                                {application.phone ?? '-'}
-                                            </td>
+                                            <td className="px-4 py-3 text-sm text-slate-600">{application.phone ?? '-'}</td>
                                             <td className="px-4 py-3">
                                                 <Badge className={statusColor[application.status] ?? 'bg-slate-200 text-slate-800'}>
                                                     {availableStatuses.find((status) => status.value === application.status)?.label ??
@@ -129,7 +121,11 @@ export default function JobApplicationIndex(): React.ReactElement {
                                                 <div className="flex flex-wrap justify-end gap-2">
                                                     {application.resume_url && (
                                                         <Button size="sm" variant="outline" asChild>
-                                                            <a href={route('admin.job-applications.resume', application.id)} target="_blank" rel="noopener noreferrer">
+                                                            <a
+                                                                href={route('admin.job-applications.resume', application.id)}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                            >
                                                                 Unduh CV
                                                             </a>
                                                         </Button>
@@ -147,13 +143,7 @@ export default function JobApplicationIndex(): React.ReactElement {
 
                         <div className="flex flex-wrap items-center gap-2">
                             {applications.links.map((link) => (
-                                <Button
-                                    key={link.label}
-                                    variant={link.active ? 'default' : 'outline'}
-                                    size="sm"
-                                    disabled={!link.url}
-                                    asChild
-                                >
+                                <Button key={link.label} variant={link.active ? 'default' : 'outline'} size="sm" disabled={!link.url} asChild>
                                     <Link href={link.url ?? '#'} dangerouslySetInnerHTML={{ __html: link.label }} />
                                 </Button>
                             ))}

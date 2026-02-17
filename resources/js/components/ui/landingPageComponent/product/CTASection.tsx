@@ -110,7 +110,7 @@ export default function CTASection({
           className="grid gap-4 md:grid-cols-3"
         >
           {visibleContacts.map((contact, index) => {
-            const key = contact.icon?.toLowerCase() ?? "phone";
+            const key = (contact.icon?.toLowerCase() ?? "phone") as keyof typeof contactIcons;
             const Icon = contactIcons[key] ?? contactIcons.phone;
 
             return (

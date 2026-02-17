@@ -1,5 +1,7 @@
+import type { SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
-import type { SeoMeta, SharedData } from '@/types';
+
+export type SeoMeta = NonNullable<SharedData['seo']>;
 
 export function PageSeo() {
     const { seo, name } = usePage<SharedData>().props;
@@ -10,7 +12,7 @@ export function PageSeo() {
 
     const title = seo.title ? `${seo.title} - ${name}` : name;
     const description = seo.description ?? '';
-    const keywords = Array.isArray(seo.keywords) ? seo.keywords.join(', ') : seo.keywords ?? '';
+    const keywords = Array.isArray(seo.keywords) ? seo.keywords.join(', ') : (seo.keywords ?? '');
     const image = seo.image ?? null;
 
     return (

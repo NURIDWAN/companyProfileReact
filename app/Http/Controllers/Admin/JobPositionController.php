@@ -9,9 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
-use Throwable;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class JobPositionController extends Controller
 {

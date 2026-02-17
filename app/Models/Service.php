@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Service extends Model
 {
@@ -17,7 +17,7 @@ class Service extends Model
             ->logOnly(['name', 'slug', 'is_active'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => "Service '{$this->name}' {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName) => "Service '{$this->name}' {$eventName}");
     }
 
     protected $fillable = [

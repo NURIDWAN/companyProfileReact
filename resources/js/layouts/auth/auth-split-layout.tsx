@@ -11,9 +11,7 @@ interface AuthLayoutProps {
 export default function AuthSplitLayout({ children, title, description }: PropsWithChildren<AuthLayoutProps>) {
     const { name, quote } = usePage<SharedData>().props;
     const headingTitle = title ?? name;
-    const portalLabel = headingTitle?.toLowerCase().includes('console')
-        ? headingTitle
-        : `${headingTitle ?? 'Portal'} Console`;
+    const portalLabel = headingTitle?.toLowerCase().includes('console') ? headingTitle : `${headingTitle ?? 'Portal'} Console`;
     const descriptionText = description ?? 'Portal internal untuk tim inti Anda.';
 
     return (
@@ -37,21 +35,19 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
                 {quote ? (
                     <div className="relative mt-auto max-w-md text-sm text-neutral-200">
                         <p className="text-lg">&ldquo;{quote.message}&rdquo;</p>
-                        <p className="mt-3 text-xs uppercase tracking-[0.3em] text-neutral-400">{quote.author}</p>
+                        <p className="mt-3 text-xs tracking-[0.3em] text-neutral-400 uppercase">{quote.author}</p>
                     </div>
                 ) : (
                     <div className="relative mt-auto text-sm text-neutral-200">
-                        <p>
-                            &ldquo;People find pleasure in different ways. I find it in keeping my mind clear.&rdquo;
-                        </p>
-                        <p className="mt-3 text-xs uppercase tracking-[0.3em] text-neutral-400">Marcus Aurelius</p>
+                        <p>&ldquo;People find pleasure in different ways. I find it in keeping my mind clear.&rdquo;</p>
+                        <p className="mt-3 text-xs tracking-[0.3em] text-neutral-400 uppercase">Marcus Aurelius</p>
                     </div>
                 )}
             </div>
             <div className="flex w-full flex-1 items-center justify-center bg-[#f7f7f5] px-6 py-10 sm:px-10 lg:px-16">
                 <div className="w-full max-w-lg space-y-6">
                     <div className="space-y-1 text-left">
-                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">{portalLabel}</p>
+                        <p className="text-xs font-semibold tracking-[0.3em] text-neutral-500 uppercase">{portalLabel}</p>
                         <h1 className="text-2xl font-semibold text-slate-900">{headingTitle}</h1>
                         <p className="text-sm text-muted-foreground">{descriptionText}</p>
                     </div>

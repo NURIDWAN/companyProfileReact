@@ -12,13 +12,13 @@ class RecaptchaV3 implements ValidationRule
         protected string $action,
         protected float $minimumScore = 0.5,
         protected ?string $ip = null,
-    ) {
-    }
+    ) {}
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (! is_string($value) || $value === '') {
             $fail(__('Captcha wajib diisi.'));
+
             return;
         }
 
@@ -26,6 +26,7 @@ class RecaptchaV3 implements ValidationRule
 
         if (! $secret) {
             $fail(__('Captcha belum dikonfigurasi. Hubungi administrator.'));
+
             return;
         }
 
@@ -39,6 +40,7 @@ class RecaptchaV3 implements ValidationRule
 
         if ($response->failed()) {
             $fail(__('Validasi captcha gagal. Silakan coba beberapa saat lagi.'));
+
             return;
         }
 
@@ -46,11 +48,13 @@ class RecaptchaV3 implements ValidationRule
 
         if (! ($payload['success'] ?? false)) {
             $fail(__('Captcha tidak valid. Silakan coba lagi.'));
+
             return;
         }
 
         if (isset($payload['action']) && $payload['action'] !== $this->action) {
             $fail(__('Captcha tidak sesuai dengan aksi yang diminta.'));
+
             return;
         }
 

@@ -37,7 +37,7 @@ class PageSectionSeeder extends Seeder
                             'Jejak proyek di lebih dari 15 sektor industri',
                             'Pendekatan berbasis data dan kebutuhan lapangan',
                             'Program implementasi dan pendampingan end-to-end',
-                            'Fokus pada hasil bisnis dan keberlanjutan'
+                            'Fokus pada hasil bisnis dan keberlanjutan',
                         ],
                         'image' => null,
                     ]),
@@ -53,7 +53,7 @@ class PageSectionSeeder extends Seeder
                             'Konsultasi Transformasi Digital',
                             'Pengembangan Aplikasi Kustom',
                             'Implementasi Data & AI',
-                            'Operasional dan Managed Services'
+                            'Operasional dan Managed Services',
                         ],
                     ]),
                 ],
@@ -68,19 +68,19 @@ class PageSectionSeeder extends Seeder
                             [
                                 'icon' => 'shield-check',
                                 'title' => 'Konsultasi Bisnis',
-                                'description' => 'Strategi bisnis yang tepat untuk pertumbuhan berkelanjutan.'
+                                'description' => 'Strategi bisnis yang tepat untuk pertumbuhan berkelanjutan.',
                             ],
                             [
                                 'icon' => 'refresh-cw',
                                 'title' => 'Transformasi Digital',
-                                'description' => 'Implementasi teknologi untuk efisiensi operasional maksimal.'
+                                'description' => 'Implementasi teknologi untuk efisiensi operasional maksimal.',
                             ],
                             [
                                 'icon' => 'trending-up',
                                 'title' => 'Peningkatan Produktivitas',
-                                'description' => 'Solusi untuk meningkatkan produktivitas tim dan proses bisnis.'
-                            ]
-                        ]
+                                'description' => 'Solusi untuk meningkatkan produktivitas tim dan proses bisnis.',
+                            ],
+                        ],
                     ]),
                 ],
                 [
@@ -97,7 +97,7 @@ class PageSectionSeeder extends Seeder
                                 'company' => 'PT Maju Jaya',
                                 'avatar' => 'https://ui-avatars.com/api/?name=Ahmad+Hidayat&background=0D8ABC&color=fff',
                                 'rating' => 5,
-                                'testimonial' => 'Pelayanan yang sangat profesional dan hasil yang memuaskan. Tim sangat responsif dan memahami kebutuhan bisnis kami.'
+                                'testimonial' => 'Pelayanan yang sangat profesional dan hasil yang memuaskan. Tim sangat responsif dan memahami kebutuhan bisnis kami.',
                             ],
                             [
                                 'name' => 'Siti Nurhaliza',
@@ -105,7 +105,7 @@ class PageSectionSeeder extends Seeder
                                 'company' => 'CV Berkah Sejahtera',
                                 'avatar' => 'https://ui-avatars.com/api/?name=Siti+Nurhaliza&background=10b981&color=fff',
                                 'rating' => 5,
-                                'testimonial' => 'Implementasi sistem berjalan lancar dan tepat waktu. Sangat puas dengan dedikasi tim dalam memberikan solusi terbaik.'
+                                'testimonial' => 'Implementasi sistem berjalan lancar dan tepat waktu. Sangat puas dengan dedikasi tim dalam memberikan solusi terbaik.',
                             ],
                             [
                                 'name' => 'Budi Santoso',
@@ -113,9 +113,9 @@ class PageSectionSeeder extends Seeder
                                 'company' => 'PT Teknologi Nusantara',
                                 'avatar' => 'https://ui-avatars.com/api/?name=Budi+Santoso&background=f59e0b&color=fff',
                                 'rating' => 5,
-                                'testimonial' => 'Kualitas code dan arsitektur sistem yang dibangun sangat baik. Support after sales juga luar biasa responsif.'
-                            ]
-                        ]
+                                'testimonial' => 'Kualitas code dan arsitektur sistem yang dibangun sangat baik. Support after sales juga luar biasa responsif.',
+                            ],
+                        ],
                     ]),
                 ],
                 [
@@ -126,8 +126,8 @@ class PageSectionSeeder extends Seeder
                         'items' => [
                             ['value' => '100+', 'label' => 'Klien Puas'],
                             ['value' => '90', 'label' => 'Proyek Selesai'],
-                            ['value' => '65%', 'label' => 'Efisiensi Meningkat']
-                        ]
+                            ['value' => '65%', 'label' => 'Efisiensi Meningkat'],
+                        ],
                     ]),
                 ],
                 [
@@ -138,7 +138,7 @@ class PageSectionSeeder extends Seeder
                         'heading' => 'Artikel Terbaru',
                         'description' => 'Baca artikel dan insight terbaru dari tim kami.',
                         'link_text' => 'Lihat Semua Artikel',
-                        'link_url' => '/blog'
+                        'link_url' => '/blog',
                     ]),
                 ],
                 [
@@ -164,17 +164,17 @@ class PageSectionSeeder extends Seeder
                         'title' => 'Tentang Kami',
                         'paragraphs' => [
                             'Kami adalah perusahaan konsultan teknologi dan manajemen yang berdedikasi untuk membantu organisasi mencapai potensi penuh mereka.',
-                            'Dengan pengalaman lebih dari satu dekade, kami telah bekerjasama dengan berbagai klien dari startup hingga perusahaan multinasional.'
+                            'Dengan pengalaman lebih dari satu dekade, kami telah bekerjasama dengan berbagai klien dari startup hingga perusahaan multinasional.',
                         ],
                         'stats' => [
                             ['value' => '10+', 'label' => 'Tahun Pengalaman'],
                             ['value' => '50+', 'label' => 'Klien Semuanya'],
-                            ['value' => '100+', 'label' => 'Proyek Selesai']
+                            ['value' => '100+', 'label' => 'Proyek Selesai'],
                         ],
                         'highlights' => [
                             ['icon' => 'zap', 'title' => 'Inovasi', 'description' => 'Selalu mencari cara baru yang lebih baik.'],
-                            ['icon' => 'shield', 'title' => 'Kepercayaan', 'description' => 'Menjaga integritas dalam setiap kerjasama.']
-                        ]
+                            ['icon' => 'shield', 'title' => 'Kepercayaan', 'description' => 'Menjaga integritas dalam setiap kerjasama.'],
+                        ],
                     ]),
                 ],
                 [
@@ -187,7 +187,7 @@ class PageSectionSeeder extends Seeder
                         'vision_title' => 'Visi Kami',
                         'vision_text' => 'Menjadi mitra transformasi digital terdepan di Asia Tenggara, memberdayakan bisnis untuk tumbuh berkelanjutan melalui teknologi.',
                         'mission_title' => 'Misi Kami',
-                        'mission_text' => 'Menyediakan solusi teknologi inovatif yang praktis, membangun talenta digital terbaik, dan menciptakan dampak positif bagi ekosistem bisnis.'
+                        'mission_text' => 'Menyediakan solusi teknologi inovatif yang praktis, membangun talenta digital terbaik, dan menciptakan dampak positif bagi ekosistem bisnis.',
                     ]),
                 ],
                 [
@@ -198,8 +198,8 @@ class PageSectionSeeder extends Seeder
                         'items' => [
                             ['icon' => 'users', 'title' => 'Kolaborasi', 'description' => 'Bekerja bersama untuk hasil terbaik.'],
                             ['icon' => 'star', 'title' => 'Keunggulan', 'description' => 'Selalu memberikan kualitas terbaik.'],
-                            ['icon' => 'heart', 'title' => 'Kepedulian', 'description' => 'Peduli pada klien, tim, dan masyarakat.']
-                        ]
+                            ['icon' => 'heart', 'title' => 'Kepedulian', 'description' => 'Peduli pada klien, tim, dan masyarakat.'],
+                        ],
                     ]),
                 ],
                 [
@@ -212,12 +212,12 @@ class PageSectionSeeder extends Seeder
                         'description' => 'Angka yang mencerminkan dedikasi dan hasil kerja keras kami.',
                         'primary' => [
                             ['value' => '98%', 'label' => 'Kepuasan Klien'],
-                            ['value' => '200%', 'label' => 'Rata-rata ROI Klien']
+                            ['value' => '200%', 'label' => 'Rata-rata ROI Klien'],
                         ],
                         'secondary' => [
                             ['value' => '24/7', 'label' => 'Dukungan Teknis'],
-                            ['value' => '15', 'label' => 'Penghargaan Industri']
-                        ]
+                            ['value' => '15', 'label' => 'Penghargaan Industri'],
+                        ],
                     ]),
                 ],
                 [
@@ -233,15 +233,15 @@ class PageSectionSeeder extends Seeder
                                 'name' => 'Budi Santoso',
                                 'role' => 'CEO',
                                 'image' => 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop',
-                                'description' => 'Visioner teknologi dengan 15 tahun pengalaman.'
+                                'description' => 'Visioner teknologi dengan 15 tahun pengalaman.',
                             ],
                             [
                                 'name' => 'Siti Aminah',
                                 'role' => 'CTO',
                                 'image' => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop',
-                                'description' => 'Arsitek sistem yang ahli dalam skalabilitas.'
-                            ]
-                        ]
+                                'description' => 'Arsitek sistem yang ahli dalam skalabilitas.',
+                            ],
+                        ],
                     ]),
                 ],
                 [
@@ -255,8 +255,8 @@ class PageSectionSeeder extends Seeder
                         'primary_label' => 'Lihat Lowongan',
                         'primary_link' => '/career',
                         'contacts' => [
-                            ['icon' => 'mail', 'title' => 'Email', 'detail' => 'career@example.com']
-                        ]
+                            ['icon' => 'mail', 'title' => 'Email', 'detail' => 'career@example.com'],
+                        ],
                     ]),
                 ],
             ],
@@ -283,7 +283,7 @@ class PageSectionSeeder extends Seeder
                         '__type' => 'service_summary',
                         'badge' => 'Layanan Kami',
                         'heading' => 'Apa yang Kami Tawarkan',
-                        'description' => 'Kami menawarkan berbagai layanan teknologi untuk mempercepat pertumbuhan bisnis Anda.'
+                        'description' => 'Kami menawarkan berbagai layanan teknologi untuk mempercepat pertumbuhan bisnis Anda.',
                     ]),
                 ],
                 [
@@ -297,8 +297,8 @@ class PageSectionSeeder extends Seeder
                         'items' => [
                             ['title' => 'Web Development', 'description' => 'Membangun website responsif dan modern.', 'icon' => 'layout'],
                             ['title' => 'Mobile Apps', 'description' => 'Aplikasi native untuk iOS dan Android.', 'icon' => 'smartphone'],
-                            ['title' => 'Cloud Infrastructure', 'description' => 'Skalabilitas dan keamanan di cloud.', 'icon' => 'cloud']
-                        ]
+                            ['title' => 'Cloud Infrastructure', 'description' => 'Skalabilitas dan keamanan di cloud.', 'icon' => 'cloud'],
+                        ],
                     ]),
                 ],
                 [
@@ -312,7 +312,7 @@ class PageSectionSeeder extends Seeder
                         'categories' => [
                             ['name' => 'Frontend', 'items' => ['React', 'Vue', 'Tailwind']],
                             ['name' => 'Backend', 'items' => ['Laravel', 'Node.js', 'Go']],
-                        ]
+                        ],
                     ]),
                 ],
                 [
@@ -327,8 +327,8 @@ class PageSectionSeeder extends Seeder
                             ['title' => 'Discovery', 'description' => 'Memahami kebutuhan bisnis.'],
                             ['title' => 'Design', 'description' => 'Merancang solusi visual dan arsitektur.'],
                             ['title' => 'Development', 'description' => 'Menulis kode berkualitas tinggi.'],
-                            ['title' => 'Launch', 'description' => 'Deployment dan monitoring.']
-                        ]
+                            ['title' => 'Launch', 'description' => 'Deployment dan monitoring.'],
+                        ],
                     ]),
                 ],
                 [
@@ -341,8 +341,8 @@ class PageSectionSeeder extends Seeder
                         'description' => 'Apa yang membedakan kami dari kompetitor.',
                         'items' => [
                             ['title' => 'Tim Berpengalaman', 'description' => 'Ahli di bidangnya masing-masing.'],
-                            ['title' => 'Komitmen pada Kualitas', 'description' => 'Standar tinggi tanpa kompromi.']
-                        ]
+                            ['title' => 'Komitmen pada Kualitas', 'description' => 'Standar tinggi tanpa kompromi.'],
+                        ],
                     ]),
                 ],
                 [
@@ -354,8 +354,8 @@ class PageSectionSeeder extends Seeder
                         'description' => 'Jawaban untuk pertanyaan yang sering diajukan.',
                         'items' => [
                             ['question' => 'Berapa lama waktu pengerjaan?', 'answer' => 'Tergantung kompleksitas proyek, biasanya 1-3 bulan.'],
-                            ['question' => 'Apakah ada garansi?', 'answer' => 'Ya, kami memberikan garansi maintenance selama 3 bulan.']
-                        ]
+                            ['question' => 'Apakah ada garansi?', 'answer' => 'Ya, kami memberikan garansi maintenance selama 3 bulan.'],
+                        ],
                     ]),
                 ],
             ],
@@ -367,7 +367,7 @@ class PageSectionSeeder extends Seeder
                         '__type' => 'product_hero',
                         'badge' => 'Produk',
                         'heading' => 'Produk Digital Unggulan',
-                        'description' => 'Solusi siap pakai untuk mempercepat operasional bisnis Anda.'
+                        'description' => 'Solusi siap pakai untuk mempercepat operasional bisnis Anda.',
                     ]),
                 ],
                 [
@@ -379,9 +379,9 @@ class PageSectionSeeder extends Seeder
                             'products' => 'Produk Aktif',
                             'clients' => 'Pengguna Puas',
                             'rating' => 'Rating Rata-rata',
-                            'awards' => 'Penghargaan'
+                            'awards' => 'Penghargaan',
                         ],
-                        'awards' => 5
+                        'awards' => 5,
                     ]),
                 ],
                 [
@@ -395,8 +395,8 @@ class PageSectionSeeder extends Seeder
                         'primary_label' => 'Hubungi Sales',
                         'primary_link' => '/contact',
                         'contacts' => [
-                            ['icon' => 'phone', 'title' => 'Telepon', 'detail' => '+62 21 555 1234']
-                        ]
+                            ['icon' => 'phone', 'title' => 'Telepon', 'detail' => '+62 21 555 1234'],
+                        ],
                     ]),
                 ],
             ],
@@ -408,7 +408,7 @@ class PageSectionSeeder extends Seeder
                         '__type' => 'project_hero',
                         'badge' => 'Portofolio',
                         'heading' => 'Karya Terbaik Kami',
-                        'description' => 'Lihat bagaimana kami membantu klien mencapai tujuan mereka melalui teknologi.'
+                        'description' => 'Lihat bagaimana kami membantu klien mencapai tujuan mereka melalui teknologi.',
                     ]),
                 ],
             ],
@@ -420,7 +420,7 @@ class PageSectionSeeder extends Seeder
                         '__type' => 'career_hero',
                         'badge' => 'Karir',
                         'heading' => 'Berkembang Bersama Kami',
-                        'description' => 'Temukan peluang karir yang menantang dan lingkungan kerja yang mendukung.'
+                        'description' => 'Temukan peluang karir yang menantang dan lingkungan kerja yang mendukung.',
                     ]),
                 ],
             ],
@@ -432,7 +432,7 @@ class PageSectionSeeder extends Seeder
                         '__type' => 'blog_hero',
                         'badge' => 'Wawasan',
                         'heading' => 'Artikel & Berita Terbaru',
-                        'description' => 'Ikuti perkembangan teknologi dan tren bisnis terkini bersama kami.'
+                        'description' => 'Ikuti perkembangan teknologi dan tren bisnis terkini bersama kami.',
                     ]),
                 ],
             ],
@@ -464,13 +464,13 @@ class PageSectionSeeder extends Seeder
 
         foreach ($sections as $slug => $sectionList) {
             $page = Page::where('slug', $slug)->first();
-            if (!$page) {
+            if (! $page) {
                 continue;
             }
 
             foreach ($sectionList as $order => $section) {
-                // Ensure content is properly JSON encoded if it's an array, 
-                // but we already json_encoded it in the array definition for clarity. 
+                // Ensure content is properly JSON encoded if it's an array,
+                // but we already json_encoded it in the array definition for clarity.
                 // However, the previous code might expect it to strictly be a string or array.
                 // In my definition above, 'content' is ALREADY a string (result of json_encode).
                 // So we just use it directly.

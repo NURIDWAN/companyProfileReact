@@ -20,7 +20,7 @@ class TeamMemberFactory extends Factory
             'photo' => null,
             'email' => $this->faker->unique()->safeEmail(),
             'phone' => $this->faker->e164PhoneNumber(),
-            'linkedin' => 'https://www.linkedin.com/in/' . $this->faker->userName(),
+            'linkedin' => 'https://www.linkedin.com/in/'.$this->faker->userName(),
             'display_order' => $this->faker->numberBetween(1, 10),
             'is_active' => true,
             'bio' => $this->faker->sentence(),

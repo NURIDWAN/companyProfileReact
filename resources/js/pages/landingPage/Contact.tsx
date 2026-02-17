@@ -55,7 +55,8 @@ type ContactPageProps = SettingsProps & {
 export default function ContactPage() {
     const { settings, branding, companyAddress, companyContacts, companySocials, flash, sections } = usePage<ContactPageProps>().props;
     const visibility = sections ?? {};
-    const isEnabled = (key: SectionKey) => visibility[key] ?? true;
+    // isEnabled helper reserved for future section visibility toggles
+    const _isEnabled = (key: SectionKey) => visibility[key] ?? true;
     const companyName = (settings?.['company.name'] as string | undefined) ?? branding?.name ?? 'Harmony Strategic Group';
     const tagline =
         (settings?.['company.tagline'] as string | undefined) ?? branding?.tagline ?? 'Kami siap membantu menjawab kebutuhan bisnis Anda.';

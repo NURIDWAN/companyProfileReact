@@ -10,8 +10,7 @@ class GeminiBlogGenerator
 {
     public function __construct(
         private readonly ?OpenRouterService $openRouterService = null,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<string, mixed>  $options
@@ -21,7 +20,7 @@ class GeminiBlogGenerator
     {
         $service = $this->openRouterService ?? app(OpenRouterService::class);
 
-        if (!$service->isConfigured()) {
+        if (! $service->isConfigured()) {
             throw new RuntimeException('AI API key is not configured. Set it in Settings or .env file.');
         }
 
@@ -42,16 +41,12 @@ class GeminiBlogGenerator
             'timeout' => 30,
         ]);
 
-        $textPayload = $service->extractContent($response);
-
-        if (!$textPayload) {
-            throw new RuntimeException('AI response does not contain content.');
-        }
+        $textPayload = $service->extractContentOrFail($response);
 
         $decoded = $this->decodeJsonPayload($textPayload);
 
-        if (!is_array($decoded)) {
-            throw new RuntimeException('AI response is not valid JSON. Response length: ' . strlen($textPayload));
+        if (! is_array($decoded)) {
+            throw new RuntimeException('AI response is not valid JSON. Response length: '.strlen($textPayload));
         }
 
         $title = trim((string) Arr::get($decoded, 'title', ''));
@@ -121,13 +116,12 @@ PROMPT;
     }
 
     /**
-     * @param  mixed  $value
      * @return array<int, string>
      */
     private function normalizeArray(mixed $value): array
     {
         $items = array_filter(array_map(
-            static fn($item) => trim((string) $item),
+            static fn ($item) => trim((string) $item),
             Arr::wrap($value),
         ));
 
@@ -136,14 +130,14 @@ PROMPT;
 
     private function normalizeKeywords(?string $keywords): string
     {
-        if (!$keywords) {
+        if (! $keywords) {
             return '';
         }
 
         $items = preg_split('/[,\\n]+/', $keywords) ?: [];
 
         $items = array_filter(array_map(
-            static fn($item) => trim($item),
+            static fn ($item) => trim($item),
             $items,
         ));
 

@@ -109,7 +109,7 @@ export default function SettingsIndex({ company, address, contacts, socials, foo
     });
     const aiForm = useForm({
         api_key: ai.api_key ?? '',
-        model: ai.model ?? 'google/gemini-2.0-flash-exp:free',
+        model: ai.model ?? 'google/gemini-2.0-flash-001',
         endpoint: ai.endpoint ?? 'https://openrouter.ai/api/v1',
     });
     const brandingForm = useForm({
@@ -121,6 +121,47 @@ export default function SettingsIndex({ company, address, contacts, socials, foo
         apple_touch_icon_file: undefined as File | undefined,
     });
     const [showApiKey, setShowApiKey] = useState(false);
+    const [aiTestLoading, setAiTestLoading] = useState(false);
+    const [aiTestResult, setAiTestResult] = useState<{
+        success: boolean;
+        message: string;
+        reply?: string;
+        model?: string;
+        latency_ms?: number;
+    } | null>(null);
+
+    const handleTestAi = async () => {
+        if (!aiForm.data.api_key) {
+            setAiTestResult({ success: false, message: 'API Key wajib diisi untuk test koneksi.' });
+            return;
+        }
+        setAiTestLoading(true);
+        setAiTestResult(null);
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            const res = await fetch(route('admin.settings.ai.test'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    api_key: aiForm.data.api_key,
+                    model: aiForm.data.model || 'google/gemini-2.0-flash-001',
+                    endpoint: aiForm.data.endpoint || 'https://openrouter.ai/api/v1',
+                }),
+            });
+            const json = await res.json();
+            setAiTestResult(json);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Gagal menghubungi server.';
+            setAiTestResult({ success: false, message });
+        } finally {
+            setAiTestLoading(false);
+        }
+    };
     const [logoPreview, setLogoPreview] = useState<string | null>(company.logo_url ?? null);
     const [logoObjectUrl, setLogoObjectUrl] = useState<string | null>(null);
 
@@ -788,11 +829,10 @@ export default function SettingsIndex({ company, address, contacts, socials, foo
                                             id="ai-model"
                                             value={aiForm.data.model ?? ''}
                                             onChange={(event) => aiForm.setData('model', event.target.value)}
-                                            placeholder="google/gemini-2.0-flash-exp:free"
+                                            placeholder="google/gemini-2.0-flash-001"
                                         />
                                         <p className="text-xs text-muted-foreground">
-                                            Model gratis: <code>google/gemini-2.0-flash-exp:free</code>,{' '}
-                                            <code>meta-llama/llama-3.2-3b-instruct:free</code>
+                                            Model gratis: <code>google/gemini-2.0-flash-001</code>, <code>meta-llama/llama-3.2-3b-instruct:free</code>
                                         </p>
                                         <InputError message={aiForm.errors.model} />
                                     </div>
@@ -806,6 +846,48 @@ export default function SettingsIndex({ company, address, contacts, socials, foo
                                             placeholder="https://openrouter.ai/api/v1"
                                         />
                                         <InputError message={aiForm.errors.endpoint} />
+                                    </div>
+
+                                    {/* Test API Button */}
+                                    <div className="space-y-3 rounded-lg border border-dashed border-muted p-4">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-sm font-medium">Test Koneksi API</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Kirim prompt pendek untuk memverifikasi API key dan model yang dikonfigurasi.
+                                                </p>
+                                            </div>
+                                            <Button type="button" variant="outline" size="sm" disabled={aiTestLoading} onClick={handleTestAi}>
+                                                {aiTestLoading ? 'Menguji...' : 'Test API'}
+                                            </Button>
+                                        </div>
+                                        {aiTestResult && (
+                                            <div
+                                                className={`rounded-md p-3 text-sm ${
+                                                    aiTestResult.success
+                                                        ? 'border border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950/30 dark:text-green-300'
+                                                        : 'border border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950/30 dark:text-red-300'
+                                                }`}
+                                            >
+                                                <p className="font-medium">
+                                                    {aiTestResult.success ? '✅ ' : '❌ '}
+                                                    {aiTestResult.message}
+                                                </p>
+                                                {aiTestResult.success && aiTestResult.reply && (
+                                                    <div className="mt-2 space-y-1 text-xs">
+                                                        <p>
+                                                            <span className="font-medium">Model:</span> {aiTestResult.model}
+                                                        </p>
+                                                        <p>
+                                                            <span className="font-medium">Respons:</span> {aiTestResult.reply}
+                                                        </p>
+                                                        <p>
+                                                            <span className="font-medium">Latensi:</span> {aiTestResult.latency_ms}ms
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </CardContent>
                                 <CardFooter className="flex items-center justify-between gap-2">

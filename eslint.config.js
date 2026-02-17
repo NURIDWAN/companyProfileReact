@@ -10,6 +10,19 @@ export default [
     js.configs.recommended,
     ...typescript.configs.recommended,
     {
+        rules: {
+            // Allow unused vars prefixed with underscore
+            '@typescript-eslint/no-unused-vars': [
+                'error',
+                {
+                    argsIgnorePattern: '^_',
+                    varsIgnorePattern: '^_',
+                    caughtErrorsIgnorePattern: '^_',
+                },
+            ],
+        },
+    },
+    {
         ...react.configs.flat.recommended,
         ...react.configs.flat['jsx-runtime'], // Required for React 17+
         languageOptions: {

@@ -19,7 +19,7 @@ class ProductFactory extends Factory
 
         return [
             'name' => ucfirst($name),
-            'slug' => Str::slug($name) . '-' . $this->faker->unique()->numberBetween(100, 999),
+            'slug' => Str::slug($name).'-'.$this->faker->unique()->numberBetween(100, 999),
             'cover_image' => null,
             'thumbnail' => null,
             'gallery' => $this->faker->randomElements(

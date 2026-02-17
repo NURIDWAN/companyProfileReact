@@ -40,7 +40,7 @@ class RolePermissionSeeder extends Seeder
         ]);
 
         $firstUser = User::query()->orderBy('id')->first();
-        if ($firstUser && !$firstUser->roles()->where('roles.id', $adminRole->id)->exists()) {
+        if ($firstUser && ! $firstUser->roles()->where('roles.id', $adminRole->id)->exists()) {
             $firstUser->roles()->attach($adminRole->id);
         }
     }

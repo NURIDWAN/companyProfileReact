@@ -1,32 +1,26 @@
-import AppLayout from "@/layouts/app-layout";
-import { Head, Link, router } from "@inertiajs/react";
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { RichTextEditor } from "@/components/RichTextEditor";
-import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronRight, GripVertical, Trash2, Plus, ArrowLeft, Save, Eye, EyeOff, FileText, Hash, Settings2 } from "lucide-react";
+import { RichTextEditor } from '@/components/RichTextEditor';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import { cn } from '@/lib/utils';
 import {
-    DndContext,
     closestCenter,
-    KeyboardSensor,
-    PointerSensor,
-    useSensor,
-    useSensors,
+    DndContext,
     DragEndEvent,
     DragOverlay,
+    KeyboardSensor,
+    PointerSensor,
     UniqueIdentifier,
-} from "@dnd-kit/core";
-import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    useSortable,
-    verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Head, Link, router } from '@inertiajs/react';
+import { ArrowLeft, ChevronDown, ChevronRight, Eye, EyeOff, FileText, GripVertical, Hash, Plus, Save, Settings2, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 // Extended Section type with unique key for drag and drop
 type Section = {
@@ -72,14 +66,7 @@ function SortableSectionCard({
     onRemove: () => void;
 }) {
     const [expanded, setExpanded] = useState(true);
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-        isDragging,
-    } = useSortable({ id: uniqueId });
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: uniqueId });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -93,18 +80,14 @@ function SortableSectionCard({
         <Card
             ref={setNodeRef}
             style={style}
-            className={cn(
-                "transition-all duration-200",
-                isDragging && "ring-2 ring-cyan-500 shadow-lg",
-                !isActive && "opacity-60 bg-gray-50"
-            )}
+            className={cn('transition-all duration-200', isDragging && 'shadow-lg ring-2 ring-cyan-500', !isActive && 'bg-gray-50 opacity-60')}
         >
             <CardHeader className="pb-3">
                 <div className="flex items-center gap-3">
                     {/* Drag Handle */}
                     <button
                         type="button"
-                        className="cursor-grab text-gray-400 hover:text-gray-600 active:cursor-grabbing p-1 rounded hover:bg-gray-100 transition-colors"
+                        className="cursor-grab rounded p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 active:cursor-grabbing"
                         {...attributes}
                         {...listeners}
                     >
@@ -115,25 +98,18 @@ function SortableSectionCard({
                     <button
                         type="button"
                         onClick={() => setExpanded((prev) => !prev)}
-                        className="text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-100 transition-colors"
+                        className="rounded p-1 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
                     >
-                        {expanded ? (
-                            <ChevronDown className="h-5 w-5" />
-                        ) : (
-                            <ChevronRight className="h-5 w-5" />
-                        )}
+                        {expanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
                     </button>
 
                     {/* Title */}
-                    <div className="flex-1 min-w-0">
-                        <CardTitle className={cn(
-                            "text-base truncate",
-                            !isActive && "text-gray-500 line-through"
-                        )}>
+                    <div className="min-w-0 flex-1">
+                        <CardTitle className={cn('truncate text-base', !isActive && 'text-gray-500 line-through')}>
                             {section.title || `Section ${index + 1}`}
                         </CardTitle>
                         {section.slug && (
-                            <p className="text-xs text-gray-400 truncate flex items-center gap-1 mt-0.5">
+                            <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-gray-400">
                                 <Hash className="h-3 w-3" />
                                 {section.slug}
                             </p>
@@ -144,12 +120,10 @@ function SortableSectionCard({
                     <div className="flex items-center gap-2">
                         <button
                             type="button"
-                            onClick={() => onUpdate("is_active", !isActive)}
+                            onClick={() => onUpdate('is_active', !isActive)}
                             className={cn(
-                                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
-                                isActive
-                                    ? "bg-green-50 text-green-700 hover:bg-green-100"
-                                    : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                                'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                                isActive ? 'bg-green-50 text-green-700 hover:bg-green-100' : 'bg-gray-100 text-gray-500 hover:bg-gray-200',
                             )}
                         >
                             {isActive ? (
@@ -169,7 +143,7 @@ function SortableSectionCard({
                             type="button"
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50"
+                            className="h-8 w-8 p-0 text-gray-400 hover:bg-red-50 hover:text-red-500"
                             onClick={onRemove}
                         >
                             <Trash2 className="h-4 w-4" />
@@ -180,57 +154,53 @@ function SortableSectionCard({
 
             {/* Section Form Content */}
             {expanded && (
-                <CardContent className="pt-0 space-y-6">
+                <CardContent className="space-y-6 pt-0">
                     {/* Title & Slug */}
                     <div className="grid gap-6 sm:grid-cols-2">
                         <div className="space-y-2">
-                            <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                            <Label className="flex items-center gap-2 text-sm font-medium text-gray-700">
                                 <FileText className="h-4 w-4 text-gray-400" />
                                 Judul Section
                             </Label>
                             <Input
                                 value={section.title}
-                                onChange={(e) => onUpdate("title", e.target.value)}
+                                onChange={(e) => onUpdate('title', e.target.value)}
                                 placeholder="Masukkan judul section"
                                 className="h-10"
                             />
-                            <p className="text-xs text-gray-400">
-                                Judul yang akan ditampilkan pada halaman
-                            </p>
+                            <p className="text-xs text-gray-400">Judul yang akan ditampilkan pada halaman</p>
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                            <Label className="flex items-center gap-2 text-sm font-medium text-gray-700">
                                 <Hash className="h-4 w-4 text-gray-400" />
                                 Slug / Anchor ID
                             </Label>
                             <Input
-                                value={section.slug ?? ""}
-                                onChange={(e) => onUpdate("slug", e.target.value)}
+                                value={section.slug ?? ''}
+                                onChange={(e) => onUpdate('slug', e.target.value)}
                                 placeholder="contoh-slug"
                                 className="h-10"
                             />
                             <p className="text-xs text-gray-400">
-                                Digunakan untuk direct link: <code className="bg-gray-100 px-1 rounded">#{section.slug || "slug"}</code>
+                                Digunakan untuk direct link: <code className="rounded bg-gray-100 px-1">#{section.slug || 'slug'}</code>
                             </p>
                         </div>
                     </div>
 
                     {/* Rich Text Content */}
                     <div className="space-y-2">
-                        <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                        <Label className="flex items-center gap-2 text-sm font-medium text-gray-700">
                             <Settings2 className="h-4 w-4 text-gray-400" />
                             Konten Section
                         </Label>
-                        <div className="border rounded-lg overflow-hidden bg-white">
+                        <div className="overflow-hidden rounded-lg border bg-white">
                             <RichTextEditor
-                                value={section.content ?? ""}
-                                onChange={(html) => onUpdate("content", html)}
+                                value={section.content ?? ''}
+                                onChange={(html) => onUpdate('content', html)}
                                 placeholder="Tulis konten section di sini..."
                             />
                         </div>
-                        <p className="text-xs text-gray-400">
-                            Gunakan editor untuk memformat teks, menambahkan gambar, link, dan lainnya
-                        </p>
+                        <p className="text-xs text-gray-400">Gunakan editor untuk memformat teks, menambahkan gambar, link, dan lainnya</p>
                     </div>
                 </CardContent>
             )}
@@ -241,13 +211,11 @@ function SortableSectionCard({
 // Section Overlay for Drag
 function SectionOverlay({ section, index }: { section: Section; index: number }) {
     return (
-        <Card className="shadow-xl opacity-95 border-2 border-cyan-500">
+        <Card className="border-2 border-cyan-500 opacity-95 shadow-xl">
             <CardHeader className="py-3">
                 <div className="flex items-center gap-2">
                     <GripVertical className="h-5 w-5 text-gray-400" />
-                    <CardTitle className="text-base">
-                        {section.title || `Section ${index + 1}`}
-                    </CardTitle>
+                    <CardTitle className="text-base">{section.title || `Section ${index + 1}`}</CardTitle>
                 </div>
             </CardHeader>
         </Card>
@@ -282,8 +250,7 @@ export default function SectionsPage({ page }: Props) {
 
     // Track changes (exclude _key from comparison)
     useEffect(() => {
-        const stripKeys = (items: Section[]) =>
-            items.map(({ _key, ...rest }) => rest);
+        const stripKeys = (items: Section[]) => items.map(({ _key: _unusedKey, ...rest }) => rest);
         const original = JSON.stringify(stripKeys(page.sections ?? []));
         const current = JSON.stringify(stripKeys(sections));
         setHasChanges(original !== current);
@@ -295,7 +262,7 @@ export default function SectionsPage({ page }: Props) {
         }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
-        })
+        }),
     );
 
     const handleDragEnd = (event: DragEndEvent) => {
@@ -324,9 +291,9 @@ export default function SectionsPage({ page }: Props) {
     const addSection = () => {
         const newSection: Section = {
             _key: generateSectionKey(),
-            title: "",
-            slug: "",
-            content: "",
+            title: '',
+            slug: '',
+            content: '',
             display_order: sections.length,
             is_active: true,
         };
@@ -348,9 +315,9 @@ export default function SectionsPage({ page }: Props) {
     const handleSave = () => {
         setSaving(true);
         // Remove _key before sending to server
-        const sectionsToSave = sections.map(({ _key, ...rest }) => rest);
+        const sectionsToSave = sections.map(({ _key: _unusedKey, ...rest }) => rest);
         router.put(
-            route("admin.menus.page-sections", page.id),
+            route('admin.menus.page-sections', page.id),
             { sections: sectionsToSave },
             {
                 preserveScroll: true,
@@ -361,13 +328,11 @@ export default function SectionsPage({ page }: Props) {
                 onError: () => {
                     setSaving(false);
                 },
-            }
+            },
         );
     };
 
-    const activeIndex = activeId
-        ? sectionIds.findIndex((id) => id === String(activeId))
-        : -1;
+    const activeIndex = activeId ? sectionIds.findIndex((id) => id === String(activeId)) : -1;
     const activeSection = activeIndex >= 0 ? sections[activeIndex] : null;
 
     return (
@@ -376,31 +341,27 @@ export default function SectionsPage({ page }: Props) {
 
             <div className="min-h-screen bg-gray-50">
                 {/* Sticky Header */}
-                <div className="sticky top-0 z-20 bg-white border-b shadow-sm">
-                    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="sticky top-0 z-20 border-b bg-white shadow-sm">
+                    <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex items-center gap-4">
                                 <Link
-                                    href={route("admin.menus.index")}
-                                    className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors"
+                                    href={route('admin.menus.index')}
+                                    className="flex items-center gap-2 text-gray-500 transition-colors hover:text-gray-700"
                                 >
                                     <ArrowLeft className="h-5 w-5" />
                                     <span className="hidden sm:inline">Kembali ke Menu</span>
                                 </Link>
-                                <div className="h-6 w-px bg-gray-200 hidden sm:block" />
+                                <div className="hidden h-6 w-px bg-gray-200 sm:block" />
                                 <div>
-                                    <h1 className="text-lg sm:text-xl font-semibold text-gray-800">
-                                        Kelola Konten: {page.title}
-                                    </h1>
-                                    <p className="text-sm text-gray-500">
-                                        Atur section dan konten halaman
-                                    </p>
+                                    <h1 className="text-lg font-semibold text-gray-800 sm:text-xl">Kelola Konten: {page.title}</h1>
+                                    <p className="text-sm text-gray-500">Atur section dan konten halaman</p>
                                 </div>
                             </div>
 
                             <div className="flex items-center gap-3">
                                 {hasChanges && (
-                                    <span className="text-xs text-amber-600 bg-amber-50 px-3 py-1.5 rounded-full font-medium">
+                                    <span className="rounded-full bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-600">
                                         ● Perubahan belum disimpan
                                     </span>
                                 )}
@@ -408,10 +369,10 @@ export default function SectionsPage({ page }: Props) {
                                     type="button"
                                     onClick={handleSave}
                                     disabled={saving || !hasChanges}
-                                    className="bg-cyan-500 hover:bg-cyan-600 text-white shadow-sm"
+                                    className="bg-cyan-500 text-white shadow-sm hover:bg-cyan-600"
                                 >
-                                    <Save className="h-4 w-4 mr-2" />
-                                    {saving ? "Menyimpan..." : "Simpan Semua"}
+                                    <Save className="mr-2 h-4 w-4" />
+                                    {saving ? 'Menyimpan...' : 'Simpan Semua'}
                                 </Button>
                             </div>
                         </div>
@@ -419,27 +380,20 @@ export default function SectionsPage({ page }: Props) {
                 </div>
 
                 {/* Main Content */}
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+                <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
                     {sections.length === 0 ? (
                         /* Empty State */
                         <Card className="p-12">
                             <div className="flex flex-col items-center justify-center text-center">
-                                <div className="rounded-full bg-gray-100 p-6 mb-4">
+                                <div className="mb-4 rounded-full bg-gray-100 p-6">
                                     <Plus className="h-10 w-10 text-gray-400" />
                                 </div>
-                                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                                    Belum Ada Section
-                                </h3>
-                                <p className="text-sm text-gray-500 max-w-md mb-6">
-                                    Section adalah bagian-bagian konten dari halaman Anda.
-                                    Mulai tambahkan section untuk membangun konten halaman.
+                                <h3 className="mb-2 text-lg font-semibold text-gray-800">Belum Ada Section</h3>
+                                <p className="mb-6 max-w-md text-sm text-gray-500">
+                                    Section adalah bagian-bagian konten dari halaman Anda. Mulai tambahkan section untuk membangun konten halaman.
                                 </p>
-                                <Button
-                                    type="button"
-                                    onClick={addSection}
-                                    className="bg-cyan-500 hover:bg-cyan-600 text-white"
-                                >
-                                    <Plus className="h-4 w-4 mr-2" />
+                                <Button type="button" onClick={addSection} className="bg-cyan-500 text-white hover:bg-cyan-600">
+                                    <Plus className="mr-2 h-4 w-4" />
                                     Tambah Section Pertama
                                 </Button>
                             </div>
@@ -448,14 +402,12 @@ export default function SectionsPage({ page }: Props) {
                         /* Section List */
                         <div className="space-y-6">
                             {/* Info Bar */}
-                            <div className="flex items-center justify-between bg-white border rounded-lg px-4 py-3">
+                            <div className="flex items-center justify-between rounded-lg border bg-white px-4 py-3">
                                 <div className="flex items-center gap-3 text-sm text-gray-600">
                                     <GripVertical className="h-4 w-4 text-gray-400" />
                                     <span>Drag untuk mengatur urutan section</span>
                                 </div>
-                                <span className="text-sm font-medium text-gray-700">
-                                    {sections.length} section
-                                </span>
+                                <span className="text-sm font-medium text-gray-700">{sections.length} section</span>
                             </div>
 
                             {/* Sortable Sections */}
@@ -465,10 +417,7 @@ export default function SectionsPage({ page }: Props) {
                                 onDragStart={(event) => setActiveId(event.active.id)}
                                 onDragEnd={handleDragEnd}
                             >
-                                <SortableContext
-                                    items={sectionIds}
-                                    strategy={verticalListSortingStrategy}
-                                >
+                                <SortableContext items={sectionIds} strategy={verticalListSortingStrategy}>
                                     <div className="space-y-4">
                                         {sections.map((section, index) => (
                                             <SortableSectionCard
@@ -482,18 +431,14 @@ export default function SectionsPage({ page }: Props) {
                                         ))}
                                     </div>
                                 </SortableContext>
-                                <DragOverlay>
-                                    {activeSection && (
-                                        <SectionOverlay section={activeSection} index={activeIndex} />
-                                    )}
-                                </DragOverlay>
+                                <DragOverlay>{activeSection && <SectionOverlay section={activeSection} index={activeIndex} />}</DragOverlay>
                             </DndContext>
 
                             {/* Add Section Button */}
                             <button
                                 type="button"
                                 onClick={addSection}
-                                className="w-full flex items-center justify-center gap-2 py-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-cyan-400 hover:text-cyan-600 hover:bg-cyan-50/50 transition-all duration-200"
+                                className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 py-4 text-gray-500 transition-all duration-200 hover:border-cyan-400 hover:bg-cyan-50/50 hover:text-cyan-600"
                             >
                                 <Plus className="h-5 w-5" />
                                 <span className="font-medium">Tambah Section Baru</span>
@@ -504,15 +449,10 @@ export default function SectionsPage({ page }: Props) {
 
                 {/* Bottom Save Bar (Mobile) */}
                 {hasChanges && (
-                    <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 sm:hidden z-30">
-                        <Button
-                            type="button"
-                            onClick={handleSave}
-                            disabled={saving}
-                            className="w-full bg-cyan-500 hover:bg-cyan-600 text-white"
-                        >
-                            <Save className="h-4 w-4 mr-2" />
-                            {saving ? "Menyimpan..." : "Simpan Perubahan"}
+                    <div className="fixed right-0 bottom-0 left-0 z-30 border-t bg-white p-4 shadow-lg sm:hidden">
+                        <Button type="button" onClick={handleSave} disabled={saving} className="w-full bg-cyan-500 text-white hover:bg-cyan-600">
+                            <Save className="mr-2 h-4 w-4" />
+                            {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
                         </Button>
                     </div>
                 )}

@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import AppLayout from "@/layouts/app-layout";
-import { Head, Link, useForm } from "@inertiajs/react";
-import { FormEventHandler, useEffect, useMemo } from "react";
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { FormEventHandler, useEffect, useMemo } from 'react';
 
 type Project = {
     id: number;
@@ -26,18 +26,18 @@ interface Props {
 }
 
 export default function ProjectForm({ project }: Props) {
-    const title = project ? "Edit Proyek" : "Tambah Proyek";
+    const title = project ? 'Edit Proyek' : 'Tambah Proyek';
     const form = useForm({
-        name: project?.name ?? "",
-        slug: project?.slug ?? "",
-        client_name: project?.client_name ?? "",
-        cover_image: project?.cover_image ?? "",
+        name: project?.name ?? '',
+        slug: project?.slug ?? '',
+        client_name: project?.client_name ?? '',
+        cover_image: project?.cover_image ?? '',
         cover_image_file: undefined as File | undefined,
-        summary: project?.summary ?? "",
-        description: project?.description ?? "",
-        started_at: project?.started_at ? project.started_at.slice(0, 10) : "",
-        completed_at: project?.completed_at ? project.completed_at.slice(0, 10) : "",
-        status: project?.status ?? "draft",
+        summary: project?.summary ?? '',
+        description: project?.description ?? '',
+        started_at: project?.started_at ? project.started_at.slice(0, 10) : '',
+        completed_at: project?.completed_at ? project.completed_at.slice(0, 10) : '',
+        status: project?.status ?? 'draft',
     });
 
     const { data, setData, processing, errors } = form;
@@ -52,18 +52,16 @@ export default function ProjectForm({ project }: Props) {
         const slug = trimmed
             ? trimmed
                   .toLowerCase()
-                  .replace(/[^a-z0-9\s-]/g, "")
-                  .replace(/\s+/g, "-")
-                  .replace(/-+/g, "-")
-            : "";
+                  .replace(/[^a-z0-9\s-]/g, '')
+                  .replace(/\s+/g, '-')
+                  .replace(/-+/g, '-')
+            : '';
 
-        setData("slug", slug);
+        setData('slug', slug);
     }, [data.name, project, setData]);
 
     const action = useMemo(() => {
-        return project
-            ? route("admin.projects.update", project.id)
-            : route("admin.projects.store");
+        return project ? route('admin.projects.update', project.id) : route('admin.projects.store');
     }, [project]);
 
     const submit: FormEventHandler<HTMLFormElement> = (event) => {
@@ -75,14 +73,14 @@ export default function ProjectForm({ project }: Props) {
                 cover_image_file: formData.cover_image_file ?? undefined,
             };
 
-            return project ? { ...transformed, _method: "put" } : transformed;
+            return project ? { ...transformed, _method: 'put' } : transformed;
         });
 
         form.post(action, {
             forceFormData: true,
             preserveScroll: true,
             onFinish: () => {
-                setData("cover_image_file", undefined);
+                setData('cover_image_file', undefined);
                 form.transform((data) => data);
             },
         });
@@ -93,139 +91,116 @@ export default function ProjectForm({ project }: Props) {
             <Head title={title} />
             <div className="p-4">
                 <div className="mb-4">
-                    <Link href={route("admin.projects.index")} className="text-sm text-muted-foreground hover:text-foreground">
+                    <Link href={route('admin.projects.index')} className="text-sm text-muted-foreground hover:text-foreground">
                         &larr; Kembali ke daftar proyek
                     </Link>
                 </div>
                 <form onSubmit={submit} encType="multipart/form-data">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{title}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="grid gap-4">
-                        {generalError && (
-                            <Alert variant="destructive">
-                                <AlertDescription>{generalError}</AlertDescription>
-                            </Alert>
-                        )}
-                        <div className="grid gap-2">
-                            <Label htmlFor="name">Nama</Label>
-                            <Input
-                                id="name"
-                                value={data.name}
-                                onChange={(event) => setData("name", event.target.value)}
-                                required
-                            />
-                            {errors.name && <p className="text-xs text-rose-500">{errors.name}</p>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="slug">Slug</Label>
-                            <Input
-                                id="slug"
-                                value={data.slug}
-                                onChange={(event) => setData("slug", event.target.value)}
-                                required
-                            />
-                            {errors.slug && <p className="text-xs text-rose-500">{errors.slug}</p>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="client_name">Nama Klien</Label>
-                            <Input
-                                id="client_name"
-                                value={data.client_name ?? ""}
-                                onChange={(event) => setData("client_name", event.target.value)}
-                            />
-                            {errors.client_name && <p className="text-xs text-rose-500">{errors.client_name}</p>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="cover_image_file">Cover Image</Label>
-                            <Input
-                                id="cover_image_file"
-                                type="file"
-                                accept="image/*"
-                                onChange={(event) => setData("cover_image_file", event.target.files?.[0])}
-                            />
-                            {errors.cover_image_file && <p className="text-xs text-rose-500">{errors.cover_image_file}</p>}
-                            {project?.cover_image_url && data.cover_image !== "" && (
-                                <div className="flex items-center gap-4">
-                                    <img
-                                        src={project.cover_image_url}
-                                        alt={project.name}
-                                        className="h-16 w-16 rounded object-cover"
-                                    />
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => {
-                                            setData("cover_image", "");
-                                            setData("cover_image_file", undefined);
-                                        }}
-                                    >
-                                        Hapus Cover
-                                    </Button>
-                                </div>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{title}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid gap-4">
+                            {generalError && (
+                                <Alert variant="destructive">
+                                    <AlertDescription>{generalError}</AlertDescription>
+                                </Alert>
                             )}
-                            {errors.cover_image && <p className="text-xs text-rose-500">{errors.cover_image}</p>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="summary">Ringkasan</Label>
-                            <Input
-                                id="summary"
-                                value={data.summary ?? ""}
-                                onChange={(event) => setData("summary", event.target.value)}
-                            />
-                            {errors.summary && <p className="text-xs text-rose-500">{errors.summary}</p>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="description">Deskripsi</Label>
-                            <textarea
-                                id="description"
-                                className="min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                value={data.description ?? ""}
-                                onChange={(event) => setData("description", event.target.value)}
-                            />
-                            {errors.description && <p className="text-xs text-rose-500">{errors.description}</p>}
-                        </div>
-                        <div className="grid gap-2 md:grid-cols-2">
                             <div className="grid gap-2">
-                                <Label htmlFor="started_at">Mulai</Label>
-                                <Input
-                                    id="started_at"
-                                    type="date"
-                                    value={data.started_at ?? ""}
-                                    onChange={(event) => setData("started_at", event.target.value)}
-                                />
-                                {errors.started_at && <p className="text-xs text-rose-500">{errors.started_at}</p>}
+                                <Label htmlFor="name">Nama</Label>
+                                <Input id="name" value={data.name} onChange={(event) => setData('name', event.target.value)} required />
+                                {errors.name && <p className="text-xs text-rose-500">{errors.name}</p>}
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="completed_at">Selesai</Label>
-                                <Input
-                                    id="completed_at"
-                                    type="date"
-                                    value={data.completed_at ?? ""}
-                                    onChange={(event) => setData("completed_at", event.target.value)}
-                                />
-                                {errors.completed_at && <p className="text-xs text-rose-500">{errors.completed_at}</p>}
+                                <Label htmlFor="slug">Slug</Label>
+                                <Input id="slug" value={data.slug} onChange={(event) => setData('slug', event.target.value)} required />
+                                {errors.slug && <p className="text-xs text-rose-500">{errors.slug}</p>}
                             </div>
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="status">Status</Label>
-                            <Input
-                                id="status"
-                                value={data.status}
-                                onChange={(event) => setData("status", event.target.value)}
-                                required
-                            />
-                            {errors.status && <p className="text-xs text-rose-500">{errors.status}</p>}
-                        </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-end gap-2">
-                        <Button type="submit" disabled={processing}>
-                            {project ? "Simpan Perubahan" : "Simpan"}
-                        </Button>
-                    </CardFooter>
-                </Card>
+                            <div className="grid gap-2">
+                                <Label htmlFor="client_name">Nama Klien</Label>
+                                <Input
+                                    id="client_name"
+                                    value={data.client_name ?? ''}
+                                    onChange={(event) => setData('client_name', event.target.value)}
+                                />
+                                {errors.client_name && <p className="text-xs text-rose-500">{errors.client_name}</p>}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="cover_image_file">Cover Image</Label>
+                                <Input
+                                    id="cover_image_file"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(event) => setData('cover_image_file', event.target.files?.[0])}
+                                />
+                                {errors.cover_image_file && <p className="text-xs text-rose-500">{errors.cover_image_file}</p>}
+                                {project?.cover_image_url && data.cover_image !== '' && (
+                                    <div className="flex items-center gap-4">
+                                        <img src={project.cover_image_url} alt={project.name} className="h-16 w-16 rounded object-cover" />
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                setData('cover_image', '');
+                                                setData('cover_image_file', undefined);
+                                            }}
+                                        >
+                                            Hapus Cover
+                                        </Button>
+                                    </div>
+                                )}
+                                {errors.cover_image && <p className="text-xs text-rose-500">{errors.cover_image}</p>}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="summary">Ringkasan</Label>
+                                <Input id="summary" value={data.summary ?? ''} onChange={(event) => setData('summary', event.target.value)} />
+                                {errors.summary && <p className="text-xs text-rose-500">{errors.summary}</p>}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="description">Deskripsi</Label>
+                                <textarea
+                                    id="description"
+                                    className="min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                                    value={data.description ?? ''}
+                                    onChange={(event) => setData('description', event.target.value)}
+                                />
+                                {errors.description && <p className="text-xs text-rose-500">{errors.description}</p>}
+                            </div>
+                            <div className="grid gap-2 md:grid-cols-2">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="started_at">Mulai</Label>
+                                    <Input
+                                        id="started_at"
+                                        type="date"
+                                        value={data.started_at ?? ''}
+                                        onChange={(event) => setData('started_at', event.target.value)}
+                                    />
+                                    {errors.started_at && <p className="text-xs text-rose-500">{errors.started_at}</p>}
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="completed_at">Selesai</Label>
+                                    <Input
+                                        id="completed_at"
+                                        type="date"
+                                        value={data.completed_at ?? ''}
+                                        onChange={(event) => setData('completed_at', event.target.value)}
+                                    />
+                                    {errors.completed_at && <p className="text-xs text-rose-500">{errors.completed_at}</p>}
+                                </div>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="status">Status</Label>
+                                <Input id="status" value={data.status} onChange={(event) => setData('status', event.target.value)} required />
+                                {errors.status && <p className="text-xs text-rose-500">{errors.status}</p>}
+                            </div>
+                        </CardContent>
+                        <CardFooter className="flex justify-end gap-2">
+                            <Button type="submit" disabled={processing}>
+                                {project ? 'Simpan Perubahan' : 'Simpan'}
+                            </Button>
+                        </CardFooter>
+                    </Card>
                 </form>
             </div>
         </AppLayout>

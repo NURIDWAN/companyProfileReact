@@ -1,15 +1,14 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import type { PageProps } from '@inertiajs/core';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Calendar, Mail, Phone } from 'lucide-react';
 
-import AppLayout from '@/layouts/app-layout';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import type { JobApplication } from '@/types';
+import AppLayout from '@/layouts/app-layout';
 
 type ContactMessage = {
     id: number;
@@ -87,14 +86,12 @@ export default function ContactMessageShow(): React.ReactElement {
                         </CardHeader>
                         <CardContent className="space-y-4 text-sm text-slate-700">
                             <div>
-                                <p className="text-xs uppercase text-slate-500">Subjek</p>
+                                <p className="text-xs text-slate-500 uppercase">Subjek</p>
                                 <p className="text-base font-medium text-slate-900">{message.subject ?? 'Tanpa subjek'}</p>
                             </div>
                             <div>
-                                <p className="text-xs uppercase text-slate-500">Pesan</p>
-                                <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-4 text-slate-700">
-                                    {message.message}
-                                </div>
+                                <p className="text-xs text-slate-500 uppercase">Pesan</p>
+                                <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-4 text-slate-700">{message.message}</div>
                             </div>
                         </CardContent>
                     </Card>
@@ -134,7 +131,7 @@ export default function ContactMessageShow(): React.ReactElement {
 
                             <form onSubmit={submit} className="space-y-3">
                                 <div>
-                                    <Label className="text-xs uppercase text-slate-500">Status</Label>
+                                    <Label className="text-xs text-slate-500 uppercase">Status</Label>
                                     <select
                                         value={form.data.status}
                                         onChange={(event) => form.setData('status', event.target.value)}
@@ -149,7 +146,7 @@ export default function ContactMessageShow(): React.ReactElement {
                                     {form.errors.status && <p className="mt-1 text-xs text-rose-500">{form.errors.status}</p>}
                                 </div>
                                 <div>
-                                    <Label className="text-xs uppercase text-slate-500">Catatan</Label>
+                                    <Label className="text-xs text-slate-500 uppercase">Catatan</Label>
                                     <Textarea
                                         value={form.data.notes}
                                         onChange={(event) => form.setData('notes', event.target.value)}

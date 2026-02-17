@@ -1,12 +1,12 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
 import type { PageProps } from '@inertiajs/core';
-import { Mail, Phone } from 'lucide-react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Phone } from 'lucide-react';
 
-import AppLayout from '@/layouts/app-layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import AppLayout from '@/layouts/app-layout';
 type ContactMessage = {
     id: number;
     name: string;
@@ -53,11 +53,7 @@ export default function ContactMessageIndex(): React.ReactElement {
     const { messages, filters, availableStatuses } = usePage<ContactMessageIndexProps>().props;
 
     const handleFilter = (value: string) => {
-        router.get(
-            route('admin.contact-messages.index'),
-            value === 'all' ? {} : { status: value },
-            { replace: true, preserveState: true },
-        );
+        router.get(route('admin.contact-messages.index'), value === 'all' ? {} : { status: value }, { replace: true, preserveState: true });
     };
 
     return (
@@ -91,7 +87,7 @@ export default function ContactMessageIndex(): React.ReactElement {
                     <CardContent className="space-y-4">
                         <div className="overflow-x-auto">
                             <table className="min-w-full divide-y divide-slate-200 text-sm">
-                                <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                <thead className="bg-slate-50 text-left text-xs font-semibold tracking-wide text-slate-500 uppercase">
                                     <tr>
                                         <th className="px-4 py-3">Nama</th>
                                         <th className="px-4 py-3">Kontak</th>
@@ -118,13 +114,10 @@ export default function ContactMessageIndex(): React.ReactElement {
                                                     '-'
                                                 )}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-slate-600">
-                                                {message.subject ?? 'Tanpa subjek'}
-                                            </td>
+                                            <td className="px-4 py-3 text-sm text-slate-600">{message.subject ?? 'Tanpa subjek'}</td>
                                             <td className="px-4 py-3">
                                                 <Badge className={statusColor[message.status] ?? 'bg-slate-200 text-slate-800'}>
-                                                    {availableStatuses.find((status) => status.value === message.status)?.label ??
-                                                        message.status}
+                                                    {availableStatuses.find((status) => status.value === message.status)?.label ?? message.status}
                                                 </Badge>
                                             </td>
                                             <td className="px-4 py-3 text-sm text-slate-600">
@@ -143,13 +136,7 @@ export default function ContactMessageIndex(): React.ReactElement {
 
                         <div className="flex flex-wrap gap-2">
                             {messages.links.map((link) => (
-                                <Button
-                                    key={link.label}
-                                    size="sm"
-                                    variant={link.active ? 'default' : 'outline'}
-                                    disabled={!link.url}
-                                    asChild
-                                >
+                                <Button key={link.label} size="sm" variant={link.active ? 'default' : 'outline'} disabled={!link.url} asChild>
                                     <Link href={link.url ?? '#'} dangerouslySetInnerHTML={{ __html: link.label }} />
                                 </Button>
                             ))}

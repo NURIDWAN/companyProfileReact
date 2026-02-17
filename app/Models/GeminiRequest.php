@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
-use App\Models\User;
 
 class GeminiRequest extends Model
 {
@@ -37,7 +36,7 @@ class GeminiRequest extends Model
     protected static function booted(): void
     {
         static::creating(function (GeminiRequest $request) {
-            if (!$request->uuid) {
+            if (! $request->uuid) {
                 $request->uuid = (string) Str::uuid();
             }
         });

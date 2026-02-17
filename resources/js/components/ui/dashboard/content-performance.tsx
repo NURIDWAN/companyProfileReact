@@ -1,5 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Layers, PackageSearch, BriefcaseBusiness, UsersRound, MessageCircle } from 'lucide-react';
+import { BriefcaseBusiness, Layers, MessageCircle, PackageSearch, UsersRound } from 'lucide-react';
 
 const links = [
     { href: '/admin/services', label: 'Kelola Layanan', icon: Layers },

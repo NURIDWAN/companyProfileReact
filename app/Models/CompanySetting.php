@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class CompanySetting extends Model
 {
@@ -27,6 +27,6 @@ class CompanySetting extends Model
             ->logOnly(['key', 'value'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => "Setting '{$this->key}' {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName) => "Setting '{$this->key}' {$eventName}");
     }
 }

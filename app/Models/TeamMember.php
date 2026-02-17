@@ -5,8 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class TeamMember extends Model
 {
@@ -18,7 +18,7 @@ class TeamMember extends Model
             ->logOnly(['name', 'role', 'is_active'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => "TeamMember '{$this->name}' {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName) => "TeamMember '{$this->name}' {$eventName}");
     }
 
     protected $fillable = [
@@ -47,7 +47,7 @@ class TeamMember extends Model
 
     protected function resolveImageUrl(?string $path): ?string
     {
-        if (!$path) {
+        if (! $path) {
             return null;
         }
 

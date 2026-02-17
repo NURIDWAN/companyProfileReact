@@ -22,7 +22,9 @@ class PageObserver
     public function updated(Page $page): void
     {
         // Check if title or slug was changed
-        if ($page->isDirty(['title', 'slug', 'parent_id'])) {
+        // Use wasChanged() instead of isDirty() because in 'updated' event,
+        // the model has already been saved, so isDirty() returns false
+        if ($page->wasChanged(['title', 'slug', 'parent_id'])) {
             $this->syncMenuItems($page);
         }
     }
@@ -47,7 +49,7 @@ class PageObserver
     {
         // Sync and reactivate menu items when page is restored
         $this->syncMenuItems($page);
-        
+
         MenuItem::where('page_id', $page->id)
             ->update(['is_active' => true]);
     }
@@ -75,7 +77,7 @@ class PageObserver
             ->where('type', 'page')
             ->update([
                 'title' => $page->title,
-                'target' => '/' . ltrim($page->full_path, '/'),
+                'target' => '/'.ltrim($page->full_path, '/'),
             ]);
 
         // Also update menu items for child pages (their full_path changed too)
@@ -96,7 +98,7 @@ class PageObserver
             MenuItem::where('page_id', $child->id)
                 ->where('type', 'page')
                 ->update([
-                    'target' => '/' . ltrim($child->full_path, '/'),
+                    'target' => '/'.ltrim($child->full_path, '/'),
                 ]);
 
             // Recursively update grandchildren

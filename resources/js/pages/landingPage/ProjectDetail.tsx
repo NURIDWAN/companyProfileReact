@@ -1,10 +1,10 @@
-import { usePage, Link } from '@inertiajs/react';
 import type { PageProps } from '@inertiajs/core';
-import { Calendar, Building2, ArrowLeft } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { ArrowLeft, Building2, Calendar } from 'lucide-react';
 
-import LandingPageLayout from '@/layouts/landingPage-layouts';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import LandingPageLayout from '@/layouts/landingPage-layouts';
 
 interface ProjectItem {
     id: number;
@@ -36,11 +36,13 @@ export default function ProjectDetailPage() {
                 </Link>
 
                 <div className="space-y-4">
-                    <Badge variant="outline" className="uppercase tracking-wide">
+                    <Badge variant="outline" className="tracking-wide uppercase">
                         {project.status ?? 'Completed'}
                     </Badge>
                     <h1 className="text-4xl font-bold text-gray-900">{project.name}</h1>
-                    <p className="text-lg text-gray-600">{project.summary ?? 'Program peningkatan kinerja dengan pendekatan strategis dan terukur.'}</p>
+                    <p className="text-lg text-gray-600">
+                        {project.summary ?? 'Program peningkatan kinerja dengan pendekatan strategis dan terukur.'}
+                    </p>
                     <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                         {project.client_name && (
                             <span className="flex items-center gap-2">
@@ -52,9 +54,7 @@ export default function ProjectDetailPage() {
                             {project.started_at ? new Date(project.started_at).toLocaleDateString('id-ID') : 'Mulai segera'}
                         </span>
                         {project.completed_at && (
-                            <span className="text-gray-500">
-                                Selesai {new Date(project.completed_at).toLocaleDateString('id-ID')}
-                            </span>
+                            <span className="text-gray-500">Selesai {new Date(project.completed_at).toLocaleDateString('id-ID')}</span>
                         )}
                     </div>
                 </div>
@@ -66,21 +66,21 @@ export default function ProjectDetailPage() {
                         <CardTitle>Ringkasan Proyek</CardTitle>
                         <CardDescription>Tujuan, lingkup, dan luaran yang berhasil dicapai.</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4 text-gray-600 leading-relaxed">
+                    <CardContent className="space-y-4 leading-relaxed text-gray-600">
                         <p>
                             {project.description ??
                                 'Implementasi solusi terintegrasi dengan fokus pada peningkatan efisiensi operasional dan pengalaman pelanggan.'}
                         </p>
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="rounded-lg border p-4">
-                                <p className="text-xs uppercase text-gray-400">Periode</p>
+                                <p className="text-xs text-gray-400 uppercase">Periode</p>
                                 <p className="font-semibold text-gray-900">
                                     {project.started_at ? new Date(project.started_at).toLocaleDateString('id-ID') : 'N/A'}
                                     {project.completed_at ? ` - ${new Date(project.completed_at).toLocaleDateString('id-ID')}` : ''}
                                 </p>
                             </div>
                             <div className="rounded-lg border p-4">
-                                <p className="text-xs uppercase text-gray-400">Status</p>
+                                <p className="text-xs text-gray-400 uppercase">Status</p>
                                 <p className="font-semibold text-gray-900">{project.status ?? 'In Progress'}</p>
                             </div>
                         </div>
@@ -91,7 +91,7 @@ export default function ProjectDetailPage() {
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm uppercase text-blue-600">Proyek Lainnya</p>
+                                <p className="text-sm text-blue-600 uppercase">Proyek Lainnya</p>
                                 <h2 className="text-2xl font-semibold text-gray-900">Studi kasus terbaru</h2>
                             </div>
                             <Link href="/project" className="text-sm font-semibold text-blue-600">

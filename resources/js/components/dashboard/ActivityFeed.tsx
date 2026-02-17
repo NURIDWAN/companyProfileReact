@@ -1,15 +1,25 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from "@/components/ui/dialog";
-import { Activity, User, Settings, FileText, LogIn, LogOut, Package, Briefcase, MessageSquare, Users, AlertCircle, Clock, Monitor, Globe, ChevronRight } from "lucide-react";
+    Activity,
+    AlertCircle,
+    Briefcase,
+    ChevronRight,
+    Clock,
+    FileText,
+    Globe,
+    LogIn,
+    LogOut,
+    MessageSquare,
+    Monitor,
+    Package,
+    Settings,
+    User,
+    Users,
+} from 'lucide-react';
+import { useState } from 'react';
 
 export type ActivityItem = {
     id: number;
@@ -40,12 +50,42 @@ const getActivityIcon = (description: string, subjectType: string) => {
 };
 
 const getEventBadge = (description: string) => {
-    if (description.toLowerCase().includes('created')) return <Badge variant="default" className="bg-green-100 text-green-700 text-[10px]">Created</Badge>;
-    if (description.toLowerCase().includes('updated')) return <Badge variant="default" className="bg-blue-100 text-blue-700 text-[10px]">Updated</Badge>;
-    if (description.toLowerCase().includes('deleted')) return <Badge variant="default" className="bg-red-100 text-red-700 text-[10px]">Deleted</Badge>;
-    if (description.toLowerCase().includes('logged in')) return <Badge variant="default" className="bg-green-100 text-green-700 text-[10px]">Login</Badge>;
-    if (description.toLowerCase().includes('logged out')) return <Badge variant="default" className="bg-orange-100 text-orange-700 text-[10px]">Logout</Badge>;
-    if (description.toLowerCase().includes('failed')) return <Badge variant="default" className="bg-red-100 text-red-700 text-[10px]">Failed</Badge>;
+    if (description.toLowerCase().includes('created'))
+        return (
+            <Badge variant="default" className="bg-green-100 text-[10px] text-green-700">
+                Created
+            </Badge>
+        );
+    if (description.toLowerCase().includes('updated'))
+        return (
+            <Badge variant="default" className="bg-blue-100 text-[10px] text-blue-700">
+                Updated
+            </Badge>
+        );
+    if (description.toLowerCase().includes('deleted'))
+        return (
+            <Badge variant="default" className="bg-red-100 text-[10px] text-red-700">
+                Deleted
+            </Badge>
+        );
+    if (description.toLowerCase().includes('logged in'))
+        return (
+            <Badge variant="default" className="bg-green-100 text-[10px] text-green-700">
+                Login
+            </Badge>
+        );
+    if (description.toLowerCase().includes('logged out'))
+        return (
+            <Badge variant="default" className="bg-orange-100 text-[10px] text-orange-700">
+                Logout
+            </Badge>
+        );
+    if (description.toLowerCase().includes('failed'))
+        return (
+            <Badge variant="default" className="bg-red-100 text-[10px] text-red-700">
+                Failed
+            </Badge>
+        );
     return null;
 };
 
@@ -85,16 +125,16 @@ export default function ActivityFeed({ activities }: Props) {
                                 <div
                                     key={activity.id}
                                     onClick={() => handleActivityClick(activity)}
-                                    className="flex gap-3 py-2 border-b border-border/50 last:border-0 cursor-pointer hover:bg-muted/50 rounded-lg px-2 -mx-2 transition-colors group"
+                                    className="group -mx-2 flex cursor-pointer gap-3 rounded-lg border-b border-border/50 px-2 py-2 transition-colors last:border-0 hover:bg-muted/50"
                                 >
-                                    <div className="mt-0.5 flex-shrink-0 rounded-full p-1.5 bg-muted/50">
+                                    <div className="mt-0.5 flex-shrink-0 rounded-full bg-muted/50 p-1.5">
                                         {getActivityIcon(activity.description, activity.subject_type)}
                                     </div>
-                                    <div className="flex-1 min-w-0 space-y-1">
-                                        <p className="text-sm font-medium leading-tight truncate" title={activity.description}>
+                                    <div className="min-w-0 flex-1 space-y-1">
+                                        <p className="truncate text-sm leading-tight font-medium" title={activity.description}>
                                             {activity.description}
                                         </p>
-                                        <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                                             <span className="flex items-center gap-1">
                                                 <User className="h-3 w-3" />
                                                 {activity.causer_name}
@@ -105,18 +145,20 @@ export default function ActivityFeed({ activities }: Props) {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        {activity.subject_type !== 'N/A' && !activity.description.toLowerCase().includes('logged') && !activity.description.toLowerCase().includes('failed') && (
-                                            <Badge variant="outline" className="text-[10px] h-5 flex-shrink-0">
-                                                {activity.subject_type}
-                                            </Badge>
-                                        )}
-                                        <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors" />
+                                        {activity.subject_type !== 'N/A' &&
+                                            !activity.description.toLowerCase().includes('logged') &&
+                                            !activity.description.toLowerCase().includes('failed') && (
+                                                <Badge variant="outline" className="h-5 flex-shrink-0 text-[10px]">
+                                                    {activity.subject_type}
+                                                </Badge>
+                                            )}
+                                        <ChevronRight className="h-4 w-4 text-muted-foreground/50 transition-colors group-hover:text-muted-foreground" />
                                     </div>
                                 </div>
                             ))}
                             {activities.length === 0 && (
                                 <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
-                                    <Activity className="h-10 w-10 mb-2 opacity-50" />
+                                    <Activity className="mb-2 h-10 w-10 opacity-50" />
                                     <p className="text-sm">Belum ada aktivitas</p>
                                 </div>
                             )}
@@ -133,9 +175,7 @@ export default function ActivityFeed({ activities }: Props) {
                             {selectedActivity && getActivityIcon(selectedActivity.description, selectedActivity.subject_type)}
                             Detail Aktivitas
                         </DialogTitle>
-                        <DialogDescription>
-                            {selectedActivity?.description}
-                        </DialogDescription>
+                        <DialogDescription>{selectedActivity?.description}</DialogDescription>
                     </DialogHeader>
 
                     {selectedActivity && (
@@ -176,8 +216,8 @@ export default function ActivityFeed({ activities }: Props) {
 
                             {/* IP & User Agent for login events */}
                             {properties?.ip ? (
-                                <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
-                                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Informasi Sesi</p>
+                                <div className="space-y-2 rounded-lg border bg-muted/30 p-3">
+                                    <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Informasi Sesi</p>
                                     <div className="grid grid-cols-[auto,1fr] gap-x-3 gap-y-2 text-sm">
                                         <div className="flex items-center gap-2 text-muted-foreground">
                                             <Globe className="h-3 w-3" />
@@ -191,7 +231,7 @@ export default function ActivityFeed({ activities }: Props) {
                                                     <Monitor className="h-3 w-3" />
                                                     <span>Browser</span>
                                                 </div>
-                                                <div className="font-mono text-xs truncate" title={String(properties.user_agent)}>
+                                                <div className="truncate font-mono text-xs" title={String(properties.user_agent)}>
                                                     {String(properties.user_agent).slice(0, 50)}...
                                                 </div>
                                             </>
@@ -211,26 +251,26 @@ export default function ActivityFeed({ activities }: Props) {
                             ) : null}
 
                             {/* Changed Values */}
-                            {(oldValues || newValues) ? (
-                                <div className="rounded-lg border bg-muted/30 p-3 space-y-3">
-                                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Perubahan Data</p>
+                            {oldValues || newValues ? (
+                                <div className="space-y-3 rounded-lg border bg-muted/30 p-3">
+                                    <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Perubahan Data</p>
                                     <div className="space-y-2">
                                         {Object.keys(newValues || oldValues || {}).map((key) => (
                                             <div key={key} className="text-sm">
-                                                <p className="font-medium text-foreground mb-1">{key}</p>
+                                                <p className="mb-1 font-medium text-foreground">{key}</p>
                                                 <div className="flex gap-2 text-xs">
                                                     {oldValues?.[key] !== undefined && (
-                                                        <div className="flex-1 rounded bg-red-50 dark:bg-red-950/30 px-2 py-1 text-red-700 dark:text-red-300">
-                                                            <span className="text-[10px] uppercase text-red-500 dark:text-red-400">Sebelum:</span>
-                                                            <pre className="mt-0.5 whitespace-pre-wrap break-all font-mono">
+                                                        <div className="flex-1 rounded bg-red-50 px-2 py-1 text-red-700 dark:bg-red-950/30 dark:text-red-300">
+                                                            <span className="text-[10px] text-red-500 uppercase dark:text-red-400">Sebelum:</span>
+                                                            <pre className="mt-0.5 font-mono break-all whitespace-pre-wrap">
                                                                 {renderPropertyValue(oldValues[key])}
                                                             </pre>
                                                         </div>
                                                     )}
                                                     {newValues?.[key] !== undefined && (
-                                                        <div className="flex-1 rounded bg-green-50 dark:bg-green-950/30 px-2 py-1 text-green-700 dark:text-green-300">
-                                                            <span className="text-[10px] uppercase text-green-500 dark:text-green-400">Sesudah:</span>
-                                                            <pre className="mt-0.5 whitespace-pre-wrap break-all font-mono">
+                                                        <div className="flex-1 rounded bg-green-50 px-2 py-1 text-green-700 dark:bg-green-950/30 dark:text-green-300">
+                                                            <span className="text-[10px] text-green-500 uppercase dark:text-green-400">Sesudah:</span>
+                                                            <pre className="mt-0.5 font-mono break-all whitespace-pre-wrap">
                                                                 {renderPropertyValue(newValues[key])}
                                                             </pre>
                                                         </div>
@@ -243,9 +283,7 @@ export default function ActivityFeed({ activities }: Props) {
                             ) : null}
 
                             {/* Status Badge */}
-                            <div className="flex justify-end">
-                                {getEventBadge(selectedActivity.description)}
-                            </div>
+                            <div className="flex justify-end">{getEventBadge(selectedActivity.description)}</div>
                         </div>
                     )}
                 </DialogContent>

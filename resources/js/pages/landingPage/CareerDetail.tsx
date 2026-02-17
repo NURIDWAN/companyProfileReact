@@ -1,12 +1,12 @@
-import { usePage, Link } from '@inertiajs/react';
 import type { PageProps } from '@inertiajs/core';
+import { Link, usePage } from '@inertiajs/react';
 import { Briefcase, Building, Clock, MapPin } from 'lucide-react';
 
-import LandingPageLayout from '@/layouts/landingPage-layouts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import JobCard from '@/components/ui/landingPageComponent/career/jobcard';
 import type { JobPosition } from '@/components/ui/landingPageComponent/career/types';
+import LandingPageLayout from '@/layouts/landingPage-layouts';
 
 type CareerDetailProps = PageProps & {
     position: JobPosition;
@@ -14,35 +14,50 @@ type CareerDetailProps = PageProps & {
 };
 
 export default function CareerDetailPage() {
-    const { position, relatedPositions = [], flash } = usePage<CareerDetailProps>().props as CareerDetailProps & {
+    const {
+        position,
+        relatedPositions = [],
+        flash,
+    } = usePage<CareerDetailProps>().props as CareerDetailProps & {
         flash?: { success?: string };
     };
-    const requirements = position.requirements && position.requirements.length
-        ? position.requirements
-        : ['Komitmen tinggi terhadap kualitas kerja', 'Mampu bekerja secara kolaboratif'];
+    const requirements =
+        position.requirements && position.requirements.length
+            ? position.requirements
+            : ['Komitmen tinggi terhadap kualitas kerja', 'Mampu bekerja secara kolaboratif'];
 
     return (
         <LandingPageLayout>
             <div className="mx-auto max-w-4xl space-y-8 p-6">
-                <Link href="/career" className="text-sm text-blue-600">&larr; Kembali ke daftar karier</Link>
+                <Link href="/career" className="text-sm text-blue-600">
+                    &larr; Kembali ke daftar karier
+                </Link>
                 {flash?.success && (
-                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
-                        {flash.success}
-                    </div>
+                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">{flash.success}</div>
                 )}
                 <div className="space-y-4">
-                    <p className="text-xs uppercase tracking-wide text-blue-600">Lowongan</p>
+                    <p className="text-xs tracking-wide text-blue-600 uppercase">Lowongan</p>
                     <h1 className="text-4xl font-bold text-gray-900">{position.title}</h1>
                     <p className="text-lg text-gray-600">
                         {position.description ?? 'Kami mencari talenta terbaik untuk memperkuat tim dan menghadirkan solusi bisnis berdampak.'}
                     </p>
                     <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                        <span className="flex items-center gap-2"><Building className="h-4 w-4" />{position.department ?? 'Semua Divisi'}</span>
-                        <span className="flex items-center gap-2"><MapPin className="h-4 w-4" />{position.location ?? 'Jakarta / Remote'}</span>
-                        <span className="flex items-center gap-2"><Briefcase className="h-4 w-4" />{position.employment_type ?? 'Full-time'}</span>
+                        <span className="flex items-center gap-2">
+                            <Building className="h-4 w-4" />
+                            {position.department ?? 'Semua Divisi'}
+                        </span>
+                        <span className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4" />
+                            {position.location ?? 'Jakarta / Remote'}
+                        </span>
+                        <span className="flex items-center gap-2">
+                            <Briefcase className="h-4 w-4" />
+                            {position.employment_type ?? 'Full-time'}
+                        </span>
                         {position.posted_at && (
                             <span className="flex items-center gap-2">
-                                <Clock className="h-4 w-4" />Posting {new Date(position.posted_at).toLocaleDateString('id-ID')}
+                                <Clock className="h-4 w-4" />
+                                Posting {new Date(position.posted_at).toLocaleDateString('id-ID')}
                             </span>
                         )}
                     </div>

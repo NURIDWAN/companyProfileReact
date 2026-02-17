@@ -70,7 +70,7 @@ class UserManagementController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'password' => ['nullable', 'string', 'min:8'],
             'roles' => ['nullable', 'array'],
             'roles.*' => ['integer', 'exists:roles,id'],
@@ -81,7 +81,7 @@ class UserManagementController extends Controller
             'email' => $data['email'],
         ]);
 
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $user->password = Hash::make($data['password']);
         }
 

@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Linkedin, ArrowRight } from "lucide-react";
 import { Link } from "@inertiajs/react";

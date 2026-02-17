@@ -1,23 +1,10 @@
-import { useId } from 'react';
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import ActivityFeed, { type ActivityItem } from '@/components/dashboard/ActivityFeed';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
-import ActivityFeed, { type ActivityItem } from '@/components/dashboard/ActivityFeed';
-import {
-    Area,
-    AreaChart,
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Legend,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from 'recharts';
+import { type BreadcrumbItem } from '@/types';
+import { Head, usePage } from '@inertiajs/react';
 import {
     ArrowDownRight,
     ArrowUpRight,
@@ -33,6 +20,8 @@ import {
     UsersRound,
     type LucideIcon,
 } from 'lucide-react';
+import { useId } from 'react';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 type DashboardProps = {
     metrics: {
@@ -206,7 +195,7 @@ export default function Dashboard() {
 
             return acc;
         },
-        { label: '-', total: 0 }
+        { label: '-', total: 0 },
     );
 
     return (
@@ -215,8 +204,8 @@ export default function Dashboard() {
             <div className="space-y-6 rounded-xl p-4 lg:p-6">
                 <section className="grid gap-4 xl:grid-cols-[2fr,1fr]">
                     <div className="relative overflow-hidden rounded-3xl border border-slate-200/60 bg-slate-950 text-white shadow-lg dark:border-slate-800">
-                        <div className="absolute left-[-10%] top-[-25%] h-72 w-72 rounded-full bg-sky-500/25 blur-3xl" />
-                        <div className="absolute right-[-20%] top-1/2 h-96 w-96 -translate-y-1/2 rounded-full bg-emerald-500/10 blur-3xl" />
+                        <div className="absolute top-[-25%] left-[-10%] h-72 w-72 rounded-full bg-sky-500/25 blur-3xl" />
+                        <div className="absolute top-1/2 right-[-20%] h-96 w-96 -translate-y-1/2 rounded-full bg-emerald-500/10 blur-3xl" />
                         <div className="relative flex h-full flex-col gap-8 p-8">
                             <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                                 <div className="space-y-3">
@@ -225,11 +214,12 @@ export default function Dashboard() {
                                     </Badge>
                                     <h1 className="text-3xl font-semibold tracking-tight">Dashboard Bisnis</h1>
                                     <p className="max-w-2xl text-sm text-white/70">
-                                        Pantau progres layanan, produk, dan proyek dalam satu layar. Data yang terkurasi membantu Anda mengambil keputusan lebih cepat dan tepat.
+                                        Pantau progres layanan, produk, dan proyek dalam satu layar. Data yang terkurasi membantu Anda mengambil
+                                        keputusan lebih cepat dan tepat.
                                     </p>
                                 </div>
                                 <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-sm text-white/80 shadow-lg backdrop-blur">
-                                    <p className="text-xs uppercase tracking-[0.24em] text-white/60">Total Aset</p>
+                                    <p className="text-xs tracking-[0.24em] text-white/60 uppercase">Total Aset</p>
                                     <p className="mt-2 text-2xl font-semibold text-white">
                                         {formatNumber(metrics.services + metrics.products + metrics.projects)} aset
                                     </p>
@@ -244,7 +234,7 @@ export default function Dashboard() {
                                                 <item.icon className="h-4 w-4" />
                                             </div>
                                             <div>
-                                                <p className="text-xs uppercase tracking-wide text-white/60">{item.label}</p>
+                                                <p className="text-xs tracking-wide text-white/60 uppercase">{item.label}</p>
                                                 <p className="text-lg font-semibold text-white">{formatNumber(item.value)}</p>
                                             </div>
                                         </div>
@@ -349,7 +339,10 @@ export default function Dashboard() {
                                                 <p className="font-medium text-foreground">{project.name}</p>
                                                 <p className="text-xs text-muted-foreground">Status terbaru proyek</p>
                                             </div>
-                                            <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                                            <Badge
+                                                variant="outline"
+                                                className="border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                                            >
                                                 {project.status}
                                             </Badge>
                                         </li>
@@ -380,14 +373,16 @@ export default function Dashboard() {
                                             className="flex items-center justify-between gap-3 rounded-xl border border-transparent bg-muted/30 px-4 py-3 transition hover:border-primary/40 hover:bg-primary/5"
                                         >
                                             <div className="max-w-[70%]">
-                                                <p className="font-medium text-foreground line-clamp-2">{post.title}</p>
+                                                <p className="line-clamp-2 font-medium text-foreground">{post.title}</p>
                                                 <p className="text-xs text-muted-foreground">Dipublikasikan {formatDate(post.published_at)}</p>
                                             </div>
                                             <Badge
                                                 variant={post.published_at ? 'secondary' : 'outline'}
                                                 className={cn(
                                                     'whitespace-nowrap',
-                                                    post.published_at ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 dark:text-emerald-400' : 'border-dashed'
+                                                    post.published_at
+                                                        ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 dark:text-emerald-400'
+                                                        : 'border-dashed',
                                                 )}
                                             >
                                                 {post.published_at ? 'Live' : 'Draft'}
@@ -443,9 +438,30 @@ export default function Dashboard() {
                                         <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
                                         <Tooltip />
                                         <Legend />
-                                        <Area type="monotone" dataKey="products" name="Produk" stroke="#6366f1" fill="url(#colorProducts)" strokeWidth={2} />
-                                        <Area type="monotone" dataKey="services" name="Layanan" stroke="#10b981" fill="url(#colorServices)" strokeWidth={2} />
-                                        <Area type="monotone" dataKey="projects" name="Proyek" stroke="#f59e0b" fill="url(#colorProjects)" strokeWidth={2} />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="products"
+                                            name="Produk"
+                                            stroke="#6366f1"
+                                            fill="url(#colorProducts)"
+                                            strokeWidth={2}
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="services"
+                                            name="Layanan"
+                                            stroke="#10b981"
+                                            fill="url(#colorServices)"
+                                            strokeWidth={2}
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="projects"
+                                            name="Proyek"
+                                            stroke="#f59e0b"
+                                            fill="url(#colorProjects)"
+                                            strokeWidth={2}
+                                        />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             )}
@@ -458,7 +474,7 @@ export default function Dashboard() {
                             ].map((item) => (
                                 <div key={item.label} className="rounded-xl border border-dashed border-muted-foreground/40 px-4 py-3">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{item.label}</span>
+                                        <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{item.label}</span>
                                         <TrendBadge trend={item.trend} />
                                     </div>
                                     <p className="mt-2 text-lg font-semibold text-foreground">{formatNumber(item.value)}</p>
@@ -506,15 +522,15 @@ export default function Dashboard() {
                         </div>
                         <div className="grid gap-3 md:grid-cols-3">
                             <div className="rounded-xl border border-dashed border-muted-foreground/40 px-4 py-3">
-                                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Total Produk</p>
+                                <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Total Produk</p>
                                 <p className="mt-1 text-lg font-semibold text-foreground">{formatNumber(totalProductsActivity)}</p>
                             </div>
                             <div className="rounded-xl border border-dashed border-muted-foreground/40 px-4 py-3">
-                                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Total Proyek</p>
+                                <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Total Proyek</p>
                                 <p className="mt-1 text-lg font-semibold text-foreground">{formatNumber(totalProjectsActivity)}</p>
                             </div>
                             <div className="rounded-xl border border-dashed border-muted-foreground/40 px-4 py-3">
-                                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Puncak Aktivitas</p>
+                                <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Puncak Aktivitas</p>
                                 {busiestActivity.label !== '-' ? (
                                     <>
                                         <p className="mt-1 text-sm font-medium text-foreground">{busiestActivity.label}</p>
@@ -547,7 +563,7 @@ function MetricCard({ label, value, description, icon: Icon, iconClassName, acce
                     <Icon className="h-4 w-4" />
                 </div>
             </CardHeader>
-            <CardContent className="flex flex-col gap-4 pb-6 pt-4">
+            <CardContent className="flex flex-col gap-4 pt-4 pb-6">
                 <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">{description}</span>
                     <TrendBadge trend={trend} />
@@ -562,7 +578,14 @@ function MetricCard({ label, value, description, icon: Icon, iconClassName, acce
                                         <stop offset="95%" stopColor={stroke} stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <Area type="monotone" dataKey="value" stroke={stroke} strokeWidth={2} fill={`url(#${gradientId})`} isAnimationActive={false} />
+                                <Area
+                                    type="monotone"
+                                    dataKey="value"
+                                    stroke={stroke}
+                                    strokeWidth={2}
+                                    fill={`url(#${gradientId})`}
+                                    isAnimationActive={false}
+                                />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
@@ -606,7 +629,9 @@ function TrendBadge({ trend }: { trend: TrendInfo | null }) {
             title="Dibanding periode sebelumnya"
             className={cn(
                 'border-transparent px-2 py-0 text-xs font-medium',
-                trend.direction === 'up' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-500 dark:text-rose-400'
+                trend.direction === 'up'
+                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                    : 'bg-rose-500/10 text-rose-500 dark:text-rose-400',
             )}
         >
             <Icon className="h-3.5 w-3.5" />
@@ -622,7 +647,7 @@ function computeTrend(data: Array<{ value: number }>): TrendInfo | null {
     }
 
     const current = data[data.length - 1]?.value ?? 0;
-    const previous = data.length > 1 ? data[data.length - 2]?.value ?? 0 : 0;
+    const previous = data.length > 1 ? (data[data.length - 2]?.value ?? 0) : 0;
     const delta = current - previous;
     const direction: TrendInfo['direction'] = delta === 0 ? 'flat' : delta > 0 ? 'up' : 'down';
     const percent = previous === 0 ? (current === 0 ? 0 : 100) : Math.round((delta / previous) * 100);
@@ -639,7 +664,7 @@ function computeTrend(data: Array<{ value: number }>): TrendInfo | null {
 function mergeMonthlySeries(
     products: Array<{ label: string; value: number }>,
     services: Array<{ label: string; value: number }>,
-    projects: Array<{ label: string; value: number }>
+    projects: Array<{ label: string; value: number }>,
 ) {
     const map = new Map<
         string,

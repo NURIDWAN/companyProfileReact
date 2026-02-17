@@ -175,6 +175,20 @@ class MenuItemController extends Controller
         return back()->with('success', 'Menu dihapus.');
     }
 
+    public function update(MenuItemRequest $request, MenuItem $menu): RedirectResponse
+    {
+        try {
+            $data = $this->payload($request);
+            $menu->update($data);
+
+            return back()->with('success', 'Menu berhasil diperbarui.');
+        } catch (Throwable $e) {
+            Log::error('Gagal memperbarui menu item', ['message' => $e->getMessage()]);
+
+            return back()->withErrors(['general' => 'Gagal memperbarui menu.'])->withInput();
+        }
+    }
+
     public function updateStatus(Request $request, MenuItem $menu): RedirectResponse
     {
         $data = $request->validate([

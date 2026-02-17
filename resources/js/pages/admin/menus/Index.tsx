@@ -24,7 +24,7 @@ import {
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { ChevronDown, ChevronRight, GripVertical, Plus, RotateCcw } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronRight, GripVertical, Plus, RotateCcw } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 type MenuItem = {
@@ -48,7 +48,7 @@ type SectionPayload = {
     display_order?: number | null;
     is_active?: boolean;
     type?: string | null;
-    data?: Record<string, any>;
+    data?: Record<string, unknown>;
 };
 
 type PageWithSections = { id: number; title: string; slug: string; full_path?: string; sections?: SectionPayload[] | null };
@@ -111,8 +111,8 @@ function flattenOptions(nodes: TreeNode[], depth = 0): { id: number; label: stri
     return nodes.flatMap((node) => [{ id: node.id, label: `${'— '.repeat(depth)}${node.title}` }, ...flattenOptions(node.children, depth + 1)]);
 }
 
-// Flatten tree to array for drag and drop
-function flattenTree(nodes: TreeNode[]): MenuItem[] {
+// Flatten tree to array for drag and drop - reserved for future parent reassignment
+function _flattenTree(nodes: TreeNode[]): MenuItem[] {
     const result: MenuItem[] = [];
     const traverse = (items: TreeNode[]) => {
         items.forEach((item) => {
@@ -329,7 +329,7 @@ function MenuItemOverlay({ node }: { node: TreeNode }) {
 }
 
 // Menu Tree Component with Drag and Drop
-function MenuTree({ nodes, position }: { nodes: TreeNode[]; position: string }) {
+function MenuTree({ nodes, position: _position }: { nodes: TreeNode[]; position: string }) {
     const [expandAll, setExpandAll] = useState(true);
     const [expandSignal, setExpandSignal] = useState(0);
     const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
@@ -458,6 +458,12 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
     const tree = useMemo(() => buildTree(positionItems), [positionItems]);
     const parentOptions = useMemo(() => flattenOptions(tree), [tree]);
 
+    // Check if ALL menu positions are empty (website not configured)
+    const isWebsiteNotConfigured = useMemo(() => {
+        const allPositions = ['main', 'header', 'footer'];
+        return allPositions.every((pos) => (menus[pos] ?? []).length === 0);
+    }, [menus]);
+
     const form = useForm({
         title: '',
         position: activeTab,
@@ -542,41 +548,88 @@ export default function MenuIndex({ menus, pages, categories = [] }: Props) {
                     </div>
                 </div>
 
-                {/* Tabs */}
-                <Tabs
-                    value={activeTab}
-                    onValueChange={(val) => {
-                        setActiveTab(val);
-                        setData('position', val);
-                    }}
-                >
-                    <TabsList className="mb-6 h-auto gap-0 rounded-none border-b border-gray-200 bg-transparent p-0">
-                        {positions.map((pos) => (
-                            <TabsTrigger
-                                key={pos.key}
-                                value={pos.key}
-                                className={cn(
-                                    'rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-gray-500',
-                                    'data-[state=active]:border-cyan-500 data-[state=active]:bg-transparent data-[state=active]:text-cyan-600 data-[state=active]:shadow-none',
-                                )}
-                            >
-                                {pos.label}
-                            </TabsTrigger>
-                        ))}
-                    </TabsList>
+                {/* Global Empty State - Website Not Configured */}
+                {isWebsiteNotConfigured ? (
+                    <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-amber-300 bg-amber-50 py-16 text-center">
+                        <div className="mb-4 rounded-full bg-amber-100 p-4">
+                            <AlertTriangle className="h-10 w-10 text-amber-600" />
+                        </div>
+                        <h2 className="text-xl font-semibold text-gray-800">Website Belum Diatur</h2>
+                        <p className="mt-2 max-w-md text-sm text-gray-600">
+                            Website Anda belum memiliki navigasi. Pengunjung tidak akan melihat menu apapun sampai Anda menambahkan menu.
+                        </p>
+                        <div className="mt-6 rounded-lg bg-white p-4 shadow-sm">
+                            <h3 className="mb-3 text-sm font-medium text-gray-700">Langkah-langkah untuk memulai:</h3>
+                            <ol className="space-y-2 text-left text-sm text-gray-600">
+                                <li className="flex items-start gap-2">
+                                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-cyan-100 text-xs font-medium text-cyan-700">
+                                        1
+                                    </span>
+                                    <span>
+                                        Klik tombol <strong>"Tambah Menu"</strong> di atas
+                                    </span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-cyan-100 text-xs font-medium text-cyan-700">
+                                        2
+                                    </span>
+                                    <span>Pilih halaman atau link yang ingin ditampilkan</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-cyan-100 text-xs font-medium text-cyan-700">
+                                        3
+                                    </span>
+                                    <span>Atur urutan menu sesuai kebutuhan</span>
+                                </li>
+                            </ol>
+                        </div>
+                        <Button
+                            type="button"
+                            size="lg"
+                            onClick={() => setCreateDialogOpen(true)}
+                            className="mt-6 bg-cyan-500 text-white hover:bg-cyan-600"
+                        >
+                            <Plus className="mr-2 h-5 w-5" />
+                            Tambah Menu Pertama
+                        </Button>
+                    </div>
+                ) : (
+                    /* Tabs - Show only when website has some menus */
+                    <Tabs
+                        value={activeTab}
+                        onValueChange={(val) => {
+                            setActiveTab(val);
+                            setData('position', val);
+                        }}
+                    >
+                        <TabsList className="mb-6 h-auto gap-0 rounded-none border-b border-gray-200 bg-transparent p-0">
+                            {positions.map((pos) => (
+                                <TabsTrigger
+                                    key={pos.key}
+                                    value={pos.key}
+                                    className={cn(
+                                        'rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-gray-500',
+                                        'data-[state=active]:border-cyan-500 data-[state=active]:bg-transparent data-[state=active]:text-cyan-600 data-[state=active]:shadow-none',
+                                    )}
+                                >
+                                    {pos.label}
+                                </TabsTrigger>
+                            ))}
+                        </TabsList>
 
-                    {positions.map((pos) => (
-                        <TabsContent key={pos.key} value={pos.key} className="mt-0">
-                            {/* Full Width - Menu Tree with Drag & Drop */}
-                            <div className="rounded-md border border-gray-200 bg-white">
-                                <div className="border-b border-gray-200 bg-gray-50 px-4 py-3">
-                                    <h3 className="text-sm font-medium text-gray-700">Struktur Menu</h3>
+                        {positions.map((pos) => (
+                            <TabsContent key={pos.key} value={pos.key} className="mt-0">
+                                {/* Full Width - Menu Tree with Drag & Drop */}
+                                <div className="rounded-md border border-gray-200 bg-white">
+                                    <div className="border-b border-gray-200 bg-gray-50 px-4 py-3">
+                                        <h3 className="text-sm font-medium text-gray-700">Struktur Menu</h3>
+                                    </div>
+                                    <MenuTree nodes={tree} position={activeTab} />
                                 </div>
-                                <MenuTree nodes={tree} position={activeTab} />
-                            </div>
-                        </TabsContent>
-                    ))}
-                </Tabs>
+                            </TabsContent>
+                        ))}
+                    </Tabs>
+                )}
             </div>
 
             {/* Create Menu Dialog */}

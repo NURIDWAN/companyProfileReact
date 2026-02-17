@@ -1,8 +1,8 @@
-import AppLayout from "@/layouts/app-layout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Head, Link } from "@inertiajs/react";
-import { DeleteButton } from "@/components/DeleteButton";
+import { DeleteButton } from '@/components/DeleteButton';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
+import { Head, Link } from '@inertiajs/react';
 
 type Testimonial = {
     id: number;
@@ -30,7 +30,7 @@ export default function TestimonialIndex({ testimonials }: Props) {
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-semibold">Testimoni</h1>
                     <Button asChild>
-                        <Link href={route("admin.testimonials.create")}>Tambah Testimoni</Link>
+                        <Link href={route('admin.testimonials.create')}>Tambah Testimoni</Link>
                     </Button>
                 </div>
 
@@ -55,29 +55,29 @@ export default function TestimonialIndex({ testimonials }: Props) {
                                     {testimonials.data.map((testimonial) => (
                                         <tr key={testimonial.id}>
                                             <td className="px-4 py-2">{testimonial.author_name}</td>
-                                            <td className="px-4 py-2 text-muted-foreground">{testimonial.company ?? "-"}</td>
-                                            <td className="px-4 py-2 text-muted-foreground">{testimonial.rating ?? "-"}</td>
+                                            <td className="px-4 py-2 text-muted-foreground">{testimonial.company ?? '-'}</td>
+                                            <td className="px-4 py-2 text-muted-foreground">{testimonial.rating ?? '-'}</td>
                                             <td className="px-4 py-2">
                                                 <span
                                                     className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                                                         testimonial.is_active
-                                                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                                                            : "bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400"
+                                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+                                                            : 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400'
                                                     }`}
                                                 >
-                                                    {testimonial.is_active ? "Aktif" : "Arsip"}
+                                                    {testimonial.is_active ? 'Aktif' : 'Arsip'}
                                                 </span>
                                             </td>
                                             <td className="px-4 py-2 text-muted-foreground">
-                                                {new Date(testimonial.updated_at).toLocaleDateString("id-ID")}
+                                                {new Date(testimonial.updated_at).toLocaleDateString('id-ID')}
                                             </td>
                                             <td className="px-4 py-2">
                                                 <div className="flex justify-end gap-2">
                                                     <Button asChild variant="outline" size="sm">
-                                                        <Link href={route("admin.testimonials.edit", testimonial.id)}>Edit</Link>
+                                                        <Link href={route('admin.testimonials.edit', testimonial.id)}>Edit</Link>
                                                     </Button>
                                                     <DeleteButton
-                                                        url={route("admin.testimonials.destroy", testimonial.id)}
+                                                        url={route('admin.testimonials.destroy', testimonial.id)}
                                                         confirmMessage={`Hapus testimoni "${testimonial.author_name}"?`}
                                                     />
                                                 </div>
@@ -89,14 +89,8 @@ export default function TestimonialIndex({ testimonials }: Props) {
                         </div>
                         <div className="flex flex-wrap gap-2">
                             {testimonials.links.map((link) => (
-                                <Button
-                                    key={link.label}
-                                    variant={link.active ? "default" : "outline"}
-                                    disabled={!link.url}
-                                    size="sm"
-                                    asChild
-                                >
-                                    <Link href={link.url ?? "#"} dangerouslySetInnerHTML={{ __html: link.label }} />
+                                <Button key={link.label} variant={link.active ? 'default' : 'outline'} disabled={!link.url} size="sm" asChild>
+                                    <Link href={link.url ?? '#'} dangerouslySetInnerHTML={{ __html: link.label }} />
                                 </Button>
                             ))}
                         </div>

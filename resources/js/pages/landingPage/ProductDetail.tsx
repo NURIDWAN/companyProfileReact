@@ -1,12 +1,12 @@
-import { useMemo, useState } from 'react';
-import { Link, usePage } from '@inertiajs/react';
 import type { PageProps } from '@inertiajs/core';
+import { Link, usePage } from '@inertiajs/react';
 import { CheckCircle2, Star, Users } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
-import LandingPageLayout from '@/layouts/landingPage-layouts';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { ProductCard } from '@/components/ui/landingPageComponent/product/productCard';
+import LandingPageLayout from '@/layouts/landingPage-layouts';
 import type { Product } from '@/types';
 import { sanitizeRichText } from '@/utils/sanitize-html';
 
@@ -48,13 +48,10 @@ export default function ProductDetailPage() {
 
     const ratingValue = Number(product.rating ?? 0);
     const features =
-        product.features && product.features.length
-            ? product.features
-            : ['Integrasi cepat', 'Skalabilitas tinggi', 'Analytics real-time'];
+        product.features && product.features.length ? product.features : ['Integrasi cepat', 'Skalabilitas tinggi', 'Analytics real-time'];
 
-    const priceLabel = selectedVariant?.price_formatted
-        ?? product.price_range?.formatted
-        ?? (product.price ? formatCurrency(product.price) : 'Hubungi sales');
+    const priceLabel =
+        selectedVariant?.price_formatted ?? product.price_range?.formatted ?? (product.price ? formatCurrency(product.price) : 'Hubungi sales');
     const comparePrice = selectedVariant?.compare_at_price_formatted;
     const purchaseUrl = product.purchase_url;
     const marketplaceLabels = useMemo(() => {
@@ -93,7 +90,7 @@ export default function ProductDetailPage() {
             <div className="mx-auto max-w-6xl space-y-10 p-6">
                 <div className="grid gap-8 lg:grid-cols-2">
                     <div className="space-y-4">
-                        <p className="text-sm uppercase text-blue-600">Produk Digital</p>
+                        <p className="text-sm text-blue-600 uppercase">Produk Digital</p>
                         <h1 className="text-4xl font-bold text-gray-900">{product.name}</h1>
                         <div className="richtext-view text-lg text-gray-600 dark:text-gray-300">
                             <div dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
@@ -107,16 +104,12 @@ export default function ProductDetailPage() {
                                 <Star className="h-4 w-4 text-yellow-500" />
                                 {ratingValue.toFixed(1)} / 5
                             </span>
-                            {product.category && (
-                                <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-600">{product.category}</span>
-                            )}
+                            {product.category && <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-600">{product.category}</span>}
                         </div>
                         <div className="space-y-3">
                             <div className="flex items-baseline gap-3">
                                 <span className="text-3xl font-semibold text-gray-900">{priceLabel}</span>
-                                {comparePrice && (
-                                    <span className="text-sm text-muted-foreground line-through">{comparePrice}</span>
-                                )}
+                                {comparePrice && <span className="text-sm text-muted-foreground line-through">{comparePrice}</span>}
                             </div>
                             <div className="flex flex-wrap gap-3">
                                 {product.demo && (
@@ -133,11 +126,7 @@ export default function ProductDetailPage() {
                                     <Link href="/contact">{primaryCtaLabel}</Link>
                                 </Button>
                                 {purchaseUrl && (
-                                    <Button
-                                        size="lg"
-                                        className="bg-emerald-600 hover:bg-emerald-700"
-                                        asChild
-                                    >
+                                    <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700" asChild>
                                         <a href={purchaseUrl} target="_blank" rel="noopener noreferrer">
                                             Beli Sekarang
                                         </a>
@@ -150,7 +139,7 @@ export default function ProductDetailPage() {
                                     {marketplaceLabels.map((label) => (
                                         <span
                                             key={label}
-                                            className="rounded-full bg-blue-50 px-3 py-1 font-semibold uppercase tracking-wide text-blue-600"
+                                            className="rounded-full bg-blue-50 px-3 py-1 font-semibold tracking-wide text-blue-600 uppercase"
                                         >
                                             {label}
                                         </span>
@@ -172,7 +161,7 @@ export default function ProductDetailPage() {
                             <Card className="border-blue-100 bg-blue-50/70 dark:border-blue-900/40 dark:bg-blue-950/30">
                                 <CardContent className="space-y-4 p-5">
                                     <div className="space-y-1">
-                                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">Insight AI</p>
+                                        <p className="text-xs font-semibold tracking-[0.3em] text-blue-600 uppercase">Insight AI</p>
                                         <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Ringkasan Solusi</h3>
                                     </div>
                                     {marketingSummaryHtml && (
@@ -195,10 +184,8 @@ export default function ProductDetailPage() {
                             <Card>
                                 <CardContent className="space-y-4 p-4">
                                     <div>
-                                        <h2 className="text-sm font-semibold uppercase tracking-wide text-blue-600">Paket Harga</h2>
-                                        <p className="text-sm text-muted-foreground">
-                                            Pilih paket yang sesuai dengan kebutuhan organisasi Anda.
-                                        </p>
+                                        <h2 className="text-sm font-semibold tracking-wide text-blue-600 uppercase">Paket Harga</h2>
+                                        <p className="text-sm text-muted-foreground">Pilih paket yang sesuai dengan kebutuhan organisasi Anda.</p>
                                     </div>
                                     <div className="grid gap-2">
                                         {variants.map((variant, index) => {
@@ -210,17 +197,13 @@ export default function ProductDetailPage() {
                                                     key={`${variant.sku ?? variant.name ?? index}`}
                                                     onClick={() => setSelectedVariantIndex(index)}
                                                     className={`flex flex-col rounded-xl border p-3 text-left transition ${
-                                                        isActive
-                                                            ? 'border-blue-500 bg-blue-50 text-blue-700'
-                                                            : 'border-border hover:border-blue-300'
+                                                        isActive ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-border hover:border-blue-300'
                                                     }`}
                                                 >
                                                     <div className="flex items-center justify-between gap-4">
                                                         <div>
                                                             <p className="text-sm font-semibold">{variant.name ?? 'Paket'}</p>
-                                                            {variant.sku && (
-                                                                <p className="text-xs text-muted-foreground">SKU: {variant.sku}</p>
-                                                            )}
+                                                            {variant.sku && <p className="text-xs text-muted-foreground">SKU: {variant.sku}</p>}
                                                         </div>
                                                         <div className="text-right">
                                                             {variant.price_formatted && (
@@ -234,9 +217,7 @@ export default function ProductDetailPage() {
                                                         </div>
                                                     </div>
                                                     {variant.stock !== null && variant.stock !== undefined && (
-                                                        <p className="text-xs text-muted-foreground">
-                                                            Stok tersedia: {variant.stock}
-                                                        </p>
+                                                        <p className="text-xs text-muted-foreground">Stok tersedia: {variant.stock}</p>
                                                     )}
                                                 </button>
                                             );
@@ -251,7 +232,7 @@ export default function ProductDetailPage() {
                             <img
                                 src={gallery[activeImageIndex] ?? product.cover_image ?? product.thumbnail ?? fallbackImage}
                                 alt={`${product.name} preview ${activeImageIndex + 1}`}
-                                className="w-full max-h-[420px] object-cover"
+                                className="max-h-[420px] w-full object-cover"
                             />
                         </div>
                         {gallery.length > 1 && (
@@ -295,7 +276,10 @@ export default function ProductDetailPage() {
                                 {faqEntries.map((faq, index) => {
                                     const answerHtml = sanitizeRichText(faq.answer);
                                     return (
-                                        <div key={`${faq.question}-${index}`} className="rounded-2xl border border-slate-100 p-4 dark:border-white/10">
+                                        <div
+                                            key={`${faq.question}-${index}`}
+                                            className="rounded-2xl border border-slate-100 p-4 dark:border-white/10"
+                                        >
                                             <p className="text-base font-semibold text-gray-900 dark:text-white">{faq.question}</p>
                                             {answerHtml && (
                                                 <div className="richtext-view mt-2 text-sm text-gray-600 dark:text-gray-300">
@@ -314,7 +298,7 @@ export default function ProductDetailPage() {
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm uppercase text-blue-600">Produk Serupa</p>
+                                <p className="text-sm text-blue-600 uppercase">Produk Serupa</p>
                                 <h2 className="text-2xl font-semibold text-gray-900">Rekomendasi lainnya</h2>
                             </div>
                             <Link href="/product" className="text-sm font-semibold text-blue-600">

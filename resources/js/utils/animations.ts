@@ -1,9 +1,9 @@
-import { Variants } from "framer-motion";
+import { Variants } from 'framer-motion';
 
 export const fadeIn: Variants = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: 20 }
+    exit: { opacity: 0, y: 20 },
 };
 
 export const containerVariants: Variants = {
@@ -11,9 +11,9 @@ export const containerVariants: Variants = {
     show: {
         opacity: 1,
         transition: {
-            staggerChildren: 0.2
-        }
-    }
+            staggerChildren: 0.2,
+        },
+    },
 };
 
 export const itemVariants: Variants = {
@@ -22,9 +22,9 @@ export const itemVariants: Variants = {
         opacity: 1,
         y: 0,
         transition: {
-            duration: 0.5
-        }
-    }
+            duration: 0.5,
+        },
+    },
 };
 
 export const scaleUp: Variants = {
@@ -33,11 +33,11 @@ export const scaleUp: Variants = {
         scale: 1,
         opacity: 1,
         transition: {
-            type: "spring" as const,
+            type: 'spring' as const,
             stiffness: 100,
-            damping: 15
-        }
-    }
+            damping: 15,
+        },
+    },
 };
 
 export const slideIn: Variants = {
@@ -46,9 +46,9 @@ export const slideIn: Variants = {
         x: 0,
         opacity: 1,
         transition: {
-            type: "spring" as const,
+            type: 'spring' as const,
             stiffness: 100,
-            damping: 15
-        }
-    }
+            damping: 15,
+        },
+    },
 };

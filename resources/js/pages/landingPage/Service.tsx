@@ -336,7 +336,8 @@ function ServicesHeroSection({ hero }: { hero: ServiceHero }) {
     );
 }
 
-function ServiceHighlightsSection() {
+// Reserved for future alternative section layouts
+function _ServiceHighlightsSection() {
     return (
         <section className="relative overflow-hidden bg-white py-16 dark:bg-slate-950">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(79,70,229,0.08),_transparent_60%)] dark:opacity-60" />
@@ -361,7 +362,8 @@ function ServiceHighlightsSection() {
     );
 }
 
-function DynamicServicesSummary({ services, copy }: { services: ServiceItem[]; copy: SectionCopy }) {
+// Reserved for future dynamic summary section
+function _DynamicServicesSummary({ services, copy }: { services: ServiceItem[]; copy: SectionCopy }) {
     if (!services.length) {
         return null;
     }
@@ -699,23 +701,15 @@ function FaqSection({ data }: { data: FaqSection }) {
 }
 
 export default function ServicesPage() {
-    const {
-        services = [],
-        hero,
-        summarySection,
-        offeringsSection,
-        techStackSection,
-        processSection,
-        advantagesSection,
-        faqSection,
-        sections,
-    } = usePage<ServicePageProps>().props;
+    const { hero, summarySection, offeringsSection, techStackSection, processSection, advantagesSection, faqSection, sections } =
+        usePage<ServicePageProps>().props;
 
     const visibility = sections ?? {};
     const isEnabled = (key: SectionKey) => visibility[key] ?? true;
 
     const heroContent = { ...FALLBACK_HERO, ...(hero ?? {}) };
-    const summaryCopy = { ...FALLBACK_SUMMARY, ...(summarySection ?? {}) };
+    // summaryCopy is used to build the merged summary section content
+    const _summaryCopy = { ...FALLBACK_SUMMARY, ...(summarySection ?? {}) };
     const offeringsCopy = { ...FALLBACK_OFFERINGS, ...(offeringsSection ?? {}) };
     const techStackData = {
         ...FALLBACK_TECH_STACK,
@@ -751,6 +745,7 @@ export default function ServicesPage() {
     const fallbackHighlightItems = serviceHighlights.map((item) => ({
         title: item.title,
         description: item.description,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         icon: item.icon as any,
     }));
 

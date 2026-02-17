@@ -21,7 +21,7 @@ class BlogPostFactory extends Factory
         return [
             'author_id' => User::factory(),
             'title' => $title,
-            'slug' => Str::slug($title) . '-' . $this->faker->unique()->numberBetween(10, 999),
+            'slug' => Str::slug($title).'-'.$this->faker->unique()->numberBetween(10, 999),
             'excerpt' => $this->faker->sentence(),
             'body' => $this->faker->paragraphs(2, true),
             'cover_image' => null,

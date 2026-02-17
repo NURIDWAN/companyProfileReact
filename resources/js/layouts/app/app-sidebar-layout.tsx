@@ -2,11 +2,11 @@ import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { type BreadcrumbItem } from '@/types';
 import { usePage } from '@inertiajs/react';
-import { type PropsWithChildren } from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle2 } from 'lucide-react';
+import { type PropsWithChildren } from 'react';
 
 export default function AppSidebarLayout({ children, breadcrumbs = [] }: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[] }>) {
     const { flash } = usePage().props as { flash?: { success?: string } };

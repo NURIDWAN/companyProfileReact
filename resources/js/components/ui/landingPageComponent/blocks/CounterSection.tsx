@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -85,7 +86,7 @@ export function CounterSection({ content }: CounterSectionProps) {
                 <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
                     {items.map((item, idx) => {
                         const IconComponent = item.icon
-                            ? (LucideIcons as Record<string, any>)[item.icon] ?? LucideIcons.Hash
+                            ? (LucideIcons as unknown as Record<string, LucideIcon>)[item.icon] ?? LucideIcons.Hash
                             : LucideIcons.Hash;
                         const numericValue = parseInt(item.value?.replace(/\D/g, '') || '0', 10);
 

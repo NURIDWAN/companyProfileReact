@@ -1,11 +1,11 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { FormEventHandler, useState } from 'react';
 
-import AuthSplitLayout from '@/layouts/auth/auth-split-layout';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import InputError from '@/components/input-error';
+import AuthSplitLayout from '@/layouts/auth/auth-split-layout';
 
 interface OtpProps {
     status?: string;
@@ -37,20 +37,24 @@ export default function LoginOtp({ status, emailHint }: OtpProps) {
 
         setResending(true);
         setResendMessage(null);
-        router.post(route('login.otp.resend'), {}, {
-            preserveScroll: true,
-            onError: (errors) => {
-                if (errors.code && typeof errors.code === 'string') {
-                    setResendMessage(errors.code);
-                } else {
-                    setResendMessage('Gagal mengirim ulang kode.');
-                }
+        router.post(
+            route('login.otp.resend'),
+            {},
+            {
+                preserveScroll: true,
+                onError: (errors) => {
+                    if (errors.code && typeof errors.code === 'string') {
+                        setResendMessage(errors.code);
+                    } else {
+                        setResendMessage('Gagal mengirim ulang kode.');
+                    }
+                },
+                onSuccess: () => {
+                    setResendMessage('Kode OTP baru telah dikirim.');
+                },
+                onFinish: () => setResending(false),
             },
-            onSuccess: () => {
-                setResendMessage('Kode OTP baru telah dikirim.');
-            },
-            onFinish: () => setResending(false),
-        });
+        );
     };
 
     return (
