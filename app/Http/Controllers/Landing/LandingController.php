@@ -127,7 +127,7 @@ class LandingController extends Controller
                 'heading' => $testimonialsSection['heading'] ?? 'Kata Mereka',
                 'description' => $testimonialsSection['description'] ?? null,
             ] : null,
-            'metrics' => $metricsSection ? ($metricsSection['items'] ?? []) : [],
+            'metrics' => $metricsSection ? $this->transformMetrics($metricsSection['items'] ?? []) : [],
             'blogPreview' => $blogPreviewSection ? [
                 'heading' => $blogPreviewSection['heading'] ?? 'Artikel Terbaru',
                 'description' => $blogPreviewSection['description'] ?? null,
